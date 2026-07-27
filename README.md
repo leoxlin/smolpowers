@@ -30,7 +30,7 @@ For example, in Claude Code:
 
 ```text
 /plugin marketplace add /absolute/path/to/smolpowers
-/plugin install smolpowers@smolpowers-dev
+/plugin install smolpowers@smolpowers
 ```
 
 ## Use
