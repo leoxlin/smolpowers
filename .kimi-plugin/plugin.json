@@ -1,0 +1,32 @@
+{
+  "name": "smolpowers",
+  "version": "0.1.0",
+  "description": "A lightweight Plan, Design, Execute, Finish workflow for coding agents.",
+  "author": {
+    "name": "Leo Xuzhang Lin",
+    "email": "me@leoxlin.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "planning",
+    "testing",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "sessionStart": {
+    "skill": "using-smolpowers"
+  },
+  "skillInstructions": "Kimi Code mapping for Smolpowers:\n\n- When a skill needs a material user decision, call `AskUserQuestion`; provide one question with concrete options when possible.\n- When a skill tracks plan work, use `TodoList`.\n- When optional delegation meets the Execute criteria, use `Agent` with `coder` for implementation or review, `explore` for bounded read-only exploration, and `plan` for read-only architecture work. Keep dependent work sequential.\n- When a skill says to invoke another skill, call Kimi Code's native `Skill` tool.\n- Use Kimi Code's `Read`, `Write`, `Edit`, `Bash`, `Grep`, `Glob`, `FetchURL`, `WebSearch`, and MCP tools by their exposed names.",
+  "interface": {
+    "displayName": "Smolpowers",
+    "shortDescription": "A small, evidence-driven coding workflow",
+    "longDescription": "Guide repository work through product planning, implementation design, proportional test-first execution, and evidence-backed finish.",
+    "developerName": "Leo Xuzhang Lin",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ]
+  }
+}

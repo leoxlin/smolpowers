@@ -1,0 +1,20 @@
+# Interfaces and Failures
+
+## Define a boundary
+
+For each component, state:
+
+- who owns creation and cleanup;
+- exact inputs and outputs;
+- persisted or externally visible formats;
+- synchronous or asynchronous behavior;
+- idempotency and retry expectations;
+- errors that propagate versus errors with a real recovery path.
+
+Keep one lifecycle owner. Do not put cleanup responsibility in both a caller and callee.
+
+## Task boundaries
+
+Split tasks only when each produces an independently testable outcome or when two tasks can be reviewed independently. Keep scaffolding, docs, and configuration in the outcome that needs them.
+
+Name cross-task interfaces in both the producing and consuming tasks. Repeat exact signatures; never rely on “as in Task N.”

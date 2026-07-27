@@ -1,0 +1,4 @@
+interface:
+  display_name: "Using Smolpowers"
+  short_description: "Route work through the Smolpowers lifecycle"
+  default_prompt: "Use $using-smolpowers to continue this repository through its earliest incomplete phase."

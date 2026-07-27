@@ -1,0 +1,4 @@
+interface:
+  display_name: "Execute"
+  short_description: "Implement a Smolpowers plan task by task"
+  default_prompt: "Use $execute to implement the current Smolpowers plan with fresh checks."

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+plugin_root="$(cd "$script_dir/.." && pwd)"
+skill_content="$(<"$plugin_root/skills/using-smolpowers/SKILL.md")"
+
+json_escape() {
+  local value="$1"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  value="${value//$'\n'/\\n}"
+  value="${value//$'\r'/\\r}"
+  value="${value//$'\t'/\\t}"
+  printf '%s' "$value"
+}
+
+context="<EXTREMELY_IMPORTANT>
+smolpowers:using-smolpowers bootstrap
+
+The using-smolpowers skill is loaded below. Follow it now and invoke exactly one phase owner.
+
+${skill_content}
+</EXTREMELY_IMPORTANT>"
+
+printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
+  "$(json_escape "$context")"

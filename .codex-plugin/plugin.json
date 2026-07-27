@@ -1,0 +1,34 @@
+{
+  "name": "smolpowers",
+  "version": "0.1.0",
+  "description": "A lightweight Plan, Design, Execute, Finish workflow for coding agents.",
+  "author": {
+    "name": "Leo Xuzhang Lin",
+    "email": "me@leoxlin.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "planning",
+    "testing",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "hooks": {},
+  "interface": {
+    "displayName": "Smolpowers",
+    "shortDescription": "A small, evidence-driven coding workflow",
+    "longDescription": "Guide repository work through product planning, implementation design, proportional test-first execution, and evidence-backed finish.",
+    "developerName": "Leo Xuzhang Lin",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use Smolpowers to build this change.",
+      "Resume the current Smolpowers plan."
+    ]
+  }
+}
