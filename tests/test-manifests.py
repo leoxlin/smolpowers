@@ -35,7 +35,7 @@ entry = claude_market["plugins"][0]
 assert entry["name"] == "smolpowers" and entry["version"] == VERSION
 
 assert kimi["skills"] == "./skills/"
-assert kimi["sessionStart"]["skill"] == "using-smolpowers"
+assert kimi["sessionStart"]["skill"] == "smol-activate"
 instructions = kimi["skillInstructions"]
 for token in [
     "AskUserQuestion",

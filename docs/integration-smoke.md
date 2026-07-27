@@ -15,9 +15,9 @@
 | Harness | Version | Local load path | Result |
 |---|---:|---|---|
 | Claude Code | 2.1.204 | `--plugin-dir <repo>` | Blocked: OAuth access token expired (`401`). No model response was claimed. |
-| Codex | 0.145.0 | temporary `.agents/skills` discovery, `codex exec --ephemeral` | Passed: loaded `using-smolpowers`, ran the loader, selected `plan`. |
-| Kimi Code | 0.29.0 | `--skills-dir <repo>/skills` | Passed: ran the loader and selected `plan`. |
-| Pi | 0.81.1 | `-e <repo> --no-session` | Passed: loaded the package bootstrap and selected `plan`. |
+| Codex | 0.145.0 | temporary `.agents/skills` discovery, `codex exec --ephemeral` | Passed: loaded the bootstrap skill, ran the loader, selected the Plan phase. |
+| Kimi Code | 0.29.0 | `--skills-dir <repo>/skills` | Passed: ran the loader and selected the Plan phase. |
+| Pi | 0.81.1 | `-e <repo> --no-session` | Passed: loaded the package bootstrap and selected the Plan phase. |
 
 The Codex and Kimi sessions exercised native skill discovery without persistently installing the repository marketplace. Their marketplace and manifest shapes are covered by the deterministic manifest tests.
 

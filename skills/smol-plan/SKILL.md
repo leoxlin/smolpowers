@@ -1,9 +1,9 @@
 ---
-name: plan
+name: smol-plan
 description: Establish the goal, success criteria, scope, and chosen product approach, then write the Smolpowers design spec. Use for new work, behavior changes, bugs without a current spec, or whenever the Plan phase is the earliest incomplete lifecycle phase.
 ---
 
-# Plan
+# Smol Plan
 
 Inspect context, decide what to build, and produce the product design artifact.
 
@@ -26,7 +26,7 @@ Use reasonable defaults for minor details. Pause only when different answers wou
 
 ## Write the Spec
 
-Load configuration through the `using-smolpowers` loader. Write:
+Load configuration through the `smol-activate` loader. Write:
 
 `<docsRoot>/specs/YYYY-MM-DD-<slug>-design.md`
 
@@ -44,7 +44,7 @@ Fix those issues in the artifact before reporting the phase outcome.
 
 ## Transition
 
-If implementation was requested, invoke `design` with the exact spec path and configured `docsRoot`.
+If implementation was requested, invoke `smol-design` with the exact spec path and configured `docsRoot`.
 
 If only a product plan or specification was requested, report the artifact path and stop.
 

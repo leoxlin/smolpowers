@@ -2,7 +2,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
-loader="$repo_root/skills/using-smolpowers/scripts/load-config.sh"
+loader="$repo_root/skills/smol-activate/scripts/load-config.sh"
 test_root="$(mktemp -d)"
 trap 'rm -rf "$test_root"' EXIT
 

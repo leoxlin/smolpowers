@@ -15,7 +15,7 @@
   ],
   "skills": "./skills/",
   "sessionStart": {
-    "skill": "using-smolpowers"
+    "skill": "smol-activate"
   },
   "skillInstructions": "Kimi Code mapping for Smolpowers:\n\n- When a skill needs a material user decision, call `AskUserQuestion`; provide one question with concrete options when possible.\n- When a skill tracks plan work, use `TodoList`.\n- When optional delegation meets the Execute criteria, use `Agent` with `coder` for implementation or review, `explore` for bounded read-only exploration, and `plan` for read-only architecture work. Keep dependent work sequential.\n- When a skill says to invoke another skill, call Kimi Code's native `Skill` tool.\n- Use Kimi Code's `Read`, `Write`, `Edit`, `Bash`, `Grep`, `Glob`, `FetchURL`, `WebSearch`, and MCP tools by their exposed names.",
   "interface": {

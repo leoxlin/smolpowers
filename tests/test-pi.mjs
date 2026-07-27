@@ -38,7 +38,7 @@ test("injects once at startup and stops after agent_end", async () => {
   await handlers.get("session_start")();
   const injected = await handlers.get("context")({ messages: original });
   assert.equal(injected.messages.length, 2);
-  assert.match(textOf(injected.messages[0]), /smolpowers:using-smolpowers bootstrap/);
+  assert.match(textOf(injected.messages[0]), /smolpowers:smol-activate bootstrap/);
   assert.equal(injected.messages[1], original[0]);
   assert.equal(await handlers.get("context")({ messages: injected.messages }), undefined);
 
@@ -54,6 +54,6 @@ test("reinjects after compaction without preceding the summary", async () => {
   await handlers.get("session_compact")();
   const result = await handlers.get("context")({ messages: [summary, user] });
   assert.equal(result.messages[0], summary);
-  assert.match(textOf(result.messages[1]), /smolpowers:using-smolpowers bootstrap/);
+  assert.match(textOf(result.messages[1]), /smolpowers:smol-activate bootstrap/);
   assert.equal(result.messages[2], user);
 });

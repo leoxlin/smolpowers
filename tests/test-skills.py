@@ -4,11 +4,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = {
-    "using-smolpowers": "Load",
-    "plan": "Inspect",
-    "design": "Validate",
-    "execute": "Review",
-    "finish": "Verify",
+    "smol-activate": "Load",
+    "smol-plan": "Inspect",
+    "smol-design": "Validate",
+    "smol-execute": "Review",
+    "smol-finish": "Verify",
 }
 
 

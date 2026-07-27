@@ -1,17 +1,17 @@
 ---
-name: finish
+name: smol-finish
 description: Verify a completed Smolpowers implementation against its spec, plan, full diff, and fresh checks, then perform only the authorized Git disposition. Use after Execute, before completion claims, commits, pushes, pull requests, merges, or handoff.
 ---
 
-# Finish
+# Smol Finish
 
 Verify requirements and the complete change before making any completion claim.
 
 ## Validate the Lifecycle
 
-Load configuration through `using-smolpowers`. Require the matching spec and plan.
+Load configuration through `smol-activate`. Require the matching spec and plan.
 
-Route to `plan` if the spec is missing or stale. Route to `design` if the plan is missing or stale. Route to `execute` if any task remains incomplete or its outcome is absent. Invoke only that phase and stop.
+Route to `smol-plan` if the spec is missing or stale. Route to `smol-design` if the plan is missing or stale. Route to `smol-execute` if any task remains incomplete or its outcome is absent. Invoke only that phase and stop.
 
 ## Verify the Work
 
@@ -27,7 +27,7 @@ Read [verification.md](references/verification.md), then:
 
 Do not infer that a command passed from partial output or an earlier run. Do not call the work complete when any required check is failing.
 
-If verification fails, report the exact command and failure, preserve the working state, and return to `execute` only when a code change is authorized.
+If verification fails, report the exact command and failure, preserve the working state, and return to `smol-execute` only when a code change is authorized.
 
 ## Handle Git
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Smol Finish"
+  short_description: "Verify work and handle its Git disposition"
+  default_prompt: "Use $smol-finish to verify the completed work and apply the authorized Git disposition."

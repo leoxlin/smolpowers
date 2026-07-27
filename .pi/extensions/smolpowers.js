@@ -2,11 +2,11 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const MARKER = "smolpowers:using-smolpowers bootstrap";
+const MARKER = "smolpowers:smol-activate bootstrap";
 const extensionDir = dirname(fileURLToPath(import.meta.url));
 const packageRoot = resolve(extensionDir, "../..");
 const skillsDir = resolve(packageRoot, "skills");
-const bootstrapPath = resolve(skillsDir, "using-smolpowers", "SKILL.md");
+const bootstrapPath = resolve(skillsDir, "smol-activate", "SKILL.md");
 
 let cachedBootstrap;
 
@@ -49,7 +49,7 @@ function bootstrap() {
   cachedBootstrap = `<EXTREMELY_IMPORTANT>
 ${MARKER}
 
-The using-smolpowers skill is already loaded for this Pi session. Follow it now and do not load it again.
+The smol-activate skill is already loaded for this Pi session. Follow it now and do not load it again.
 
 ${skill}
 

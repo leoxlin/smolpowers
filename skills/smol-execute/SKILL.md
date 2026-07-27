@@ -1,17 +1,17 @@
 ---
-name: execute
+name: smol-execute
 description: Review and implement a current Smolpowers implementation plan, applying proportional test-first development and fresh task checks. Use when the spec and plan are current and implementation tasks remain, including resuming a partially completed plan.
 ---
 
-# Execute
+# Smol Execute
 
 Review the plan, implement every remaining task, and keep its checkboxes truthful.
 
 ## Validate and Review
 
-Load configuration through `using-smolpowers`. Require both the spec and plan artifact for the same slug.
+Load configuration through `smol-activate`. Require both the spec and plan artifact for the same slug.
 
-Route to `plan` when the spec is missing or stale. Route to `design` when the plan is missing, contradicts the spec, relies on materially changed repository facts, or lacks executable verification. Invoke only the prerequisite phase and stop.
+Route to `smol-plan` when the spec is missing or stale. Route to `smol-design` when the plan is missing, contradicts the spec, relies on materially changed repository facts, or lacks executable verification. Invoke only the prerequisite phase and stop.
 
 Read the complete plan before editing. Resolve only blocking contradictions; do not reopen settled product choices because another approach is merely possible.
 
@@ -43,7 +43,7 @@ Do not require subagents. Continue directly when the harness lacks them.
 
 ## Transition
 
-After every plan task has a verified outcome, invoke `finish` with the exact spec and plan paths.
+After every plan task has a verified outcome, invoke `smol-finish` with the exact spec and plan paths.
 
 Do not push, open a pull request, publish, or perform another external side effect unless the user explicitly authorized it.
 

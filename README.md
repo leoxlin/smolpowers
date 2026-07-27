@@ -2,11 +2,11 @@
 
 Smolpowers is a small adaptation of Superpowers v6.2.0. It keeps one lifecycle—Plan → Design → Execute → Finish—and five skills:
 
-- `using-smolpowers`
-- `plan`
-- `design`
-- `execute`
-- `finish`
+- `smol-activate`
+- `smol-plan`
+- `smol-design`
+- `smol-execute`
+- `smol-finish`
 
 It targets Claude Code, Codex, Kimi Code, and Pi without telemetry, runtime dependencies, mandatory worktrees, mandatory subagents, or vendored heavyweight skills.
 
@@ -41,7 +41,7 @@ Install this repository as a plugin:
 /plugins install /absolute/path/to/smolpowers
 ```
 
-Kimi loads `using-smolpowers` through `sessionStart.skill` and uses the native mappings in `.kimi-plugin/plugin.json`.
+Kimi loads `smol-activate` through `sessionStart.skill` and uses the native mappings in `.kimi-plugin/plugin.json`.
 
 ### Pi
 

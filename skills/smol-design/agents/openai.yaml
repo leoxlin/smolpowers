@@ -1,0 +1,4 @@
+interface:
+  display_name: "Smol Design"
+  short_description: "Turn a spec into an implementation plan"
+  default_prompt: "Use $smol-design to create a precise, verifiable implementation plan from the current spec."

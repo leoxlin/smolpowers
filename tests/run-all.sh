@@ -12,10 +12,10 @@ node --test tests/test-pi.mjs
 python3 tests/test-artifacts.py
 
 bash -n hooks/session-start hooks/run-hook.cmd \
-  skills/using-smolpowers/scripts/load-config.sh tests/*.sh
+  skills/smol-activate/scripts/load-config.sh tests/*.sh
 
 if command -v shellcheck >/dev/null 2>&1; then
-  shellcheck hooks/session-start skills/using-smolpowers/scripts/load-config.sh tests/*.sh
+  shellcheck hooks/session-start skills/smol-activate/scripts/load-config.sh tests/*.sh
 else
   printf '%s\n' "SKIP: shellcheck is not installed"
 fi

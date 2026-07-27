@@ -1,19 +1,19 @@
 ---
-name: design
+name: smol-design
 description: Convert a current Smolpowers product spec into an upstream-compatible implementation plan with tasks, interfaces, failure handling, and exact checks. Use after Plan, when a spec exists but its implementation plan is missing or stale, or when explicitly asked for the Design phase.
 ---
 
-# Design
+# Smol Design
 
 Validate the product spec and produce an executable implementation plan.
 
 ## Validate the Prerequisite
 
-Load configuration through `using-smolpowers`. Require a current spec at:
+Load configuration through `smol-activate`. Require a current spec at:
 
 `<docsRoot>/specs/YYYY-MM-DD-<slug>-design.md`
 
-Compare the spec to the active request and relevant repository facts. Treat it as stale when its goal, constraints, or chosen approach no longer describe the requested work. If it is missing, incomplete, or stale, invoke `plan` with the configured spec path and stop this phase.
+Compare the spec to the active request and relevant repository facts. Treat it as stale when its goal, constraints, or chosen approach no longer describe the requested work. If it is missing, incomplete, or stale, invoke `smol-plan` with the configured spec path and stop this phase.
 
 ## Shape the Implementation
 
@@ -50,7 +50,7 @@ Review the final plan against every spec requirement, then scan for placeholders
 
 ## Transition
 
-If implementation was requested, invoke `execute` with the exact spec and plan paths.
+If implementation was requested, invoke `smol-execute` with the exact spec and plan paths.
 
 If only an implementation plan was requested, report the artifact path and stop.
 

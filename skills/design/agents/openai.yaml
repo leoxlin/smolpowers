@@ -1,4 +1,0 @@
-interface:
-  display_name: "Design"
-  short_description: "Turn a spec into an implementation plan"
-  default_prompt: "Use $design to create a precise, verifiable implementation plan from the current spec."

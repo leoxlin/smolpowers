@@ -1,9 +1,9 @@
 ---
-name: using-smolpowers
+name: smol-activate
 description: Bootstrap the lightweight Plan → Design → Execute → Finish lifecycle, load repository Smolpowers configuration, and route to the earliest incomplete phase. Use at session start, after compaction, when resuming work, or when a coding request has not already selected a phase skill.
 ---
 
-# Using Smolpowers
+# Smol Activate
 
 Load configuration, inspect the artifact pair, and invoke exactly one phase owner.
 
@@ -14,7 +14,7 @@ Load the repository root with `git rev-parse --show-toplevel`.
 Locate `scripts/load-config.sh` in this skill directory and run:
 
 ```bash
-bash /absolute/path/to/using-smolpowers/scripts/load-config.sh /absolute/repo/root
+bash /absolute/path/to/smol-activate/scripts/load-config.sh /absolute/repo/root
 ```
 
 Parse its JSON output directly. Never use `eval`. Treat `docsRoot` as the artifact root and `stateRoot` as information only. Core Smolpowers never writes `stateRoot`.
@@ -32,10 +32,10 @@ Prefer an explicitly named artifact or slug. Otherwise choose the artifact pair 
 
 Invoke exactly one owner:
 
-1. Invoke `plan` when the product spec is missing, incomplete, contradicted by the current request, or based on repository facts that materially changed.
-2. Invoke `design` when the spec is current but its implementation plan is missing, incomplete, or no longer implements the spec.
-3. Invoke `execute` when the plan is current and any task remains unchecked, or when implementation exists but the plan and checks have not been reconciled.
-4. Invoke `finish` when all plan tasks are complete and the implementation needs final requirements, diff, verification, or Git handling.
+1. Invoke `smol-plan` when the product spec is missing, incomplete, contradicted by the current request, or based on repository facts that materially changed.
+2. Invoke `smol-design` when the spec is current but its implementation plan is missing, incomplete, or no longer implements the spec.
+3. Invoke `smol-execute` when the plan is current and any task remains unchecked, or when implementation exists but the plan and checks have not been reconciled.
+4. Invoke `smol-finish` when all plan tasks are complete and the implementation needs final requirements, diff, verification, or Git handling.
 
 Route backward on stale prerequisites. Do not skip a missing phase.
 

@@ -3,7 +3,7 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 plugin_root="$(cd "$script_dir/.." && pwd)"
-skill_content="$(<"$plugin_root/skills/using-smolpowers/SKILL.md")"
+skill_content="$(<"$plugin_root/skills/smol-activate/SKILL.md")"
 
 json_escape() {
   local value="$1"
@@ -16,9 +16,9 @@ json_escape() {
 }
 
 context="<EXTREMELY_IMPORTANT>
-smolpowers:using-smolpowers bootstrap
+smolpowers:smol-activate bootstrap
 
-The using-smolpowers skill is loaded below. Follow it now and invoke exactly one phase owner.
+The smol-activate skill is loaded below. Follow it now and invoke exactly one phase owner.
 
 ${skill_content}
 </EXTREMELY_IMPORTANT>"
