@@ -6,10 +6,11 @@ Resolve the repository root:
 git rev-parse --show-toplevel
 ```
 
-Locate `scripts/load-config.sh` under the installed `smol-activate` skill and run:
+Requires `pipx`. Locate `scripts/load-config.py` under the installed
+`smol-activate` skill and run:
 
 ```bash
-bash /absolute/path/to/smol-activate/scripts/load-config.sh /absolute/repo/root
+pipx run /absolute/path/to/smol-activate/scripts/load-config.py /absolute/repo/root
 ```
 
 Parse its JSON output directly. Never use `eval`. Treat `docsRoot` as the

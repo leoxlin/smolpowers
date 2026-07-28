@@ -1,6 +1,6 @@
 # Repository Guidelines
 - Keep the cross-agent runtime lightweight and evidence-driven across Design → Plan → Execute → Finish.
-- Use `.smolpowers.json`; keep parsing, validation, path resolution, and defaults in `load-config.sh`.
+- Use `.smolpowers.json`; keep parsing, validation, path resolution, and defaults in `load-config.py`.
 - Invalid or unsafe configuration must warn once and fall back atomically to all defaults.
 - Test observable behavior and structured interfaces, not prose, headings, or static file substrings.
 - Use proportional TDD by default; strict mode requires an observed failing test before production code.

@@ -1,13 +1,15 @@
 import json
 import os
 import subprocess
+import sys
+import tomllib
 from pathlib import Path
 
 import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-LOADER = ROOT / "skills/smol-activate/scripts/load-config.sh"
+LOADER = ROOT / "skills/smol-activate/scripts/load-config.py"
 
 
 def defaults(project: Path) -> dict:
@@ -37,15 +39,11 @@ def defaults(project: Path) -> dict:
     }
 
 
-def load(project: Path, *, path: str | None = None) -> tuple[dict, str]:
-    env = os.environ.copy()
-    if path is not None:
-        env["PATH"] = path
+def load(project: Path) -> tuple[dict, str]:
     result = subprocess.run(
-        ["/bin/bash", str(LOADER), str(project)],
+        [sys.executable, str(LOADER), str(project)],
         capture_output=True,
         check=True,
-        env=env,
         text=True,
     )
     return json.loads(result.stdout), result.stderr
@@ -59,15 +57,6 @@ def write_config(project: Path, content: str) -> None:
 def test_absent_config_uses_defaults(tmp_path: Path) -> None:
     project = tmp_path / "absent"
     project.mkdir()
-    actual, stderr = load(project)
-    assert actual == defaults(project)
-    assert stderr == ""
-
-
-def test_yaml_config_is_ignored(tmp_path: Path) -> None:
-    project = tmp_path / "yaml-only"
-    project.mkdir()
-    (project / ".smolpowers.yml").write_text("docsRoot: ignored\n")
     actual, stderr = load(project)
     assert actual == defaults(project)
     assert stderr == ""
@@ -239,9 +228,58 @@ def test_invalid_config_falls_back_atomically(
     assert len(stderr.splitlines()) == 1
 
 
-def test_missing_jq_falls_back_to_defaults(tmp_path: Path) -> None:
-    project = tmp_path / "no-jq"
-    write_config(project, '{"docsRoot":"custom","stateRoot":"state"}\n')
-    actual, stderr = load(project, path="/nonexistent")
-    assert actual == defaults(project)
-    assert len(stderr.splitlines()) == 1
+def test_pep_723_metadata() -> None:
+    lines = LOADER.read_text().splitlines()
+    start = lines.index("# /// script") + 1
+    end = lines.index("# ///", start)
+    metadata = tomllib.loads(
+        "\n".join(line.removeprefix("# ") for line in lines[start:end])
+    )
+    assert metadata == {"requires-python": ">=3.11", "dependencies": []}
+
+
+def test_omitted_root_uses_git_repository() -> None:
+    explicit = subprocess.run(
+        [sys.executable, str(LOADER), str(ROOT)],
+        capture_output=True,
+        check=True,
+        text=True,
+    )
+    discovered = subprocess.run(
+        [sys.executable, str(LOADER)],
+        capture_output=True,
+        check=True,
+        cwd=ROOT,
+        text=True,
+    )
+    assert discovered.stdout == explicit.stdout
+    assert discovered.stderr == ""
+
+
+def test_rejects_extra_argument() -> None:
+    result = subprocess.run(
+        [sys.executable, str(LOADER), str(ROOT), "extra"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "usage:" in result.stderr
+
+
+def test_runs_with_pipx(tmp_path: Path) -> None:
+    project = tmp_path / "pipx"
+    project.mkdir()
+    result = subprocess.run(
+        ["pipx", "run", str(LOADER), str(project)],
+        capture_output=True,
+        check=True,
+        env=os.environ
+        | {
+            "PATH": str(Path(sys.executable).parent),
+            "PIPX_HOME": str(tmp_path / "pipx-home"),
+            "PIPX_BIN_DIR": str(tmp_path / "pipx-bin"),
+        },
+        text=True,
+    )
+    assert json.loads(result.stdout) == defaults(project)
+    assert result.stderr == ""
