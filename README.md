@@ -19,17 +19,6 @@ worktrees, or mandatory subagents.
 
 By default, specs and plans are written under `docs/superpowers/`.
 
-## Install
-
-Install this repository as a plugin with your coding agent's plugin manager.
-
-For example, in Claude Code:
-
-```text
-/plugin marketplace add /absolute/path/to/smolpowers
-/plugin install smolpowers@smolpowers
-```
-
 ## Use
 
 Ask your agent to use Smolpowers for a change:
@@ -44,6 +33,7 @@ an existing spec and plan.
 
 ## Documentation
 
+- [Installation](docs/installation.md) — installing Smolpowers as a plugin.
 - [Configuration](docs/configuration.md) — schema, defaults, and examples.
 - [Integrations](docs/integrations.md) — using selected upstream Superpowers skills.
 - [Testing](docs/testing.md) — deterministic tests and model-backed evaluations.
