@@ -21,9 +21,9 @@ done
 
 grep -Fq 'superpowers:test-driven-development' "$repo_root/README.md"
 grep -Fq 'smolpowers:smol-execute' "$repo_root/README.md"
-grep -Fq '"phases"' "$repo_root/README.md"
-grep -Fq '"owner"' "$repo_root/README.md"
-grep -Fq '"companions"' "$repo_root/README.md"
+grep -Fq 'phases:' "$repo_root/README.md"
+grep -Fq 'owner:' "$repo_root/README.md"
+grep -Fq 'companions:' "$repo_root/README.md"
 
 if [[ ! -x "$upstream_root/skills/subagent-driven-development/scripts/task-brief" ]]; then
   printf 'SKIP: set SUPERPOWERS_ROOT to an upstream Superpowers checkout\n'

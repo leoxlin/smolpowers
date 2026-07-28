@@ -45,8 +45,8 @@ with tempfile.TemporaryDirectory() as tmp:
 
     custom_repo = Path(tmp) / "custom"
     custom_repo.mkdir()
-    (custom_repo / ".smolpowers.json").write_text(
-        '{"docsRoot":"project-notes","stateRoot":"/tmp/smol-state"}\n'
+    (custom_repo / ".smolpowers.yml").write_text(
+        "docsRoot: project-notes\nstateRoot: /tmp/smol-state\n"
     )
     output = subprocess.check_output(
         [

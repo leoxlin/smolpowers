@@ -44,27 +44,21 @@ an existing spec and plan.
 
 ## Configure
 
-Add `.smolpowers.json` to the repository root to change artifact locations,
+Add `.smolpowers.yml` to the repository root to change artifact locations,
 phase owners, ordered companions, or phase-specific settings:
 
-```json
-{
-  "docsRoot": "docs/superpowers",
-  "stateRoot": ".superpowers",
-  "phases": {
-    "design": {
-      "owner": "superpowers:brainstorming"
-    },
-    "execute": {
-      "owner": "smolpowers:smol-execute",
-      "companions": [],
-      "tdd": "strict"
-    },
-    "finish": {
-      "owner": "superpowers:finishing-a-development-branch"
-    }
-  }
-}
+```yaml
+docsRoot: docs/superpowers
+stateRoot: .superpowers
+phases:
+  design:
+    owner: superpowers:brainstorming
+  execute:
+    owner: smolpowers:smol-execute
+    companions: []
+    tdd: strict
+  finish:
+    owner: superpowers:finishing-a-development-branch
 ```
 
 Paths may be absolute or repository-root-relative. Each phase has one explicit
@@ -75,6 +69,9 @@ all defaults.
 
 The released flat `design`, `plan`, `execute`, `finish`, and `tdd` keys remain
 accepted as legacy input when `phases` is absent. Do not mix the two shapes.
+Reading a configuration file requires
+[Mike Farah `yq` v4](https://github.com/mikefarah/yq); an absent file uses
+defaults without invoking `yq`.
 
 ## Substitute upstream phases
 
@@ -89,17 +86,12 @@ request it for a single run to replace its Smolpowers phase:
 To use the exact upstream TDD skill instead of built-in strict mode, add it as
 an Execute companion while retaining Smol Execute as the phase owner:
 
-```json
-{
-  "phases": {
-    "execute": {
-      "owner": "smolpowers:smol-execute",
-      "companions": [
-        "superpowers:test-driven-development"
-      ]
-    }
-  }
-}
+```yaml
+phases:
+  execute:
+    owner: smolpowers:smol-execute
+    companions:
+      - superpowers:test-driven-development
 ```
 
 Smolpowers passes the configured artifact paths and asks returning upstream

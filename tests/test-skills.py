@@ -65,8 +65,18 @@ for clause in [
     "phases.<name>.owner",
     "phases.<name>.companions",
     "phases.execute.tdd",
+    ".smolpowers.yml",
+    "Mike Farah `yq` v4",
 ]:
     assert clause in configuration, f"configuration: missing phase object contract: {clause}"
+assert ".smolpowers.json" not in configuration, (
+    "configuration: stale JSON configuration filename"
+)
+loader = (
+    ROOT / "skills" / "smol-activate" / "scripts" / "load-config.sh"
+).read_text()
+assert "command -v yq" in loader, "configuration loader: missing yq dependency"
+assert "jq" not in loader, "configuration loader: stale jq dependency"
 
 tdd_reference_path = (
     ROOT / "skills" / "smol-execute" / "references" / "test-driven-development.md"

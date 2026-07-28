@@ -25,8 +25,18 @@ cp -R "$repo_root/skills/smol-activate" "$fixture/.agents/skills/"
 cp -R "$repo_root/tests/fixtures/override-skills/." "$fixture/.agents/skills/"
 
 printf '%s\n' \
-  '{"docsRoot":"artifacts","stateRoot":".smol-state","phases":{"design":{"owner":"integration-design"},"plan":{"owner":"integration-plan"},"execute":{"owner":"integration-execute"},"finish":{"owner":"integration-finish"}}}' \
-  >"$fixture/.smolpowers.json"
+  'docsRoot: artifacts' \
+  'stateRoot: .smol-state' \
+  'phases:' \
+  '  design:' \
+  '    owner: integration-design' \
+  '  plan:' \
+  '    owner: integration-plan' \
+  '  execute:' \
+  '    owner: integration-execute' \
+  '  finish:' \
+  '    owner: integration-finish' \
+  >"$fixture/.smolpowers.yml"
 printf '# Configuration override fixture\n' >"$fixture/README.md"
 
 git -C "$fixture" init -q
