@@ -1,4 +1,4 @@
 {
-  "docsRoot": ".superpowers/docs",
-  "stateRoot": ".superpowers"
+  "specDir": ".superpowers/docs",
+  "stateDir": ".superpowers"
 }

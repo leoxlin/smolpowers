@@ -30,7 +30,7 @@ Use reasonable defaults for minor details. Pause only when different answers wou
 
 Write:
 
-`<docsRoot>/specs/YYYY-MM-DD-<slug>-design.md`
+`<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
 
 Use [spec-template.md](references/spec-template.md). Replace every placeholder with concrete content and preserve its core headings. Create parent directories only when they are inside an authorized writable location.
 

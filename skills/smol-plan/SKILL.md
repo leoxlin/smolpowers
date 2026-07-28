@@ -13,7 +13,7 @@ Resolve and apply the configured `plan` phase object by following [configuration
 
 Require a current spec at:
 
-`<docsRoot>/specs/YYYY-MM-DD-<slug>-design.md`
+`<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
 
 Compare the spec to the active request and relevant repository facts. Treat it as stale when its goal, constraints, or chosen approach no longer describe the requested work. If it is missing, incomplete, or stale, invoke the configured `design` phase object with the configured spec path and stop this phase.
 
@@ -36,7 +36,7 @@ Read [interfaces-and-failures.md](references/interfaces-and-failures.md) when a 
 
 Write:
 
-`<docsRoot>/plans/YYYY-MM-DD-<slug>.md`
+`<specDir>/plans/YYYY-MM-DD-<slug>.md`
 
 Use [plan-template.md](references/plan-template.md). Preserve these upstream-consumable elements:
 

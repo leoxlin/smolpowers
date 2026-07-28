@@ -14,8 +14,8 @@ LOADER = ROOT / "skills/smol-activate/scripts/load-config.py"
 
 def defaults(project: Path) -> dict:
     return {
-        "docsRoot": str(project / "docs/superpowers"),
-        "stateRoot": str(project / ".superpowers"),
+        "specDir": str(project / "docs/superpowers"),
+        "stateDir": str(project / ".superpowers"),
         "activation": "full",
         "phases": {
             "design": {
@@ -62,15 +62,15 @@ def test_absent_config_uses_defaults(tmp_path: Path) -> None:
     assert stderr == ""
 
 
-def test_relative_roots_are_resolved(tmp_path: Path) -> None:
+def test_relative_dirs_are_resolved(tmp_path: Path) -> None:
     project = tmp_path / "relative"
     write_config(
-        project, '{"docsRoot":"notes/work","stateRoot":"var/smol"}\n'
+        project, '{"specDir":"notes/work","stateDir":"var/smol"}\n'
     )
     actual, stderr = load(project)
     expected = defaults(project)
-    expected["docsRoot"] = str(project / "notes/work")
-    expected["stateRoot"] = str(project / "var/smol")
+    expected["specDir"] = str(project / "notes/work")
+    expected["stateDir"] = str(project / "var/smol")
     assert actual == expected
     assert stderr == ""
 
@@ -177,25 +177,25 @@ def test_legacy_strict_tdd(tmp_path: Path) -> None:
     assert stderr == ""
 
 
-def test_absolute_roots_are_preserved(tmp_path: Path) -> None:
+def test_absolute_dirs_are_preserved(tmp_path: Path) -> None:
     project = tmp_path / "absolute"
     write_config(
         project,
-        '{"docsRoot":"/tmp/smol-docs","stateRoot":"/tmp/smol-state"}\n',
+        '{"specDir":"/tmp/smol-docs","stateDir":"/tmp/smol-state"}\n',
     )
     actual, stderr = load(project)
     expected = defaults(project)
-    expected["docsRoot"] = "/tmp/smol-docs"
-    expected["stateRoot"] = "/tmp/smol-state"
+    expected["specDir"] = "/tmp/smol-docs"
+    expected["stateDir"] = "/tmp/smol-state"
     assert actual == expected
     assert stderr == ""
 
 
 INVALID_CONFIGS = {
     "malformed": "{not json\n",
-    "unknown": '{"docsRoot":"docs","surprise":"value"}\n',
-    "atomic": '{"docsRoot":"custom","stateRoot":""}\n',
-    "unsafe": '{"docsRoot":"bad\\npath","stateRoot":"custom"}\n',
+    "unknown": '{"specDir":"docs","surprise":"value"}\n',
+    "atomic": '{"specDir":"custom","stateDir":""}\n',
+    "unsafe": '{"specDir":"bad\\npath","stateDir":"custom"}\n',
     "legacy-invalid-owner": '{"design":""}\n',
     "legacy-empty-chain": '{"execute":[]}\n',
     "legacy-non-string-member": '{"execute":["smolpowers:smol-execute",42]}\n',
@@ -238,7 +238,7 @@ def test_pep_723_metadata() -> None:
     assert metadata == {"requires-python": ">=3.11", "dependencies": []}
 
 
-def test_omitted_root_uses_git_repository() -> None:
+def test_omitted_repository_uses_git_repository() -> None:
     explicit = subprocess.run(
         [sys.executable, str(LOADER), str(ROOT)],
         capture_output=True,

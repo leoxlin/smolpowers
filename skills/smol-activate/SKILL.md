@@ -29,8 +29,8 @@ Read [lifecycle.md](references/lifecycle.md) when choosing a phase is not obviou
 
 Inspect the user's request, relevant repository state, and artifacts under:
 
-- `<docsRoot>/specs/YYYY-MM-DD-<slug>-design.md`
-- `<docsRoot>/plans/YYYY-MM-DD-<slug>.md`
+- `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
+- `<specDir>/plans/YYYY-MM-DD-<slug>.md`
 
 Prefer an explicitly named artifact or slug. Otherwise choose the artifact pair most clearly associated with the request; do not select an unrelated file merely because it is newest.
 

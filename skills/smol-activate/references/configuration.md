@@ -13,9 +13,10 @@ Requires `pipx`. Locate `scripts/load-config.py` under the installed
 pipx run /absolute/path/to/smol-activate/scripts/load-config.py /absolute/repo/root
 ```
 
-Parse its JSON output directly. Never use `eval`. Treat `docsRoot` as the
-artifact root and `stateRoot` as information only. Core Smolpowers never writes
-`stateRoot`. Apply the normalized `activation` level before selecting a phase.
+Parse its JSON output directly. Never use `eval`. Treat `specDir` as the
+artifact directory and `stateDir` as information only. Core Smolpowers never
+writes `stateDir`. Apply the normalized `activation` level before selecting a
+phase.
 
 The loader always returns one normalized phase object for each lifecycle phase:
 

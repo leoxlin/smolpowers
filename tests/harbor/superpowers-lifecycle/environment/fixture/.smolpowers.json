@@ -1,6 +1,6 @@
 {
-  "docsRoot": "artifacts",
-  "stateRoot": ".smol-state",
+  "specDir": "artifacts",
+  "stateDir": ".smol-state",
   "phases": {
     "design": {
       "owner": "smol-design"

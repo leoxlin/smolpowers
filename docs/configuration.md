@@ -6,8 +6,8 @@ phase owners, ordered companions, or phase-specific settings:
 ```json
 {
   "activation": "full",
-  "docsRoot": "docs/superpowers",
-  "stateRoot": ".superpowers",
+  "specDir": "docs/superpowers",
+  "stateDir": ".superpowers",
   "phases": {
     "design": {
       "owner": "superpowers:brainstorming"

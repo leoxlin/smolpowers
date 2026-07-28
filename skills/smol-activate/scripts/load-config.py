@@ -10,7 +10,7 @@ import sys
 from pathlib import Path, PureWindowsPath
 
 
-DEFAULT_DOCS = "docs/superpowers"
+DEFAULT_SPEC = "docs/superpowers"
 DEFAULT_STATE = ".superpowers"
 DEFAULT_ACTIVATION = "full"
 DEFAULT_TDD = "proportional"
@@ -74,9 +74,9 @@ def validate(config: object) -> None:
     legacy_keys = set(PHASES) | {"tdd"}
     allowed = legacy_keys | {
         "activation",
-        "docsRoot",
+        "specDir",
         "phases",
-        "stateRoot",
+        "stateDir",
     }
     if not isinstance(config, dict) or not set(config) <= allowed:
         raise ValueError
@@ -84,7 +84,7 @@ def validate(config: object) -> None:
         raise ValueError
     if not all(
         config.get(name) is None or safe_string(config[name])
-        for name in ("docsRoot", "stateRoot")
+        for name in ("specDir", "stateDir")
     ):
         raise ValueError
 
@@ -144,11 +144,11 @@ def normalize_phases(config: dict) -> dict:
 
 def normalize(repo_root: Path, config: dict) -> dict:
     return {
-        "docsRoot": resolve_path(
-            repo_root, config.get("docsRoot") or DEFAULT_DOCS
+        "specDir": resolve_path(
+            repo_root, config.get("specDir") or DEFAULT_SPEC
         ),
-        "stateRoot": resolve_path(
-            repo_root, config.get("stateRoot") or DEFAULT_STATE
+        "stateDir": resolve_path(
+            repo_root, config.get("stateDir") or DEFAULT_STATE
         ),
         "activation": config.get("activation") or DEFAULT_ACTIVATION,
         "phases": normalize_phases(config),
