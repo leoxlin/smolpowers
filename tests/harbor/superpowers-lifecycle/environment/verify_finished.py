@@ -27,7 +27,7 @@ assert "> **For agentic workers:** REQUIRED SUB-SKILL:" in plan.read_text()
 assert "- [ ]" not in plan.read_text()
 
 subprocess.run(
-    ["git", "diff", "HEAD", "--quiet", "--", ".smolpowers.yml", "tests/test_greet.py"],
+    ["git", "diff", "HEAD", "--quiet", "--", ".smolpowers.json", "tests/test_greet.py"],
     cwd=ROOT,
     check=True,
 )

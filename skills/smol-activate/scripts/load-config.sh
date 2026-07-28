@@ -12,7 +12,7 @@ else
   repo_root="$(git rev-parse --show-toplevel)"
 fi
 
-config_file="$repo_root/.smolpowers.yml"
+config_file="$repo_root/.smolpowers.json"
 default_docs="docs/superpowers"
 default_state=".superpowers"
 default_tdd="proportional"
@@ -70,194 +70,129 @@ if [[ ! -f "$config_file" ]]; then
   exit 0
 fi
 
-if ! command -v yq >/dev/null 2>&1; then
+if ! command -v jq >/dev/null 2>&1; then
   fallback
   exit 0
 fi
 
-safe_string='
-  . | (
-    type == "!!str" and
-    length > 0 and
-    (contains("\u0000") | not) and
-    (contains("\n") | not) and
-    (contains("\r") | not)
-  )
+# shellcheck disable=SC2016
+filter='
+  def safe_string:
+    type == "string" and length > 0 and (test("[\u0000\n\r]") | not);
+  def legacy_phase:
+    safe_string or
+    (type == "array" and length > 0 and all(safe_string));
+  def phase($allow_tdd):
+    type == "object" and
+    ((keys - (
+      ["owner", "companions"] +
+      (if $allow_tdd then ["tdd"] else [] end)
+    )) | length == 0) and
+    (.owner? == null or (.owner | safe_string)) and
+    (.companions? == null or (
+      .companions | type == "array" and all(safe_string)
+    )) and
+    (
+      ($allow_tdd | not) or
+      .tdd? == null or
+      .tdd == "proportional" or
+      .tdd == "strict"
+    );
+  def optional_phase($name; $allow_tdd):
+    (.phases | has($name) | not) or
+    (.phases[$name] | phase($allow_tdd));
+  def valid:
+    type == "object" and
+    ((keys - [
+      "design", "docsRoot", "execute", "finish", "phases", "plan",
+      "stateRoot", "tdd"
+    ]) | length == 0) and
+    ([.docsRoot?, .stateRoot?] | all(
+      . == null or safe_string
+    )) and
+    (
+      if has("phases") then
+        (([has("design"), has("plan"), has("execute"), has("finish"), has("tdd")]
+          | any) | not) and
+        (.phases | type == "object") and
+        ((.phases | keys) - ["design", "execute", "finish", "plan"] | length == 0) and
+        optional_phase("design"; false) and
+        optional_phase("plan"; false) and
+        optional_phase("execute"; true) and
+        optional_phase("finish"; false)
+      else
+        ([.design?, .plan?, .execute?, .finish?] | all(
+          . == null or legacy_phase
+        )) and
+        (.tdd? == null or .tdd == "proportional" or .tdd == "strict")
+      end
+    );
+  def nested_phase($name; $default_owner):
+    (.phases[$name] // {}) as $phase |
+    {
+      owner: ($phase.owner // $default_owner),
+      companions: ($phase.companions // [])
+    };
+  def legacy_phase_object($value; $default_owner):
+    ($value // $default_owner) as $phase |
+    if ($phase | type) == "array" then
+      {
+        owner: $phase[-1],
+        companions: $phase[0:-1]
+      }
+    else
+      {
+        owner: $phase,
+        companions: []
+      }
+    end;
+
+  select(valid) |
+  {
+    docsRoot: (.docsRoot // $default_docs),
+    stateRoot: (.stateRoot // $default_state),
+    phases: (
+      if has("phases") then
+        {
+          design: nested_phase("design"; $default_design),
+          plan: nested_phase("plan"; $default_plan),
+          execute: (
+            nested_phase("execute"; $default_execute) +
+            {tdd: (.phases.execute.tdd // $default_tdd)}
+          ),
+          finish: nested_phase("finish"; $default_finish)
+        }
+      else
+        {
+          design: legacy_phase_object(.design; $default_design),
+          plan: legacy_phase_object(.plan; $default_plan),
+          execute: (
+            legacy_phase_object(.execute; $default_execute) +
+            {tdd: (.tdd // $default_tdd)}
+          ),
+          finish: legacy_phase_object(.finish; $default_finish)
+        }
+      end
+    )
+  }
 '
 
-validate_document() {
-  local document_count
-  document_count="$(yq ea -r '[.] | length' "$config_file" 2>/dev/null)" \
-    || return 1
-  [[ "$document_count" == 1 ]] || return 1
-
-  yq -e "
-    type == \"!!map\" and
-    ((keys - [
-      \"design\", \"docsRoot\", \"execute\", \"finish\", \"phases\", \"plan\",
-      \"stateRoot\", \"tdd\"
-    ]) | length == 0) and
-    ([.docsRoot, .stateRoot] | all_c(
-      . == null or ($safe_string)
-    ))
-  " "$config_file" >/dev/null 2>&1
-}
-
-validate_phase() {
-  local name="$1"
-  local allowed='["owner", "companions"]'
-  local tdd_check=true
-
-  [[ "$(yq -r ".phases | has(\"$name\")" "$config_file" 2>/dev/null)" == true ]] \
-    || return 0
-
-  if [[ "$name" == execute ]]; then
-    allowed='["owner", "companions", "tdd"]'
-    tdd_check='
-      .tdd == null or
-      .tdd == "proportional" or
-      .tdd == "strict"
-    '
-  fi
-
-  yq -e "
-    .phases.$name | (
-      type == \"!!map\" and
-      ((keys - $allowed) | length == 0) and
-      (.owner == null or (.owner | $safe_string)) and
-      (.companions == null or (
-        .companions | (
-          type == \"!!seq\" and all_c($safe_string)
-        )
-      )) and
-      ($tdd_check)
-    )
-  " "$config_file" >/dev/null 2>&1
-}
-
-validate_preferred() {
-  yq -e '
-    (([
-      has("design"), has("plan"), has("execute"), has("finish"), has("tdd")
-    ] | any_c(.)) | not) and
-    (.phases | type == "!!map") and
-    ((.phases | keys) - ["design", "execute", "finish", "plan"] | length == 0)
-  ' "$config_file" >/dev/null 2>&1 &&
-    validate_phase design &&
-    validate_phase plan &&
-    validate_phase execute &&
-    validate_phase finish
-}
-
-validate_legacy() {
-  yq -e "
-    [.design, .plan, .execute, .finish] | all_c(
-      . == null or
-      ($safe_string) or
-      (
-        type == \"!!seq\" and
-        length > 0 and
-        all_c($safe_string)
-      )
-    )
-  " "$config_file" >/dev/null 2>&1 &&
-    yq -e '
-      .tdd == null or
-      .tdd == "proportional" or
-      .tdd == "strict"
-    ' "$config_file" >/dev/null 2>&1
-}
-
-preferred_phase() {
-  local name="$1"
-  local default_owner="$2"
-  local owner companions
-
-  owner="$(
-    DEFAULT_OWNER="$default_owner" \
-      yq -r ".phases.$name.owner // strenv(DEFAULT_OWNER)" \
-        "$config_file" 2>/dev/null
-  )" || return 1
-  companions="$(
-    yq -o=json -I=0 ".phases.$name.companions // []" \
-      "$config_file" 2>/dev/null
-  )" || return 1
-
-  printf '{"owner":"%s","companions":%s}' \
-    "$(json_escape "$owner")" "$companions"
-}
-
-legacy_phase() {
-  local name="$1"
-  local default_owner="$2"
-  local phase_type owner companions
-
-  phase_type="$(yq -r ".$name | type" "$config_file" 2>/dev/null)" \
-    || return 1
-  if [[ "$phase_type" == "!!seq" ]]; then
-    owner="$(yq -r ".${name}[-1]" "$config_file" 2>/dev/null)" || return 1
-    companions="$(
-      yq -o=json -I=0 ".${name}[0:-1]" "$config_file" 2>/dev/null
-    )" || return 1
-  elif [[ "$phase_type" == "!!str" ]]; then
-    owner="$(yq -r ".$name" "$config_file" 2>/dev/null)" || return 1
-    companions='[]'
-  else
-    owner="$default_owner"
-    companions='[]'
-  fi
-
-  printf '{"owner":"%s","companions":%s}' \
-    "$(json_escape "$owner")" "$companions"
-}
-
-if ! validate_document; then
+if ! normalized="$(
+  jq -ce \
+    --arg default_docs "$default_docs" \
+    --arg default_state "$default_state" \
+    --arg default_tdd "$default_tdd" \
+    --arg default_design "$default_design" \
+    --arg default_plan "$default_plan" \
+    --arg default_execute "$default_execute" \
+    --arg default_finish "$default_finish" \
+    "$filter" "$config_file" 2>/dev/null
+)"; then
   fallback
   exit 0
 fi
 
-if [[ "$(yq -r 'has("phases")' "$config_file" 2>/dev/null)" == true ]]; then
-  validate_preferred || {
-    fallback
-    exit 0
-  }
-  design="$(preferred_phase design "$default_design")" || exit 1
-  plan="$(preferred_phase plan "$default_plan")" || exit 1
-  execute="$(preferred_phase execute "$default_execute")" || exit 1
-  finish="$(preferred_phase finish "$default_finish")" || exit 1
-  tdd="$(
-    DEFAULT_TDD="$default_tdd" \
-      yq -r '.phases.execute.tdd // strenv(DEFAULT_TDD)' \
-        "$config_file" 2>/dev/null
-  )" || exit 1
-else
-  validate_legacy || {
-    fallback
-    exit 0
-  }
-  design="$(legacy_phase design "$default_design")" || exit 1
-  plan="$(legacy_phase plan "$default_plan")" || exit 1
-  execute="$(legacy_phase execute "$default_execute")" || exit 1
-  finish="$(legacy_phase finish "$default_finish")" || exit 1
-  tdd="$(
-    DEFAULT_TDD="$default_tdd" \
-      yq -r '.tdd // strenv(DEFAULT_TDD)' "$config_file" 2>/dev/null
-  )" || exit 1
-fi
-
-docs="$(
-  DEFAULT_DOCS="$default_docs" \
-    yq -r '.docsRoot // strenv(DEFAULT_DOCS)' "$config_file" 2>/dev/null
-)" || exit 1
-state="$(
-  DEFAULT_STATE="$default_state" \
-    yq -r '.stateRoot // strenv(DEFAULT_STATE)' "$config_file" 2>/dev/null
-)" || exit 1
-phases="$(
-  printf \
-    '{"design":%s,"plan":%s,"execute":%s,"finish":%s}' \
-    "$design" "$plan" \
-    "${execute%\}},\"tdd\":\"$(json_escape "$tdd")\"}" \
-    "$finish"
-)"
+docs="$(jq -r '.docsRoot' <<<"$normalized")"
+state="$(jq -r '.stateRoot' <<<"$normalized")"
+phases="$(jq -c '.phases' <<<"$normalized")"
 emit "$docs" "$state" "$phases"

@@ -52,7 +52,7 @@ def load(project: Path, *, path: str | None = None) -> tuple[dict, str]:
 
 def write_config(project: Path, content: str) -> None:
     project.mkdir()
-    (project / ".smolpowers.yml").write_text(content)
+    (project / ".smolpowers.json").write_text(content)
 
 
 def test_absent_config_uses_defaults(tmp_path: Path) -> None:
@@ -63,10 +63,10 @@ def test_absent_config_uses_defaults(tmp_path: Path) -> None:
     assert stderr == ""
 
 
-def test_json_config_is_ignored(tmp_path: Path) -> None:
-    project = tmp_path / "json-only"
+def test_yaml_config_is_ignored(tmp_path: Path) -> None:
+    project = tmp_path / "yaml-only"
     project.mkdir()
-    (project / ".smolpowers.json").write_text('{"docsRoot":"ignored"}\n')
+    (project / ".smolpowers.yml").write_text("docsRoot: ignored\n")
     actual, stderr = load(project)
     assert actual == defaults(project)
     assert stderr == ""
@@ -74,7 +74,9 @@ def test_json_config_is_ignored(tmp_path: Path) -> None:
 
 def test_relative_roots_are_resolved(tmp_path: Path) -> None:
     project = tmp_path / "relative"
-    write_config(project, "docsRoot: notes/work\nstateRoot: var/smol\n")
+    write_config(
+        project, '{"docsRoot":"notes/work","stateRoot":"var/smol"}\n'
+    )
     actual, stderr = load(project)
     expected = defaults(project)
     expected["docsRoot"] = str(project / "notes/work")
@@ -87,19 +89,12 @@ def test_nested_phase_configuration(tmp_path: Path) -> None:
     project = tmp_path / "preferred"
     write_config(
         project,
-        """\
-phases:
-  design:
-    owner: superpowers:brainstorming
-  execute:
-    owner: smolpowers:smol-execute
-    companions:
-      - superpowers:test-driven-development
-    tdd: strict
-  finish:
-    owner: superpowers:finishing-a-development-branch
-    companions: []
-""",
+        '{"phases":{'
+        '"design":{"owner":"superpowers:brainstorming"},'
+        '"execute":{"owner":"smolpowers:smol-execute",'
+        '"companions":["superpowers:test-driven-development"],"tdd":"strict"},'
+        '"finish":{"owner":"superpowers:finishing-a-development-branch",'
+        '"companions":[]}}}\n',
     )
     actual, stderr = load(project)
     assert actual["phases"]["design"] == {
@@ -126,12 +121,8 @@ def test_partial_nested_phase_uses_defaults(tmp_path: Path) -> None:
     project = tmp_path / "preferred-partial"
     write_config(
         project,
-        """\
-phases:
-  execute:
-    companions:
-      - superpowers:test-driven-development
-""",
+        '{"phases":{"execute":{'
+        '"companions":["superpowers:test-driven-development"]}}}\n',
     )
     actual, stderr = load(project)
     assert actual["phases"]["execute"] == {
@@ -146,10 +137,8 @@ def test_legacy_phase_owners(tmp_path: Path) -> None:
     project = tmp_path / "legacy-owners"
     write_config(
         project,
-        """\
-design: superpowers:brainstorming
-finish: superpowers:finishing-a-development-branch
-""",
+        '{"design":"superpowers:brainstorming",'
+        '"finish":"superpowers:finishing-a-development-branch"}\n',
     )
     actual, stderr = load(project)
     assert actual["phases"]["design"] == {
@@ -169,11 +158,8 @@ def test_legacy_phase_chain(tmp_path: Path) -> None:
     project = tmp_path / "legacy-chain"
     write_config(
         project,
-        """\
-execute:
-  - superpowers:test-driven-development
-  - smolpowers:smol-execute
-""",
+        '{"execute":["superpowers:test-driven-development",'
+        '"smolpowers:smol-execute"]}\n',
     )
     actual, stderr = load(project)
     assert actual["phases"]["execute"] == {
@@ -186,7 +172,7 @@ execute:
 
 def test_legacy_strict_tdd(tmp_path: Path) -> None:
     project = tmp_path / "legacy-tdd-strict"
-    write_config(project, "tdd: strict\n")
+    write_config(project, '{"tdd":"strict"}\n')
     actual, stderr = load(project)
     assert actual["phases"]["execute"]["tdd"] == "strict"
     assert stderr == ""
@@ -194,7 +180,10 @@ def test_legacy_strict_tdd(tmp_path: Path) -> None:
 
 def test_absolute_roots_are_preserved(tmp_path: Path) -> None:
     project = tmp_path / "absolute"
-    write_config(project, "docsRoot: /tmp/smol-docs\nstateRoot: /tmp/smol-state\n")
+    write_config(
+        project,
+        '{"docsRoot":"/tmp/smol-docs","stateRoot":"/tmp/smol-state"}\n',
+    )
     actual, stderr = load(project)
     expected = defaults(project)
     expected["docsRoot"] = "/tmp/smol-docs"
@@ -204,7 +193,7 @@ def test_absolute_roots_are_preserved(tmp_path: Path) -> None:
 
 
 INVALID_CONFIGS = {
-    "malformed": "phases:\n  execute: [unclosed\n",
+    "malformed": "{not json\n",
     "unknown": '{"docsRoot":"docs","surprise":"value"}\n',
     "atomic": '{"docsRoot":"custom","stateRoot":""}\n',
     "unsafe": '{"docsRoot":"bad\\npath","stateRoot":"custom"}\n',
@@ -224,8 +213,7 @@ INVALID_CONFIGS = {
     "empty-companion": '{"phases":{"execute":{"companions":[""]}}}\n',
     "misplaced-tdd": '{"phases":{"design":{"tdd":"strict"}}}\n',
     "invalid-nested-tdd": '{"phases":{"execute":{"tdd":"sometimes"}}}\n',
-    "phases-scalar": "phases: execute\n",
-    "multiple-documents": "docsRoot: first\n---\ndocsRoot: second\n",
+    "phases-scalar": '{"phases":"execute"}\n',
 }
 
 
@@ -240,9 +228,9 @@ def test_invalid_config_falls_back_atomically(
     assert len(stderr.splitlines()) == 1
 
 
-def test_missing_yq_falls_back_to_defaults(tmp_path: Path) -> None:
-    project = tmp_path / "no-yq"
-    write_config(project, "docsRoot: custom\nstateRoot: state\n")
+def test_missing_jq_falls_back_to_defaults(tmp_path: Path) -> None:
+    project = tmp_path / "no-jq"
+    write_config(project, '{"docsRoot":"custom","stateRoot":"state"}\n')
     actual, stderr = load(project, path="/nonexistent")
     assert actual == defaults(project)
     assert len(stderr.splitlines()) == 1

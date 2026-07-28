@@ -16,11 +16,6 @@ Parse its JSON output directly. Never use `eval`. Treat `docsRoot` as the
 artifact root and `stateRoot` as information only. Core Smolpowers never writes
 `stateRoot`.
 
-The repository input file is `.smolpowers.yml`. When it exists, the loader
-requires Mike Farah `yq` v4 to parse and validate its single YAML document. An
-absent file uses defaults without invoking `yq`; a missing `yq`, malformed
-document, or invalid value produces the normal all-default fallback.
-
 The loader always returns one normalized phase object for each lifecycle phase:
 
 ```json
@@ -47,7 +42,7 @@ roots, active request, and exact artifact paths available at that point. If any
 skill is not installed, report that exact skill instead of dropping it or
 running a default.
 
-The preferred `.smolpowers.yml` input groups settings beneath `phases`.
+The preferred `.smolpowers.json` input groups settings beneath `phases`.
 Released flat phase keys, ordered phase arrays, and top-level `tdd` remain
 accepted as legacy input when `phases` is absent. The loader normalizes both
 input shapes, so lifecycle skills consume only explicit phase objects.
