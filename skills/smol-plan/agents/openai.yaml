@@ -1,4 +1,4 @@
 interface:
   display_name: "Smol Plan"
-  short_description: "Turn a request into a product design spec"
-  default_prompt: "Use $smol-plan to define the goal, scope, and product approach for this work."
+  short_description: "Turn a spec into an implementation plan"
+  default_prompt: "Use $smol-plan to create a precise, verifiable implementation plan from the current spec."

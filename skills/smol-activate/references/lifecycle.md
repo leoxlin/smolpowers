@@ -10,11 +10,11 @@ Treat a plan as stale when it no longer implements the current spec, names inter
 
 ## Resume rules
 
-- Existing spec, no plan: Design.
+- Existing spec, no plan: Plan.
 - Existing plan with unchecked tasks: Execute.
 - Existing plan with checked tasks but failing checks: Execute.
 - Existing plan with checked tasks and unverified diff: Finish.
-- Changed request that invalidates scope: Plan.
-- Changed implementation shape with unchanged product decision: Design.
+- Changed request that invalidates scope: Design.
+- Changed implementation shape with unchanged product decision: Plan.
 
 If several artifact pairs exist, follow the explicitly named pair. Otherwise connect the request to artifact content before using dates as a tie-breaker.

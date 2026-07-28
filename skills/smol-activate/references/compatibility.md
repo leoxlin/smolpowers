@@ -4,8 +4,8 @@
 
 | Requested upstream skill | Replaced phase | Handoff |
 |---|---|---|
-| `superpowers:brainstorming` | Plan | Pass `workflow_owner: smolpowers:smol-activate`, the spec path as `output_path`, `tracked_artifact: true`, and `return_to_caller: true`. |
-| `superpowers:writing-plans` | Design | Pass `workflow_owner: smolpowers:smol-activate`, the current spec, the plan path as `output_path`, `tracked_artifact: true`, and `return_to_caller: true`. |
+| `superpowers:brainstorming` | Design | Pass `workflow_owner: smolpowers:smol-activate`, the spec path as `output_path`, `tracked_artifact: true`, and `return_to_caller: true`. |
+| `superpowers:writing-plans` | Plan | Pass `workflow_owner: smolpowers:smol-activate`, the current spec, the plan path as `output_path`, `tracked_artifact: true`, and `return_to_caller: true`. |
 | `superpowers:subagent-driven-development` | Execute | Pass `workflow_owner: smolpowers:smol-activate`, the exact plan path, and `return_to_caller: true`. |
 | `superpowers:executing-plans` | Execute and Finish | Pass the exact plan path. This upstream owner continues into upstream branch finishing instead of returning to Smolpowers. |
 | `superpowers:finishing-a-development-branch` | Finish | Pass both artifact paths and the authorized Git disposition. |

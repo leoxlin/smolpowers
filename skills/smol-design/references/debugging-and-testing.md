@@ -1,4 +1,4 @@
-# Planning Bugs and Verification
+# Designing Bug Fixes and Verification
 
 ## Reproduce before choosing
 

@@ -5,8 +5,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = {
     "smol-activate": "Load",
-    "smol-plan": "Inspect",
-    "smol-design": "Validate",
+    "smol-design": "Inspect",
+    "smol-plan": "Validate",
     "smol-execute": "Review",
     "smol-finish": "Verify",
 }

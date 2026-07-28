@@ -1,6 +1,6 @@
 ---
 name: smol-activate
-description: Activate Smolpowers and route to the earliest incomplete Plan → Design → Execute → Finish phase. Use at session start, resumption, or when no phase is selected.
+description: Activate Smolpowers and route to the earliest incomplete Design → Plan → Execute → Finish phase. Use at session start, resumption, or when no phase is selected.
 ---
 
 # Smol Activate
@@ -24,8 +24,8 @@ Prefer an explicitly named artifact or slug. Otherwise choose the artifact pair 
 
 Invoke exactly one owner:
 
-1. Invoke `smol-plan` when the product spec is missing, incomplete, contradicted by the current request, or based on repository facts that materially changed.
-2. Invoke `smol-design` when the spec is current but its implementation plan is missing, incomplete, or no longer implements the spec.
+1. Invoke `smol-design` when the product spec is missing, incomplete, contradicted by the current request, or based on repository facts that materially changed.
+2. Invoke `smol-plan` when the spec is current but its implementation plan is missing, incomplete, or no longer implements the spec.
 3. Invoke `smol-execute` when the plan is current and any task remains unchecked, or when implementation exists but the plan and checks have not been reconciled.
 4. Invoke `smol-finish` when all plan tasks are complete and the implementation needs final requirements, diff, verification, or Git handling.
 

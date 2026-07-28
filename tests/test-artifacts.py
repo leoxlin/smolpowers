@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-template = (ROOT / "skills/smol-design/references/plan-template.md").read_text()
+template = (ROOT / "skills/smol-plan/references/plan-template.md").read_text()
 
 for heading in [
     "# [Feature Name] Implementation Plan",
@@ -20,7 +20,7 @@ for heading in [
 ]:
     assert heading in template, f"plan template misses {heading}"
 
-spec_template = (ROOT / "skills/smol-plan/references/spec-template.md").read_text()
+spec_template = (ROOT / "skills/smol-design/references/spec-template.md").read_text()
 for heading in ["# [Feature Name] Design", "## Goal", "## Success", "## Scope"]:
     assert heading in spec_template, f"spec template misses {heading}"
 

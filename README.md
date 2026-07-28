@@ -11,7 +11,7 @@
 Smolpowers keeps the smallest useful loop from
 [Superpowers](https://github.com/obra/superpowers), adapted from v6.2.0:
 
-**Plan → Design → Execute → Finish**
+**Design → Plan → Execute → Finish**
 
 It preserves reviewable specs, executable plans, proportional testing, and
 fresh verification—without telemetry, runtime dependencies, mandatory
@@ -20,8 +20,8 @@ worktrees, or mandatory subagents.
 ## How it works
 
 - `smol-activate` resumes the earliest incomplete phase.
-- `smol-plan` defines the goal and writes a product spec.
-- `smol-design` turns the spec into an executable implementation plan.
+- `smol-design` defines the goal and writes a product spec.
+- `smol-plan` turns the spec into an executable implementation plan.
 - `smol-execute` implements and verifies each task.
 - `smol-finish` checks the requirements, complete diff, and fresh test results.
 
@@ -69,8 +69,8 @@ configuration falls back to these defaults.
 With selected upstream Superpowers skills installed, request one by name to
 replace its Smolpowers phase:
 
-- `superpowers:brainstorming` replaces Plan.
-- `superpowers:writing-plans` replaces Design.
+- `superpowers:brainstorming` replaces Design.
+- `superpowers:writing-plans` replaces Plan.
 - `superpowers:subagent-driven-development` replaces Execute.
 - `superpowers:finishing-a-development-branch` replaces Finish.
 

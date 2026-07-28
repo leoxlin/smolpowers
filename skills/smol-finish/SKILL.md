@@ -13,7 +13,7 @@ If the user explicitly requested `superpowers:finishing-a-development-branch`, i
 
 Load the repository root, `docsRoot`, and `stateRoot` by following [configuration.md](../smol-activate/references/configuration.md). Require the matching spec and plan.
 
-Route to `smol-plan` if the spec is missing or stale. Route to `smol-design` if the plan is missing or stale. Route to `smol-execute` if any task remains incomplete or its outcome is absent. Invoke only that phase and stop.
+Route to `smol-design` if the spec is missing or stale. Route to `smol-plan` if the plan is missing or stale. Route to `smol-execute` if any task remains incomplete or its outcome is absent. Invoke only that phase and stop.
 
 ## Verify the Work
 

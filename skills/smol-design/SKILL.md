@@ -1,57 +1,51 @@
 ---
 name: smol-design
-description: Design a Smolpowers implementation plan from a current spec. Use when the plan is missing, incomplete, or stale.
+description: Design a Smolpowers change in a product spec. Use when the spec is missing, incomplete, or stale.
 ---
 
 # Smol Design
 
-Validate the product spec and produce an executable implementation plan.
+Inspect context, decide what to build, and produce the product design artifact.
 
-If the user explicitly requested `superpowers:writing-plans`, invoke it before doing Design work using the [upstream contract](../smol-activate/references/compatibility.md), then stop this phase.
+If the user explicitly requested `superpowers:brainstorming`, invoke it before doing Design work using the [upstream contract](../smol-activate/references/compatibility.md), then stop this phase.
 
-## Validate the Prerequisite
+## Design the Product
 
-Load the repository root, `docsRoot`, and `stateRoot` by following [configuration.md](../smol-activate/references/configuration.md). Require a current spec at:
+Inspect the repository, current documentation, recent relevant changes, and the user's request before proposing an approach.
+
+For a bug, reproduce the reported behavior or record the exact environmental blocker before choosing a fix. Read [debugging-and-testing.md](references/debugging-and-testing.md) when reproduction, root-cause tracing, or test strategy needs more detail.
+
+Establish:
+
+- the concrete goal and observable success criteria;
+- in-scope and out-of-scope behavior;
+- constraints and compatibility requirements;
+- the current behavior or root cause for bugs;
+- viable approaches and their material tradeoffs;
+- one chosen product approach.
+
+Use reasonable defaults for minor details. Pause only when different answers would materially change scope, behavior, destructive impact, or external effects.
+
+## Write the Spec
+
+Load the repository root, `docsRoot`, and `stateRoot` by following [configuration.md](../smol-activate/references/configuration.md). Write:
 
 `<docsRoot>/specs/YYYY-MM-DD-<slug>-design.md`
 
-Compare the spec to the active request and relevant repository facts. Treat it as stale when its goal, constraints, or chosen approach no longer describe the requested work. If it is missing, incomplete, or stale, invoke `smol-plan` with the configured spec path and stop this phase.
+Use [spec-template.md](references/spec-template.md). Replace every placeholder with concrete content and preserve its core headings. Create parent directories only when they are inside an authorized writable location.
 
-## Shape the Implementation
+Review the written spec for:
 
-Inspect the code paths and tests the spec affects. Define:
+- missing requirements or success criteria;
+- placeholders and vague language;
+- contradictions between scope and approach;
+- assumptions that repository evidence disproves;
+- work unrelated to the request.
 
-- the smallest implementation shape that satisfies the spec;
-- file responsibilities and public interfaces;
-- data flow and lifecycle ownership;
-- failure behavior and recovery paths;
-- task boundaries that yield independently verifiable outcomes;
-- proportional test-first steps and exact final checks.
-
-Avoid mandatory worktrees, speculative abstractions, and unconditional delegation. Keep setup and documentation with the task whose outcome needs them.
-
-Read [interfaces-and-failures.md](references/interfaces-and-failures.md) when a boundary, error contract, migration, or cleanup path is non-trivial.
-
-## Write the Implementation Plan
-
-Write:
-
-`<docsRoot>/plans/YYYY-MM-DD-<slug>.md`
-
-Use [plan-template.md](references/plan-template.md). Preserve these upstream-consumable elements:
-
-- `Goal`, `Architecture`, and `Global Constraints`;
-- numbered `### Task N` headings;
-- `Files`, `Outcome`, and interface details;
-- checkbox steps;
-- exact verification commands and expected results.
-
-Replace every placeholder. Make each task understandable without relying on “similar to Task N” or unstated context. Ensure later task interfaces match earlier definitions.
-
-Review the final plan against every spec requirement, then scan for placeholders, missing failure cases, inconsistent names, and commands that cannot prove their stated outcome.
+Fix those issues in the artifact before reporting the phase outcome.
 
 ## Transition
 
-If implementation was requested, invoke `smol-execute` with the exact spec and plan paths.
+If implementation was requested, invoke `smol-plan` with the exact spec path and configured `docsRoot`.
 
-If only an implementation plan was requested, report the artifact path and stop.
+If only a product design or specification was requested, report the artifact path and stop.

@@ -13,7 +13,7 @@ If the user explicitly requested `superpowers:subagent-driven-development` or `s
 
 Load the repository root, `docsRoot`, and `stateRoot` by following [configuration.md](../smol-activate/references/configuration.md). Require both the spec and plan artifact for the same slug.
 
-Route to `smol-plan` when the spec is missing or stale. Route to `smol-design` when the plan is missing, contradicts the spec, relies on materially changed repository facts, or lacks executable verification. Invoke only the prerequisite phase and stop.
+Route to `smol-design` when the spec is missing or stale. Route to `smol-plan` when the plan is missing, contradicts the spec, relies on materially changed repository facts, or lacks executable verification. Invoke only the prerequisite phase and stop.
 
 Read the complete plan before editing. Resolve only blocking contradictions; do not reopen settled product choices because another approach is merely possible.
 

@@ -35,7 +35,7 @@ trap 'rm -rf "$test_root"' EXIT
 plan="$test_root/plan.md"
 brief="$test_root/task-1.md"
 sed 's/Task N/Task 1/' \
-  "$repo_root/skills/smol-design/references/plan-template.md" >"$plan"
+  "$repo_root/skills/smol-plan/references/plan-template.md" >"$plan"
 "$upstream_root/skills/subagent-driven-development/scripts/task-brief" \
   "$plan" 1 "$brief" >/dev/null
 grep -q '^### Task 1:' "$brief"

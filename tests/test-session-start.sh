@@ -14,7 +14,7 @@ hook = payload["hookSpecificOutput"]
 assert hook["hookEventName"] == "SessionStart"
 context = hook["additionalContext"]
 assert "smolpowers:smol-activate bootstrap" in context
-assert "Plan" in context and "Design" in context
+assert "Design → Plan → Execute → Finish" in context
 assert "TODO" not in context
 PY
 
