@@ -23,6 +23,8 @@ Inspect the worktree before changing it. Preserve unrelated user changes and nev
 
 Execute unchecked tasks in order unless the plan explicitly marks them independent.
 
+When task tracking is available, create todos for every unchecked task. Mark each `in_progress` before implementation and `completed` only after its outcome and checks pass.
+
 Read [test-driven-development.md](references/test-driven-development.md) and follow the mode matching `phases.execute.tdd` for every new feature, bug fix, refactor, or production behavior change.
 
 Configuration-only, documentation-only, generated, or harness-metadata changes that do not alter production behavior may use the narrowest direct validation. Record why in the task outcome.

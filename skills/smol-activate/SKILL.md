@@ -41,6 +41,8 @@ Invoke exactly one configured phase object:
 3. Invoke the configured `execute` phase object when the plan is current and any task remains unchecked, or when implementation exists but the plan and checks have not been reconciled.
 4. Invoke the configured `finish` phase object when all plan tasks are complete and the implementation needs final requirements, diff, verification, or Git handling.
 
+When selecting Execute, create todos for every unchecked task when task tracking is available; the Execute owner keeps their statuses synchronized.
+
 Route backward on stale prerequisites. Do not skip a missing phase.
 
 If the user explicitly requests a corresponding upstream skill, it overrides
