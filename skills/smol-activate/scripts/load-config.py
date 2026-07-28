@@ -5,11 +5,9 @@
 
 import argparse
 import json
-import os
-import re
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 
 DEFAULT_DOCS = "docs/superpowers"
@@ -27,11 +25,7 @@ WARNING = "smolpowers: invalid configuration; using defaults"
 
 
 def resolve_path(repo_root: Path, value: str) -> str:
-    if (
-        os.path.isabs(value)
-        or re.match(r"^[A-Za-z]:[\\/]", value)
-        or value.startswith("\\\\")
-    ):
+    if Path(value).is_absolute() or PureWindowsPath(value).is_absolute():
         return value
     return str(repo_root / value)
 
@@ -43,15 +37,6 @@ def default_phases() -> dict:
     }
     phases["execute"]["tdd"] = DEFAULT_TDD
     return phases
-
-
-def defaults(repo_root: Path) -> dict:
-    return {
-        "docsRoot": resolve_path(repo_root, DEFAULT_DOCS),
-        "stateRoot": resolve_path(repo_root, DEFAULT_STATE),
-        "activation": DEFAULT_ACTIVATION,
-        "phases": default_phases(),
-    }
 
 
 def safe_string(value: object) -> bool:
@@ -177,7 +162,7 @@ def reject_nonstandard_constant(value: str) -> None:
 def load(repo_root: Path) -> tuple[dict, bool]:
     config_file = repo_root / ".smolpowers.json"
     if not config_file.is_file():
-        return defaults(repo_root), False
+        return normalize(repo_root, {}), False
     try:
         config = json.loads(
             config_file.read_text(), parse_constant=reject_nonstandard_constant
@@ -185,7 +170,7 @@ def load(repo_root: Path) -> tuple[dict, bool]:
         validate(config)
         return normalize(repo_root, config), False
     except (OSError, ValueError):
-        return defaults(repo_root), True
+        return normalize(repo_root, {}), True
 
 
 def repository_root(value: str | None) -> Path:
