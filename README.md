@@ -1,16 +1,21 @@
-# Smolpowers
+# smolpowers
 
-<p align="center">
-  <img src="smolpowers.png" alt="A small hamster wearing a superhero cape" width="420">
-</p>
+<div align="center">
+  <img src="smolpowers.png" alt="A small hamster wearing a superhero cape" width="250">
+  <br>
+  A lightweight, evidence-driven workflow for coding agents.
+</div>
 
-A lightweight, evidence-driven workflow for coding agents.
+## Why smolpowers
 
-Smolpowers adapts Superpowers v6.2.0 into one small lifecycle:
+Smolpowers keeps the smallest useful loop from
+[Superpowers](https://github.com/obra/superpowers), adapted from v6.2.0:
 
 **Plan → Design → Execute → Finish**
 
-It keeps the useful structure—clear requirements, implementation plans, proportional testing, and fresh verification—without telemetry, runtime dependencies, mandatory worktrees, or mandatory subagents.
+It preserves reviewable specs, executable plans, proportional testing, and
+fresh verification—without telemetry, runtime dependencies, mandatory
+worktrees, or mandatory subagents.
 
 ## How it works
 
@@ -41,7 +46,9 @@ Ask your agent to use Smolpowers for a change:
 Use Smolpowers to add account deletion.
 ```
 
-Smolpowers will start at the first phase that is not already complete and continue through the lifecycle. You can also request a specific phase or resume an existing spec and plan.
+Smolpowers will start at the first phase that is not already complete and
+continue through the lifecycle. You can also request a specific phase or resume
+an existing spec and plan.
 
 ## Configure
 
@@ -54,7 +61,8 @@ Add `.smolpowers.json` to the repository root to change the artifact locations:
 }
 ```
 
-Both values may be absolute or repository-root-relative. Missing or invalid configuration falls back to these defaults.
+Both values may be absolute or repository-root-relative. Missing or invalid
+configuration falls back to these defaults.
 
 ## Verify
 
