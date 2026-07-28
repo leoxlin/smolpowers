@@ -18,6 +18,11 @@ After a returning upstream owner completes, continue with the next configured
 phase when the request authorizes it. Do not invoke the replaced default phase
 before or after its upstream owner.
 
+`superpowers:test-driven-development` is an Execute companion, not a phase
+owner. Place it before the configured Execute owner in the phase chain. Invoke
+it first so its red-green-refactor instructions govern implementation; the
+final owner still reconciles plan tasks and transitions the lifecycle.
+
 Only substitute an upstream skill that is installed. Enabling both complete
 bootstrap plugins simultaneously is not supported because both inject
 lifecycle owners at session start.

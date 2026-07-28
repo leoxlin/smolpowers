@@ -12,6 +12,15 @@ done
 grep -Fq '| `superpowers:subagent-driven-development` | Execute |' "$compatibility"
 # shellcheck disable=SC2016
 grep -Fq '| `superpowers:executing-plans` | Execute and Finish |' "$compatibility"
+grep -Fq 'superpowers:test-driven-development' "$compatibility"
+grep -Fq 'companion' "$compatibility"
+
+for skill in smol-activate smol-design smol-plan smol-execute smol-finish; do
+  grep -Fq 'phase chain' "$repo_root/skills/$skill/SKILL.md"
+done
+
+grep -Fq 'superpowers:test-driven-development' "$repo_root/README.md"
+grep -Fq 'smolpowers:smol-execute' "$repo_root/README.md"
 
 if [[ ! -x "$upstream_root/skills/subagent-driven-development/scripts/task-brief" ]]; then
   printf 'SKIP: set SUPERPOWERS_ROOT to an upstream Superpowers checkout\n'

@@ -67,13 +67,35 @@ assert actual["finish"] == "superpowers:finishing-a-development-branch"
 PY
 test ! -s "$test_root/phases/stderr"
 
+mkdir -p "$test_root/phase-chain"
+printf '%s\n' \
+  '{"execute":["superpowers:test-driven-development","smolpowers:smol-execute"]}' \
+  >"$test_root/phase-chain/.smolpowers.json"
+run_case phase-chain
+python3 - "$test_root/phase-chain/stdout" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1]) as output:
+    actual = json.load(output)
+assert actual["design"] == "smolpowers:smol-design"
+assert actual["plan"] == "smolpowers:smol-plan"
+assert actual["execute"] == [
+    "superpowers:test-driven-development",
+    "smolpowers:smol-execute",
+]
+assert actual["finish"] == "smolpowers:smol-finish"
+PY
+test ! -s "$test_root/phase-chain/stderr"
+
 mkdir -p "$test_root/absolute"
 printf '%s\n' '{"docsRoot":"/tmp/smol-docs","stateRoot":"/tmp/smol-state"}' \
   >"$test_root/absolute/.smolpowers.json"
 run_case absolute
 assert_json "$(cat "$test_root/absolute/stdout")" "/tmp/smol-docs" "/tmp/smol-state"
 
-for name in malformed unknown atomic unsafe invalid-skill; do
+for name in malformed unknown atomic unsafe invalid-skill \
+  empty-phase-chain non-string-phase-member empty-phase-member; do
   mkdir -p "$test_root/$name"
 done
 printf '%s\n' '{not json' >"$test_root/malformed/.smolpowers.json"
@@ -84,8 +106,15 @@ printf '%s\n' '{"docsRoot":"custom","stateRoot":""}' \
 printf '%s\n' '{"docsRoot":"bad\npath","stateRoot":"custom"}' \
   >"$test_root/unsafe/.smolpowers.json"
 printf '%s\n' '{"design":""}' >"$test_root/invalid-skill/.smolpowers.json"
+printf '%s\n' '{"execute":[]}' \
+  >"$test_root/empty-phase-chain/.smolpowers.json"
+printf '%s\n' '{"execute":["smolpowers:smol-execute",42]}' \
+  >"$test_root/non-string-phase-member/.smolpowers.json"
+printf '%s\n' '{"execute":["","smolpowers:smol-execute"]}' \
+  >"$test_root/empty-phase-member/.smolpowers.json"
 
-for name in malformed unknown atomic unsafe invalid-skill; do
+for name in malformed unknown atomic unsafe invalid-skill \
+  empty-phase-chain non-string-phase-member empty-phase-member; do
   run_case "$name"
   assert_json "$(cat "$test_root/$name/stdout")" \
     "$test_root/$name/docs/superpowers" "$test_root/$name/.superpowers"

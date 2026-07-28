@@ -58,8 +58,9 @@ the skill that owns each phase:
 
 Paths may be absolute or repository-root-relative. The phase keys are
 `design`, `plan`, `execute`, and `finish`; omitted phase keys use their
-`smolpowers:smol-*` owner. Missing or invalid configuration falls back to all
-defaults.
+`smolpowers:smol-*` owner. A phase may be one skill string or an ordered array:
+leading skills are companions and the final skill is the sole phase owner.
+Missing or invalid configuration falls back to all defaults.
 
 ## Substitute upstream phases
 
@@ -70,6 +71,18 @@ request it for a single run to replace its Smolpowers phase:
 - `superpowers:writing-plans` replaces Plan.
 - `superpowers:subagent-driven-development` replaces Execute.
 - `superpowers:finishing-a-development-branch` replaces Finish.
+
+Use upstream strict TDD as an Execute companion while retaining Smol Execute
+as the phase owner:
+
+```json
+{
+  "execute": [
+    "superpowers:test-driven-development",
+    "smolpowers:smol-execute"
+  ]
+}
+```
 
 Smolpowers passes the configured artifact paths and asks returning upstream
 owners to hand control back to its lifecycle. Upstream `executing-plans`

@@ -41,21 +41,28 @@ emit() {
   local docs state
   docs="$(resolve_path "$1")"
   state="$(resolve_path "$2")"
-  printf '{"docsRoot":"%s","stateRoot":"%s","design":"%s","plan":"%s","execute":"%s","finish":"%s"}\n' \
+  printf '{"docsRoot":"%s","stateRoot":"%s","design":%s,"plan":%s,"execute":%s,"finish":%s}\n' \
     "$(json_escape "$docs")" "$(json_escape "$state")" \
-    "$(json_escape "$3")" "$(json_escape "$4")" \
-    "$(json_escape "$5")" "$(json_escape "$6")"
+    "$3" "$4" "$5" "$6"
+}
+
+json_string() {
+  printf '"%s"' "$(json_escape "$1")"
+}
+
+emit_defaults() {
+  emit "$default_docs" "$default_state" \
+    "$(json_string "$default_design")" "$(json_string "$default_plan")" \
+    "$(json_string "$default_execute")" "$(json_string "$default_finish")"
 }
 
 fallback() {
   printf '%s\n' "smolpowers: invalid configuration; using defaults" >&2
-  emit "$default_docs" "$default_state" \
-    "$default_design" "$default_plan" "$default_execute" "$default_finish"
+  emit_defaults
 }
 
 if [[ ! -f "$config_file" ]]; then
-  emit "$default_docs" "$default_state" \
-    "$default_design" "$default_plan" "$default_execute" "$default_finish"
+  emit_defaults
   exit 0
 fi
 
@@ -65,11 +72,21 @@ if ! command -v jq >/dev/null 2>&1; then
 fi
 
 validation='
+  def safe_string:
+    type == "string" and length > 0 and (test("[\u0000\n\r]") | not);
+  def phase:
+    safe_string or
+    (type == "array" and length > 0 and all(safe_string));
+
   type == "object" and
   ((keys - ["design", "docsRoot", "execute", "finish", "plan", "stateRoot"]) | length == 0) and
-  ([.docsRoot?, .stateRoot?, .design?, .plan?, .execute?, .finish?] | all(
+  ([.docsRoot?, .stateRoot?] | all(
     . == null or
-    (type == "string" and length > 0 and (test("[\u0000\n\r]") | not))
+    safe_string
+  )) and
+  ([.design?, .plan?, .execute?, .finish?] | all(
+    . == null or
+    phase
   ))
 '
 
@@ -88,13 +105,13 @@ if ! docs="$(
 fi
 
 if ! design="$(
-  jq -r --arg default "$default_design" '.design // $default' "$config_file"
+  jq -c --arg default "$default_design" '.design // $default' "$config_file"
 )" || ! plan="$(
-  jq -r --arg default "$default_plan" '.plan // $default' "$config_file"
+  jq -c --arg default "$default_plan" '.plan // $default' "$config_file"
 )" || ! execute="$(
-  jq -r --arg default "$default_execute" '.execute // $default' "$config_file"
+  jq -c --arg default "$default_execute" '.execute // $default' "$config_file"
 )" || ! finish="$(
-  jq -r --arg default "$default_finish" '.finish // $default' "$config_file"
+  jq -c --arg default "$default_finish" '.finish // $default' "$config_file"
 )"; then
   fallback
   exit 0
