@@ -11,6 +11,7 @@ bash tests/test-session-start.sh
 node --test tests/test-pi.mjs
 python3 tests/test-artifacts.py
 bash tests/test-upstream.sh
+bash tests/test-superpowers-integration.sh --discovery-only
 
 bash -n hooks/session-start hooks/run-hook.cmd \
   skills/smol-activate/scripts/load-config.sh tests/*.sh
