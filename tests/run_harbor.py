@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TESTS = ROOT / "tests"
 SUPPORTED_AGENTS = ("claude-code", "codex", "kimi-cli", "pi")
 CASES = {
+    "base": TESTS / "harbor/base-lifecycle",
     "override": TESTS / "harbor/override-lifecycle",
     "superpowers": TESTS / "harbor/superpowers-lifecycle",
 }
@@ -88,6 +89,8 @@ def resolve_superpowers_root(argument: Path | None) -> Path:
 
 
 def skills_for(case: str, superpowers_root: Path) -> tuple[Path, ...]:
+    if case == "base":
+        return SMOL_SKILLS
     if case == "override":
         return SMOL_SKILLS + OVERRIDE_SKILLS
     return SMOL_SKILLS + (

@@ -43,6 +43,16 @@ def test_override_job_config() -> None:
     assert len(config.agents[0].skills) == 9
 
 
+def test_base_job_config() -> None:
+    config = run_harbor.build_job_config(
+        "base",
+        [run_harbor.AgentModel("codex", "openai/gpt-5")],
+        Path("/unused-superpowers"),
+    )
+    assert config.tasks[0].path == run_harbor.CASES["base"]
+    assert config.agents[0].skills == [str(path) for path in run_harbor.SMOL_SKILLS]
+
+
 def test_validation_fails_before_run_for_missing_upstream(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError, match="writing-plans"):
         run_harbor.validate_inputs(
