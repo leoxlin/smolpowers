@@ -86,6 +86,12 @@ selected upstream skills discoverable alongside the Smolpowers bootstrap.
 bash tests/run-all.sh
 ```
 
+Run the authenticated, model-backed configuration override lifecycle separately:
+
+```bash
+bash tests/test-overrides-integration.sh
+```
+
 Integration smoke-test coverage and known gaps are recorded in [docs/integration-smoke.md](docs/integration-smoke.md).
 
 ## License
