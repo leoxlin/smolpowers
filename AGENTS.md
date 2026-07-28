@@ -1,0 +1,9 @@
+# Repository Guidelines
+- Keep the cross-agent runtime lightweight and evidence-driven across Design → Plan → Execute → Finish.
+- Use `.smolpowers.json`; keep parsing, validation, path resolution, and defaults in `load-config.sh`.
+- Invalid or unsafe configuration must warn once and fall back atomically to all defaults.
+- Test observable behavior and structured interfaces, not prose, headings, or static file substrings.
+- Use proportional TDD by default; strict mode requires an observed failing test before production code.
+- Run focused tests via `bash tests/run-all.sh <paths>` and the full suite via `bash tests/run-all.sh`.
+- Keep Harbor/model-backed fixtures isolated from the source repo; never commit or push from fixtures.
+- Use conventional commit subjects (`feat:`, `fix:`, `test:`, `docs:`, `chore:`).
