@@ -49,6 +49,7 @@ phase owners, ordered companions, or phase-specific settings:
 
 ```json
 {
+  "activation": "full",
   "docsRoot": "docs/superpowers",
   "stateRoot": ".superpowers",
   "phases": {
@@ -66,6 +67,12 @@ phase owners, ordered companions, or phase-specific settings:
   }
 }
 ```
+
+Activation follows an intensity scale:
+
+- `lite`: only explicit requests to use or resume Smolpowers;
+- `full` (default): new features, large refactors, and other non-trivial changes;
+- `ultra`: every requested code change.
 
 Paths may be absolute or repository-root-relative. Each phase has one explicit
 `owner` and an optional ordered `companions` array. Omitted phases and

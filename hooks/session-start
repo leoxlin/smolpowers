@@ -18,7 +18,7 @@ json_escape() {
 context="<EXTREMELY_IMPORTANT>
 smolpowers:smol-activate bootstrap
 
-The smol-activate skill is loaded below. Follow it now and invoke exactly one phase owner.
+The smol-activate skill is loaded below. Apply its configured activation level. Invoke exactly one phase owner only when the request qualifies.
 
 ${skill_content}
 </EXTREMELY_IMPORTANT>"

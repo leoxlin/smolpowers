@@ -15,6 +15,7 @@ fi
 config_file="$repo_root/.smolpowers.json"
 default_docs="docs/superpowers"
 default_state=".superpowers"
+default_activation="full"
 default_tdd="proportional"
 default_design="smolpowers:smol-design"
 default_plan="smolpowers:smol-plan"
@@ -52,12 +53,13 @@ emit() {
   local docs state
   docs="$(resolve_path "$1")"
   state="$(resolve_path "$2")"
-  printf '{"docsRoot":"%s","stateRoot":"%s","phases":%s}\n' \
-    "$(json_escape "$docs")" "$(json_escape "$state")" "$3"
+  printf '{"docsRoot":"%s","stateRoot":"%s","activation":"%s","phases":%s}\n' \
+    "$(json_escape "$docs")" "$(json_escape "$state")" \
+    "$(json_escape "$3")" "$4"
 }
 
 emit_defaults() {
-  emit "$default_docs" "$default_state" "$(default_phases)"
+  emit "$default_docs" "$default_state" "$default_activation" "$(default_phases)"
 }
 
 fallback() {
@@ -104,9 +106,13 @@ filter='
   def valid:
     type == "object" and
     ((keys - [
-      "design", "docsRoot", "execute", "finish", "phases", "plan",
+      "activation", "design", "docsRoot", "execute", "finish", "phases", "plan",
       "stateRoot", "tdd"
     ]) | length == 0) and
+    (.activation? == null or
+      .activation == "lite" or
+      .activation == "full" or
+      .activation == "ultra") and
     ([.docsRoot?, .stateRoot?] | all(
       . == null or safe_string
     )) and
@@ -151,6 +157,7 @@ filter='
   {
     docsRoot: (.docsRoot // $default_docs),
     stateRoot: (.stateRoot // $default_state),
+    activation: (.activation // $default_activation),
     phases: (
       if has("phases") then
         {
@@ -181,6 +188,7 @@ if ! normalized="$(
   jq -ce \
     --arg default_docs "$default_docs" \
     --arg default_state "$default_state" \
+    --arg default_activation "$default_activation" \
     --arg default_tdd "$default_tdd" \
     --arg default_design "$default_design" \
     --arg default_plan "$default_plan" \
@@ -194,5 +202,6 @@ fi
 
 docs="$(jq -r '.docsRoot' <<<"$normalized")"
 state="$(jq -r '.stateRoot' <<<"$normalized")"
+activation="$(jq -r '.activation' <<<"$normalized")"
 phases="$(jq -c '.phases' <<<"$normalized")"
-emit "$docs" "$state" "$phases"
+emit "$docs" "$state" "$activation" "$phases"

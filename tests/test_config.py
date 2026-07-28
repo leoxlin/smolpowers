@@ -14,6 +14,7 @@ def defaults(project: Path) -> dict:
     return {
         "docsRoot": str(project / "docs/superpowers"),
         "stateRoot": str(project / ".superpowers"),
+        "activation": "full",
         "phases": {
             "design": {
                 "owner": "smolpowers:smol-design",
@@ -82,6 +83,15 @@ def test_relative_roots_are_resolved(tmp_path: Path) -> None:
     expected["docsRoot"] = str(project / "notes/work")
     expected["stateRoot"] = str(project / "var/smol")
     assert actual == expected
+    assert stderr == ""
+
+
+@pytest.mark.parametrize("activation", ["lite", "full", "ultra"])
+def test_activation_level(tmp_path: Path, activation: str) -> None:
+    project = tmp_path / activation
+    write_config(project, f'{{"activation":"{activation}"}}\n')
+    actual, stderr = load(project)
+    assert actual["activation"] == activation
     assert stderr == ""
 
 
@@ -202,6 +212,7 @@ INVALID_CONFIGS = {
     "legacy-non-string-member": '{"execute":["smolpowers:smol-execute",42]}\n',
     "legacy-empty-member": '{"execute":["","smolpowers:smol-execute"]}\n',
     "legacy-invalid-tdd": '{"tdd":"sometimes"}\n',
+    "invalid-activation": '{"activation":"sometimes"}\n',
     "mixed-shapes": '{"execute":"smolpowers:smol-execute","phases":{}}\n',
     "unknown-phase": '{"phases":{"deploy":{"owner":"example:deploy"}}}\n',
     "unknown-phase-property": '{"phases":{"design":{"mode":"fast"}}}\n',

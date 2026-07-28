@@ -39,6 +39,8 @@ test("injects once at startup and stops after agent_end", async () => {
   const injected = await handlers.get("context")({ messages: original });
   assert.equal(injected.messages.length, 2);
   assert.match(textOf(injected.messages[0]), /smolpowers:smol-activate bootstrap/);
+  assert.match(textOf(injected.messages[0]), /Apply its configured activation level/);
+  assert.match(textOf(injected.messages[0]), /new features/);
   assert.equal(injected.messages[1], original[0]);
   assert.equal(await handlers.get("context")({ messages: injected.messages }), undefined);
 

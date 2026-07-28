@@ -49,7 +49,7 @@ function bootstrap() {
   cachedBootstrap = `<EXTREMELY_IMPORTANT>
 ${MARKER}
 
-The smol-activate skill is already loaded for this Pi session. Follow it now and do not load it again.
+The smol-activate skill is already loaded for this Pi session. Apply its configured activation level and do not load it again. Invoke exactly one phase owner only when the request qualifies.
 
 ${skill}
 

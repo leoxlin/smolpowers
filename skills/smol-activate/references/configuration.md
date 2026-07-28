@@ -14,12 +14,13 @@ bash /absolute/path/to/smol-activate/scripts/load-config.sh /absolute/repo/root
 
 Parse its JSON output directly. Never use `eval`. Treat `docsRoot` as the
 artifact root and `stateRoot` as information only. Core Smolpowers never writes
-`stateRoot`.
+`stateRoot`. Apply the normalized `activation` level before selecting a phase.
 
 The loader always returns one normalized phase object for each lifecycle phase:
 
 ```json
 {
+  "activation": "full",
   "phases": {
     "execute": {
       "owner": "smolpowers:smol-execute",
@@ -34,6 +35,7 @@ Every `phases.<name>.owner` is the sole lifecycle owner.
 `phases.<name>.companions` is an ordered array of skills whose instructions
 govern the owner without owning artifacts or transitions.
 `phases.execute.tdd` is either `proportional` or `strict`.
+`activation` is `lite`, `full`, or `ultra`.
 
 When routing to a phase, confirm that its owner and every companion are
 installed. Invoke companions in declared order through the harness's native
@@ -47,5 +49,5 @@ Released flat phase keys, ordered phase arrays, and top-level `tdd` remain
 accepted as legacy input when `phases` is absent. The loader normalizes both
 input shapes, so lifecycle skills consume only explicit phase objects.
 
-Configuration is loaded when the absolute repository root, both roots, and all
-four normalized phase objects are known.
+Configuration is loaded when the absolute repository root, both roots,
+activation level, and all four normalized phase objects are known.

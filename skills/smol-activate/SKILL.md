@@ -1,15 +1,27 @@
 ---
 name: smol-activate
-description: Activate Smolpowers and route to the earliest incomplete Design → Plan → Execute → Finish phase. Use at session start, resumption, or when no phase is selected.
+description: Route qualifying work through the earliest incomplete Design → Plan → Execute → Finish phase. Use when the user explicitly invokes Smolpowers or requests a new feature, large refactor, or other non-trivial change.
 ---
 
 # Smol Activate
 
-Load configuration, inspect the artifact pair, and invoke exactly one phase object.
+Load configuration, apply activation, then inspect the artifact pair and invoke exactly one phase object when the request qualifies.
 
 ## Bootstrap
 
-Load the repository root, roots, and phase objects by following [configuration.md](references/configuration.md).
+Load the repository root, roots, activation level, and phase objects by following [configuration.md](references/configuration.md).
+
+## Activation
+
+Apply the configured activation level:
+
+| Level | Activate Smolpowers for |
+|---|---|
+| `lite` | Explicit requests to use or resume Smolpowers. |
+| `full` | `lite`, plus new features, large refactors, and other non-trivial changes with material scope, behavior, risk, or cross-cutting impact. |
+| `ultra` | `full`, plus every requested code change. |
+
+When the request does not qualify, continue with the normal agent workflow.
 
 Read [lifecycle.md](references/lifecycle.md) when choosing a phase is not obvious. Read [compatibility.md](references/compatibility.md) when a configured or explicitly requested owner is an upstream Superpowers skill, or the active harness needs a tool mapping.
 
