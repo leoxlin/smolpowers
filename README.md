@@ -4,6 +4,8 @@
   <img src="smolpowers.png" alt="A small hamster wearing a superhero cape" width="250">
   <br>
   A lightweight, evidence-driven workflow for coding agents.
+  <br>
+  <strong><a href="skills/smol-design/SKILL.md">Design</a> → <a href="skills/smol-plan/SKILL.md">Plan</a> → <a href="skills/smol-execute/SKILL.md">Execute</a> → <a href="skills/smol-finish/SKILL.md">Finish</a></strong>
 </div>
 
 ## Why smolpowers
@@ -11,19 +13,9 @@
 Smolpowers keeps the smallest useful loop from
 [Superpowers](https://github.com/obra/superpowers), adapted from v6.2.0:
 
-**Design → Plan → Execute → Finish**
-
 It preserves reviewable specs, executable plans, proportional testing, and
 fresh verification—without telemetry, runtime dependencies, mandatory
 worktrees, or mandatory subagents.
-
-## How it works
-
-- `smol-activate` resumes the earliest incomplete phase.
-- `smol-design` defines the goal and writes a product spec.
-- `smol-plan` turns the spec into an executable implementation plan.
-- `smol-execute` implements and verifies each task.
-- `smol-finish` checks the requirements, complete diff, and fresh test results.
 
 By default, specs and plans are written under `docs/superpowers/`.
 
