@@ -1,8 +1,8 @@
 # Harness and Upstream Compatibility
 
-## Explicit upstream ownership
+## Configured or explicit upstream ownership
 
-| Requested upstream skill | Replaced phase | Handoff |
+| Upstream skill | Replaced phase | Handoff |
 |---|---|---|
 | `superpowers:brainstorming` | Design | Pass `workflow_owner: smolpowers:smol-activate`, the spec path as `output_path`, `tracked_artifact: true`, and `return_to_caller: true`. |
 | `superpowers:writing-plans` | Plan | Pass `workflow_owner: smolpowers:smol-activate`, the current spec, the plan path as `output_path`, `tracked_artifact: true`, and `return_to_caller: true`. |
@@ -10,9 +10,17 @@
 | `superpowers:executing-plans` | Execute and Finish | Pass the exact plan path. This upstream owner continues into upstream branch finishing instead of returning to Smolpowers. |
 | `superpowers:finishing-a-development-branch` | Finish | Pass both artifact paths and the authorized Git disposition. |
 
-After a returning upstream owner completes, continue with the next Smolpowers phase when the request authorizes it. Do not invoke the replaced Smolpowers phase before or after its upstream owner.
+Use this handoff when the upstream skill is configured for the phase or the
+user explicitly requests it for the current run. An explicit request overrides
+the configured owner.
 
-Only substitute an upstream skill that is installed and explicitly requested. Enabling both complete bootstrap plugins simultaneously is not supported because both inject lifecycle owners at session start.
+After a returning upstream owner completes, continue with the next configured
+phase when the request authorizes it. Do not invoke the replaced default phase
+before or after its upstream owner.
+
+Only substitute an upstream skill that is installed. Enabling both complete
+bootstrap plugins simultaneously is not supported because both inject
+lifecycle owners at session start.
 
 ## Harness tools
 

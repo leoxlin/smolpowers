@@ -7,13 +7,13 @@ description: Finish a Smolpowers change with full-diff verification and authoriz
 
 Verify requirements and the complete change before making any completion claim.
 
-If the user explicitly requested `superpowers:finishing-a-development-branch`, invoke it before doing Finish work using the [upstream contract](../smol-activate/references/compatibility.md), then stop this phase.
+Load configuration by following [configuration.md](../smol-activate/references/configuration.md). An explicitly requested `superpowers:finishing-a-development-branch` overrides the configured owner; use the [upstream contract](../smol-activate/references/compatibility.md). Otherwise, if `finish` names another skill, invoke that owner and stop this phase.
 
 ## Validate the Lifecycle
 
-Load the repository root, `docsRoot`, and `stateRoot` by following [configuration.md](../smol-activate/references/configuration.md). Require the matching spec and plan.
+Require the matching spec and plan.
 
-Route to `smol-design` if the spec is missing or stale. Route to `smol-plan` if the plan is missing or stale. Route to `smol-execute` if any task remains incomplete or its outcome is absent. Invoke only that phase and stop.
+Route to the configured `design` skill if the spec is missing or stale. Route to the configured `plan` skill if the plan is missing or stale. Route to the configured `execute` skill if any task remains incomplete or its outcome is absent. Invoke only that phase and stop.
 
 ## Verify the Work
 
@@ -29,7 +29,7 @@ Read [verification.md](references/verification.md), then:
 
 Do not infer that a command passed from partial output or an earlier run. Do not call the work complete when any required check is failing.
 
-If verification fails, report the exact command and failure, preserve the working state, and return to `smol-execute` only when a code change is authorized.
+If verification fails, report the exact command and failure, preserve the working state, and return to the configured `execute` skill only when a code change is authorized.
 
 ## Handle Git
 

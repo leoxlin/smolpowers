@@ -44,22 +44,27 @@ an existing spec and plan.
 
 ## Configure
 
-Add `.smolpowers.json` to the repository root to change the artifact locations:
+Add `.smolpowers.json` to the repository root to change artifact locations or
+the skill that owns each phase:
 
 ```json
 {
   "docsRoot": "docs/superpowers",
-  "stateRoot": ".superpowers"
+  "stateRoot": ".superpowers",
+  "design": "superpowers:brainstorming",
+  "finish": "superpowers:finishing-a-development-branch"
 }
 ```
 
-Both values may be absolute or repository-root-relative. Missing or invalid
-configuration falls back to these defaults.
+Paths may be absolute or repository-root-relative. The phase keys are
+`design`, `plan`, `execute`, and `finish`; omitted phase keys use their
+`smolpowers:smol-*` owner. Missing or invalid configuration falls back to all
+defaults.
 
 ## Substitute upstream phases
 
-With selected upstream Superpowers skills installed, request one by name to
-replace its Smolpowers phase:
+With selected upstream Superpowers skills installed, configure one by name or
+request it for a single run to replace its Smolpowers phase:
 
 - `superpowers:brainstorming` replaces Design.
 - `superpowers:writing-plans` replaces Plan.

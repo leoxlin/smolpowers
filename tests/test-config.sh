@@ -15,7 +15,14 @@ import json
 import sys
 
 actual = json.loads(sys.argv[1])
-expected = {"docsRoot": sys.argv[2], "stateRoot": sys.argv[3]}
+expected = {
+    "docsRoot": sys.argv[2],
+    "stateRoot": sys.argv[3],
+    "design": "smolpowers:smol-design",
+    "plan": "smolpowers:smol-plan",
+    "execute": "smolpowers:smol-execute",
+    "finish": "smolpowers:smol-finish",
+}
 assert actual == expected, f"expected {expected!r}, got {actual!r}"
 PY
 }
@@ -42,13 +49,31 @@ assert_json "$(cat "$test_root/relative/stdout")" \
   "$test_root/relative/notes/work" "$test_root/relative/var/smol"
 test ! -s "$test_root/relative/stderr"
 
+mkdir -p "$test_root/phases"
+printf '%s\n' \
+  '{"design":"superpowers:brainstorming","finish":"superpowers:finishing-a-development-branch"}' \
+  >"$test_root/phases/.smolpowers.json"
+run_case phases
+python3 - "$test_root/phases/stdout" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1]) as output:
+    actual = json.load(output)
+assert actual["design"] == "superpowers:brainstorming"
+assert actual["plan"] == "smolpowers:smol-plan"
+assert actual["execute"] == "smolpowers:smol-execute"
+assert actual["finish"] == "superpowers:finishing-a-development-branch"
+PY
+test ! -s "$test_root/phases/stderr"
+
 mkdir -p "$test_root/absolute"
 printf '%s\n' '{"docsRoot":"/tmp/smol-docs","stateRoot":"/tmp/smol-state"}' \
   >"$test_root/absolute/.smolpowers.json"
 run_case absolute
 assert_json "$(cat "$test_root/absolute/stdout")" "/tmp/smol-docs" "/tmp/smol-state"
 
-for name in malformed unknown atomic unsafe; do
+for name in malformed unknown atomic unsafe invalid-skill; do
   mkdir -p "$test_root/$name"
 done
 printf '%s\n' '{not json' >"$test_root/malformed/.smolpowers.json"
@@ -58,8 +83,9 @@ printf '%s\n' '{"docsRoot":"custom","stateRoot":""}' \
   >"$test_root/atomic/.smolpowers.json"
 printf '%s\n' '{"docsRoot":"bad\npath","stateRoot":"custom"}' \
   >"$test_root/unsafe/.smolpowers.json"
+printf '%s\n' '{"design":""}' >"$test_root/invalid-skill/.smolpowers.json"
 
-for name in malformed unknown atomic unsafe; do
+for name in malformed unknown atomic unsafe invalid-skill; do
   run_case "$name"
   assert_json "$(cat "$test_root/$name/stdout")" \
     "$test_root/$name/docs/superpowers" "$test_root/$name/.superpowers"

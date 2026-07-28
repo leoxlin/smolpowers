@@ -7,15 +7,15 @@ description: Plan a Smolpowers implementation from a current spec. Use when the 
 
 Validate the product spec and produce an executable implementation plan.
 
-If the user explicitly requested `superpowers:writing-plans`, invoke it before doing Plan work using the [upstream contract](../smol-activate/references/compatibility.md), then stop this phase.
+Load configuration by following [configuration.md](../smol-activate/references/configuration.md). An explicitly requested `superpowers:writing-plans` overrides the configured owner; use the [upstream contract](../smol-activate/references/compatibility.md). Otherwise, if `plan` names another skill, invoke that owner and stop this phase.
 
 ## Validate the Prerequisite
 
-Load the repository root, `docsRoot`, and `stateRoot` by following [configuration.md](../smol-activate/references/configuration.md). Require a current spec at:
+Require a current spec at:
 
 `<docsRoot>/specs/YYYY-MM-DD-<slug>-design.md`
 
-Compare the spec to the active request and relevant repository facts. Treat it as stale when its goal, constraints, or chosen approach no longer describe the requested work. If it is missing, incomplete, or stale, invoke `smol-design` with the configured spec path and stop this phase.
+Compare the spec to the active request and relevant repository facts. Treat it as stale when its goal, constraints, or chosen approach no longer describe the requested work. If it is missing, incomplete, or stale, invoke the configured `design` skill with the configured spec path and stop this phase.
 
 ## Shape the Implementation
 
@@ -52,6 +52,6 @@ Review the final plan against every spec requirement, then scan for placeholders
 
 ## Transition
 
-If implementation was requested, invoke `smol-execute` with the exact spec and plan paths.
+If implementation was requested, invoke the configured `execute` skill with the exact spec and plan paths.
 
 If only an implementation plan was requested, report the artifact path and stop.

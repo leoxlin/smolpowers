@@ -7,13 +7,13 @@ description: Execute a current Smolpowers plan with proportional test-first chec
 
 Review the plan, implement every remaining task, and keep its checkboxes truthful.
 
-If the user explicitly requested `superpowers:subagent-driven-development` or `superpowers:executing-plans`, invoke it before doing Execute work using the [upstream contract](../smol-activate/references/compatibility.md), then stop this phase.
+Load configuration by following [configuration.md](../smol-activate/references/configuration.md). An explicitly requested `superpowers:subagent-driven-development` or `superpowers:executing-plans` overrides the configured owner; use the [upstream contract](../smol-activate/references/compatibility.md). Otherwise, if `execute` names another skill, invoke that owner and stop this phase.
 
 ## Validate and Review
 
-Load the repository root, `docsRoot`, and `stateRoot` by following [configuration.md](../smol-activate/references/configuration.md). Require both the spec and plan artifact for the same slug.
+Require both the spec and plan artifact for the same slug.
 
-Route to `smol-design` when the spec is missing or stale. Route to `smol-plan` when the plan is missing, contradicts the spec, relies on materially changed repository facts, or lacks executable verification. Invoke only the prerequisite phase and stop.
+Route to the configured `design` skill when the spec is missing or stale. Route to the configured `plan` skill when the plan is missing, contradicts the spec, relies on materially changed repository facts, or lacks executable verification. Invoke only the prerequisite phase and stop.
 
 Read the complete plan before editing. Resolve only blocking contradictions; do not reopen settled product choices because another approach is merely possible.
 
@@ -45,6 +45,6 @@ Do not require subagents. Continue directly when the harness lacks them.
 
 ## Transition
 
-After every plan task has a verified outcome, invoke `smol-finish` with the exact spec and plan paths.
+After every plan task has a verified outcome, invoke the configured `finish` skill with the exact spec and plan paths.
 
 Do not push, open a pull request, publish, or perform another external side effect unless the user explicitly authorized it.

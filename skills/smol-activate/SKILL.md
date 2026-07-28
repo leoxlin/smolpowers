@@ -9,9 +9,9 @@ Load configuration, inspect the artifact pair, and invoke exactly one phase owne
 
 ## Bootstrap
 
-Load the repository root, `docsRoot`, and `stateRoot` by following [configuration.md](references/configuration.md).
+Load the repository root, roots, and phase owners by following [configuration.md](references/configuration.md).
 
-Read [lifecycle.md](references/lifecycle.md) when choosing a phase is not obvious. Read [compatibility.md](references/compatibility.md) when the user explicitly requests an upstream Superpowers skill or the active harness needs a tool mapping.
+Read [lifecycle.md](references/lifecycle.md) when choosing a phase is not obvious. Read [compatibility.md](references/compatibility.md) when a configured or explicitly requested owner is an upstream Superpowers skill, or the active harness needs a tool mapping.
 
 ## Select One Phase
 
@@ -24,14 +24,18 @@ Prefer an explicitly named artifact or slug. Otherwise choose the artifact pair 
 
 Invoke exactly one owner:
 
-1. Invoke `smol-design` when the product spec is missing, incomplete, contradicted by the current request, or based on repository facts that materially changed.
-2. Invoke `smol-plan` when the spec is current but its implementation plan is missing, incomplete, or no longer implements the spec.
-3. Invoke `smol-execute` when the plan is current and any task remains unchecked, or when implementation exists but the plan and checks have not been reconciled.
-4. Invoke `smol-finish` when all plan tasks are complete and the implementation needs final requirements, diff, verification, or Git handling.
+1. Invoke the configured `design` skill when the product spec is missing, incomplete, contradicted by the current request, or based on repository facts that materially changed.
+2. Invoke the configured `plan` skill when the spec is current but its implementation plan is missing, incomplete, or no longer implements the spec.
+3. Invoke the configured `execute` skill when the plan is current and any task remains unchecked, or when implementation exists but the plan and checks have not been reconciled.
+4. Invoke the configured `finish` skill when all plan tasks are complete and the implementation needs final requirements, diff, verification, or Git handling.
 
 Route backward on stale prerequisites. Do not skip a missing phase.
 
-If the user explicitly requests a corresponding upstream skill, follow the handoff contract in [compatibility.md](references/compatibility.md) and invoke it instead of the Smolpowers counterpart. When a returning upstream owner completes, continue at the next incomplete phase if the request authorizes it. Do not wrap or duplicate the upstream phase.
+If the user explicitly requests a corresponding upstream skill, it overrides
+the configured owner for this run. Follow the handoff contract in
+[compatibility.md](references/compatibility.md). When a returning owner
+completes, continue at the next incomplete configured phase if the request
+authorizes it. Do not wrap or duplicate the selected phase.
 
 ## Continue Automatically
 

@@ -7,7 +7,7 @@ description: Design a Smolpowers change in a product spec. Use when the spec is 
 
 Inspect context, decide what to build, and produce the product design artifact.
 
-If the user explicitly requested `superpowers:brainstorming`, invoke it before doing Design work using the [upstream contract](../smol-activate/references/compatibility.md), then stop this phase.
+Load configuration by following [configuration.md](../smol-activate/references/configuration.md). An explicitly requested `superpowers:brainstorming` overrides the configured owner; use the [upstream contract](../smol-activate/references/compatibility.md). Otherwise, if `design` names another skill, invoke that owner and stop this phase.
 
 ## Design the Product
 
@@ -28,7 +28,7 @@ Use reasonable defaults for minor details. Pause only when different answers wou
 
 ## Write the Spec
 
-Load the repository root, `docsRoot`, and `stateRoot` by following [configuration.md](../smol-activate/references/configuration.md). Write:
+Write:
 
 `<docsRoot>/specs/YYYY-MM-DD-<slug>-design.md`
 
@@ -46,6 +46,6 @@ Fix those issues in the artifact before reporting the phase outcome.
 
 ## Transition
 
-If implementation was requested, invoke `smol-plan` with the exact spec path and configured `docsRoot`.
+If implementation was requested, invoke the configured `plan` skill with the exact spec path and configured roots.
 
 If only a product design or specification was requested, report the artifact path and stop.
