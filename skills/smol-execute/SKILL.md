@@ -1,6 +1,6 @@
 ---
 name: smol-execute
-description: Review and implement a current Smolpowers implementation plan, applying proportional test-first development and fresh task checks. Use when the spec and plan are current and implementation tasks remain, including resuming a partially completed plan.
+description: Execute a current Smolpowers plan with proportional test-first checks. Use when plan tasks or their verification remain incomplete.
 ---
 
 # Smol Execute
@@ -11,7 +11,7 @@ If the user explicitly requested `superpowers:subagent-driven-development` or `s
 
 ## Validate and Review
 
-Load configuration through `smol-activate`. Require both the spec and plan artifact for the same slug.
+Load the repository root, `docsRoot`, and `stateRoot` by following [configuration.md](../smol-activate/references/configuration.md). Require both the spec and plan artifact for the same slug.
 
 Route to `smol-plan` when the spec is missing or stale. Route to `smol-design` when the plan is missing, contradicts the spec, relies on materially changed repository facts, or lacks executable verification. Invoke only the prerequisite phase and stop.
 
@@ -33,7 +33,7 @@ For each behavior change:
 
 Use test-first development proportionally. Configuration-only, documentation-only, generated, or untestable harness metadata may use direct validation instead of a contrived unit test. Record why in the task outcome.
 
-When a check fails unexpectedly, investigate the root cause before editing. Read [testing-and-debugging.md](references/testing-and-debugging.md) for the bounded workflow.
+When a check fails unexpectedly, investigate the root cause before editing. Read [debugging.md](references/debugging.md) for the bounded workflow.
 
 ## Delegate Sparingly
 

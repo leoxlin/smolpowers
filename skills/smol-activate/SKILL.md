@@ -1,6 +1,6 @@
 ---
 name: smol-activate
-description: Bootstrap the lightweight Plan → Design → Execute → Finish lifecycle, load repository Smolpowers configuration, and route to the earliest incomplete phase. Use at session start, after compaction, when resuming work, or when a coding request has not already selected a phase skill.
+description: Activate Smolpowers and route to the earliest incomplete Plan → Design → Execute → Finish phase. Use at session start, resumption, or when no phase is selected.
 ---
 
 # Smol Activate
@@ -9,15 +9,7 @@ Load configuration, inspect the artifact pair, and invoke exactly one phase owne
 
 ## Bootstrap
 
-Load the repository root with `git rev-parse --show-toplevel`.
-
-Locate `scripts/load-config.sh` in this skill directory and run:
-
-```bash
-bash /absolute/path/to/smol-activate/scripts/load-config.sh /absolute/repo/root
-```
-
-Parse its JSON output directly. Never use `eval`. Treat `docsRoot` as the artifact root and `stateRoot` as information only. Core Smolpowers never writes `stateRoot`.
+Load the repository root, `docsRoot`, and `stateRoot` by following [configuration.md](references/configuration.md).
 
 Read [lifecycle.md](references/lifecycle.md) when choosing a phase is not obvious. Read [compatibility.md](references/compatibility.md) when the user explicitly requests an upstream Superpowers skill or the active harness needs a tool mapping.
 

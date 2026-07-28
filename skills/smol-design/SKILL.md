@@ -1,6 +1,6 @@
 ---
 name: smol-design
-description: Convert a current Smolpowers product spec into an upstream-compatible implementation plan with tasks, interfaces, failure handling, and exact checks. Use after Plan, when a spec exists but its implementation plan is missing or stale, or when explicitly asked for the Design phase.
+description: Design a Smolpowers implementation plan from a current spec. Use when the plan is missing, incomplete, or stale.
 ---
 
 # Smol Design
@@ -11,7 +11,7 @@ If the user explicitly requested `superpowers:writing-plans`, invoke it before d
 
 ## Validate the Prerequisite
 
-Load configuration through `smol-activate`. Require a current spec at:
+Load the repository root, `docsRoot`, and `stateRoot` by following [configuration.md](../smol-activate/references/configuration.md). Require a current spec at:
 
 `<docsRoot>/specs/YYYY-MM-DD-<slug>-design.md`
 

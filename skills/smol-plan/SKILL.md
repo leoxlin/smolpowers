@@ -1,6 +1,6 @@
 ---
 name: smol-plan
-description: Establish the goal, success criteria, scope, and chosen product approach, then write the Smolpowers design spec. Use for new work, behavior changes, bugs without a current spec, or whenever the Plan phase is the earliest incomplete lifecycle phase.
+description: Plan a Smolpowers change in a product spec. Use when the spec is missing, incomplete, or stale.
 ---
 
 # Smol Plan
@@ -28,7 +28,7 @@ Use reasonable defaults for minor details. Pause only when different answers wou
 
 ## Write the Spec
 
-Load configuration through the `smol-activate` loader. Write:
+Load the repository root, `docsRoot`, and `stateRoot` by following [configuration.md](../smol-activate/references/configuration.md). Write:
 
 `<docsRoot>/specs/YYYY-MM-DD-<slug>-design.md`
 
