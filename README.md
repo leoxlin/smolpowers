@@ -44,25 +44,37 @@ an existing spec and plan.
 
 ## Configure
 
-Add `.smolpowers.json` to the repository root to change artifact locations or
-the skill that owns each phase:
+Add `.smolpowers.json` to the repository root to change artifact locations,
+phase owners, ordered companions, or phase-specific settings:
 
 ```json
 {
   "docsRoot": "docs/superpowers",
   "stateRoot": ".superpowers",
-  "tdd": "strict",
-  "design": "superpowers:brainstorming",
-  "finish": "superpowers:finishing-a-development-branch"
+  "phases": {
+    "design": {
+      "owner": "superpowers:brainstorming"
+    },
+    "execute": {
+      "owner": "smolpowers:smol-execute",
+      "companions": [],
+      "tdd": "strict"
+    },
+    "finish": {
+      "owner": "superpowers:finishing-a-development-branch"
+    }
+  }
 }
 ```
 
-Paths may be absolute or repository-root-relative. The phase keys are
-`design`, `plan`, `execute`, and `finish`; omitted phase keys use their
-`smolpowers:smol-*` owner. A phase may be one skill string or an ordered array:
-leading skills are companions and the final skill is the sole phase owner.
-Set `tdd` to `proportional` (the default) or `strict`. Missing or invalid
-configuration falls back to all defaults.
+Paths may be absolute or repository-root-relative. Each phase has one explicit
+`owner` and an optional ordered `companions` array. Omitted phases and
+properties use their defaults. Execute accepts `tdd: proportional` (the
+default) or `strict`. Missing or invalid configuration falls back atomically to
+all defaults.
+
+The released flat `design`, `plan`, `execute`, `finish`, and `tdd` keys remain
+accepted as legacy input when `phases` is absent. Do not mix the two shapes.
 
 ## Substitute upstream phases
 
@@ -79,10 +91,14 @@ an Execute companion while retaining Smol Execute as the phase owner:
 
 ```json
 {
-  "execute": [
-    "superpowers:test-driven-development",
-    "smolpowers:smol-execute"
-  ]
+  "phases": {
+    "execute": {
+      "owner": "smolpowers:smol-execute",
+      "companions": [
+        "superpowers:test-driven-development"
+      ]
+    }
+  }
 }
 ```
 

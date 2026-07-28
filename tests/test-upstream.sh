@@ -16,11 +16,14 @@ grep -Fq 'superpowers:test-driven-development' "$compatibility"
 grep -Fq 'companion' "$compatibility"
 
 for skill in smol-activate smol-design smol-plan smol-execute smol-finish; do
-  grep -Fq 'phase chain' "$repo_root/skills/$skill/SKILL.md"
+  grep -Fq 'phase object' "$repo_root/skills/$skill/SKILL.md"
 done
 
 grep -Fq 'superpowers:test-driven-development' "$repo_root/README.md"
 grep -Fq 'smolpowers:smol-execute' "$repo_root/README.md"
+grep -Fq '"phases"' "$repo_root/README.md"
+grep -Fq '"owner"' "$repo_root/README.md"
+grep -Fq '"companions"' "$repo_root/README.md"
 
 if [[ ! -x "$upstream_root/skills/subagent-driven-development/scripts/task-brief" ]]; then
   printf 'SKIP: set SUPERPOWERS_ROOT to an upstream Superpowers checkout\n'

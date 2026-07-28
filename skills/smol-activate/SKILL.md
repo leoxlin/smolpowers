@@ -5,11 +5,11 @@ description: Activate Smolpowers and route to the earliest incomplete Design →
 
 # Smol Activate
 
-Load configuration, inspect the artifact pair, and invoke exactly one phase chain.
+Load configuration, inspect the artifact pair, and invoke exactly one phase object.
 
 ## Bootstrap
 
-Load the repository root, roots, and phase chains by following [configuration.md](references/configuration.md).
+Load the repository root, roots, and phase objects by following [configuration.md](references/configuration.md).
 
 Read [lifecycle.md](references/lifecycle.md) when choosing a phase is not obvious. Read [compatibility.md](references/compatibility.md) when a configured or explicitly requested owner is an upstream Superpowers skill, or the active harness needs a tool mapping.
 
@@ -22,17 +22,17 @@ Inspect the user's request, relevant repository state, and artifacts under:
 
 Prefer an explicitly named artifact or slug. Otherwise choose the artifact pair most clearly associated with the request; do not select an unrelated file merely because it is newest.
 
-Invoke exactly one configured phase chain:
+Invoke exactly one configured phase object:
 
-1. Invoke the configured `design` phase chain when the product spec is missing, incomplete, contradicted by the current request, or based on repository facts that materially changed.
-2. Invoke the configured `plan` phase chain when the spec is current but its implementation plan is missing, incomplete, or no longer implements the spec.
-3. Invoke the configured `execute` phase chain when the plan is current and any task remains unchecked, or when implementation exists but the plan and checks have not been reconciled.
-4. Invoke the configured `finish` phase chain when all plan tasks are complete and the implementation needs final requirements, diff, verification, or Git handling.
+1. Invoke the configured `design` phase object when the product spec is missing, incomplete, contradicted by the current request, or based on repository facts that materially changed.
+2. Invoke the configured `plan` phase object when the spec is current but its implementation plan is missing, incomplete, or no longer implements the spec.
+3. Invoke the configured `execute` phase object when the plan is current and any task remains unchecked, or when implementation exists but the plan and checks have not been reconciled.
+4. Invoke the configured `finish` phase object when all plan tasks are complete and the implementation needs final requirements, diff, verification, or Git handling.
 
 Route backward on stale prerequisites. Do not skip a missing phase.
 
 If the user explicitly requests a corresponding upstream skill, it overrides
-the entire configured phase chain for this run. Follow the handoff contract in
+the entire configured phase object for this run. Follow the handoff contract in
 [compatibility.md](references/compatibility.md). When a returning owner
 completes, continue at the next incomplete configured phase if the request
 authorizes it. Do not wrap or duplicate the selected phase.

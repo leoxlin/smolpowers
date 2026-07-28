@@ -38,24 +38,26 @@ resolve_path() {
   esac
 }
 
+default_phases() {
+  printf \
+    '{"design":{"owner":"%s","companions":[]},"plan":{"owner":"%s","companions":[]},"execute":{"owner":"%s","companions":[],"tdd":"%s"},"finish":{"owner":"%s","companions":[]}}' \
+    "$(json_escape "$default_design")" \
+    "$(json_escape "$default_plan")" \
+    "$(json_escape "$default_execute")" \
+    "$(json_escape "$default_tdd")" \
+    "$(json_escape "$default_finish")"
+}
+
 emit() {
   local docs state
   docs="$(resolve_path "$1")"
   state="$(resolve_path "$2")"
-  printf '{"docsRoot":"%s","stateRoot":"%s","tdd":"%s","design":%s,"plan":%s,"execute":%s,"finish":%s}\n' \
-    "$(json_escape "$docs")" "$(json_escape "$state")" "$(json_escape "$7")" \
-    "$3" "$4" "$5" "$6"
-}
-
-json_string() {
-  printf '"%s"' "$(json_escape "$1")"
+  printf '{"docsRoot":"%s","stateRoot":"%s","phases":%s}\n' \
+    "$(json_escape "$docs")" "$(json_escape "$state")" "$3"
 }
 
 emit_defaults() {
-  emit "$default_docs" "$default_state" \
-    "$(json_string "$default_design")" "$(json_string "$default_plan")" \
-    "$(json_string "$default_execute")" "$(json_string "$default_finish")" \
-    "$default_tdd"
+  emit "$default_docs" "$default_state" "$(default_phases)"
 }
 
 fallback() {
@@ -73,53 +75,124 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 0
 fi
 
-validation='
+# shellcheck disable=SC2016
+filter='
   def safe_string:
     type == "string" and length > 0 and (test("[\u0000\n\r]") | not);
-  def phase:
+  def legacy_phase:
     safe_string or
     (type == "array" and length > 0 and all(safe_string));
+  def phase($allow_tdd):
+    type == "object" and
+    ((keys - (
+      ["owner", "companions"] +
+      (if $allow_tdd then ["tdd"] else [] end)
+    )) | length == 0) and
+    (.owner? == null or (.owner | safe_string)) and
+    (.companions? == null or (
+      .companions | type == "array" and all(safe_string)
+    )) and
+    (
+      ($allow_tdd | not) or
+      .tdd? == null or
+      .tdd == "proportional" or
+      .tdd == "strict"
+    );
+  def optional_phase($name; $allow_tdd):
+    (.phases | has($name) | not) or
+    (.phases[$name] | phase($allow_tdd));
+  def valid:
+    type == "object" and
+    ((keys - [
+      "design", "docsRoot", "execute", "finish", "phases", "plan",
+      "stateRoot", "tdd"
+    ]) | length == 0) and
+    ([.docsRoot?, .stateRoot?] | all(
+      . == null or safe_string
+    )) and
+    (
+      if has("phases") then
+        (([has("design"), has("plan"), has("execute"), has("finish"), has("tdd")]
+          | any) | not) and
+        (.phases | type == "object") and
+        ((.phases | keys) - ["design", "execute", "finish", "plan"] | length == 0) and
+        optional_phase("design"; false) and
+        optional_phase("plan"; false) and
+        optional_phase("execute"; true) and
+        optional_phase("finish"; false)
+      else
+        ([.design?, .plan?, .execute?, .finish?] | all(
+          . == null or legacy_phase
+        )) and
+        (.tdd? == null or .tdd == "proportional" or .tdd == "strict")
+      end
+    );
+  def nested_phase($name; $default_owner):
+    (.phases[$name] // {}) as $phase |
+    {
+      owner: ($phase.owner // $default_owner),
+      companions: ($phase.companions // [])
+    };
+  def legacy_phase_object($value; $default_owner):
+    ($value // $default_owner) as $phase |
+    if ($phase | type) == "array" then
+      {
+        owner: $phase[-1],
+        companions: $phase[0:-1]
+      }
+    else
+      {
+        owner: $phase,
+        companions: []
+      }
+    end;
 
-  type == "object" and
-  ((keys - ["design", "docsRoot", "execute", "finish", "plan", "stateRoot", "tdd"]) | length == 0) and
-  ([.docsRoot?, .stateRoot?] | all(
-    . == null or
-    safe_string
-  )) and
-  (.tdd? == null or .tdd == "proportional" or .tdd == "strict") and
-  ([.design?, .plan?, .execute?, .finish?] | all(
-    . == null or
-    phase
-  ))
+  select(valid) |
+  {
+    docsRoot: (.docsRoot // $default_docs),
+    stateRoot: (.stateRoot // $default_state),
+    phases: (
+      if has("phases") then
+        {
+          design: nested_phase("design"; $default_design),
+          plan: nested_phase("plan"; $default_plan),
+          execute: (
+            nested_phase("execute"; $default_execute) +
+            {tdd: (.phases.execute.tdd // $default_tdd)}
+          ),
+          finish: nested_phase("finish"; $default_finish)
+        }
+      else
+        {
+          design: legacy_phase_object(.design; $default_design),
+          plan: legacy_phase_object(.plan; $default_plan),
+          execute: (
+            legacy_phase_object(.execute; $default_execute) +
+            {tdd: (.tdd // $default_tdd)}
+          ),
+          finish: legacy_phase_object(.finish; $default_finish)
+        }
+      end
+    )
+  }
 '
 
-if ! jq -e "$validation" "$config_file" >/dev/null 2>&1; then
-  fallback
-  exit 0
-fi
-
-if ! docs="$(
-  jq -r --arg default "$default_docs" '.docsRoot // $default' "$config_file"
-)" || ! state="$(
-  jq -r --arg default "$default_state" '.stateRoot // $default' "$config_file"
-)" || ! tdd="$(
-  jq -r --arg default "$default_tdd" '.tdd // $default' "$config_file"
+if ! normalized="$(
+  jq -ce \
+    --arg default_docs "$default_docs" \
+    --arg default_state "$default_state" \
+    --arg default_tdd "$default_tdd" \
+    --arg default_design "$default_design" \
+    --arg default_plan "$default_plan" \
+    --arg default_execute "$default_execute" \
+    --arg default_finish "$default_finish" \
+    "$filter" "$config_file" 2>/dev/null
 )"; then
   fallback
   exit 0
 fi
 
-if ! design="$(
-  jq -c --arg default "$default_design" '.design // $default' "$config_file"
-)" || ! plan="$(
-  jq -c --arg default "$default_plan" '.plan // $default' "$config_file"
-)" || ! execute="$(
-  jq -c --arg default "$default_execute" '.execute // $default' "$config_file"
-)" || ! finish="$(
-  jq -c --arg default "$default_finish" '.finish // $default' "$config_file"
-)"; then
-  fallback
-  exit 0
-fi
-
-emit "$docs" "$state" "$design" "$plan" "$execute" "$finish" "$tdd"
+docs="$(jq -r '.docsRoot' <<<"$normalized")"
+state="$(jq -r '.stateRoot' <<<"$normalized")"
+phases="$(jq -c '.phases' <<<"$normalized")"
+emit "$docs" "$state" "$phases"

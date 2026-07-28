@@ -53,9 +53,20 @@ for name, imperative in SKILLS.items():
 execute = (ROOT / "skills" / "smol-execute" / "SKILL.md").read_text()
 reference_link = "[test-driven-development.md](references/test-driven-development.md)"
 assert reference_link in execute, "smol-execute: missing TDD reference link"
+assert "phases.execute.tdd" in execute, "smol-execute: missing nested TDD lookup"
 assert (
     "NO PRODUCTION CODE WITHOUT AN OBSERVED FAILING TEST FIRST" not in execute
 ), "smol-execute: strict TDD detail must live in its reference"
+
+configuration = (
+    ROOT / "skills" / "smol-activate" / "references" / "configuration.md"
+).read_text()
+for clause in [
+    "phases.<name>.owner",
+    "phases.<name>.companions",
+    "phases.execute.tdd",
+]:
+    assert clause in configuration, f"configuration: missing phase object contract: {clause}"
 
 tdd_reference_path = (
     ROOT / "skills" / "smol-execute" / "references" / "test-driven-development.md"

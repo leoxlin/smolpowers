@@ -18,11 +18,25 @@ actual = json.loads(sys.argv[1])
 expected = {
     "docsRoot": sys.argv[2],
     "stateRoot": sys.argv[3],
-    "tdd": "proportional",
-    "design": "smolpowers:smol-design",
-    "plan": "smolpowers:smol-plan",
-    "execute": "smolpowers:smol-execute",
-    "finish": "smolpowers:smol-finish",
+    "phases": {
+        "design": {
+            "owner": "smolpowers:smol-design",
+            "companions": [],
+        },
+        "plan": {
+            "owner": "smolpowers:smol-plan",
+            "companions": [],
+        },
+        "execute": {
+            "owner": "smolpowers:smol-execute",
+            "companions": [],
+            "tdd": "proportional",
+        },
+        "finish": {
+            "owner": "smolpowers:smol-finish",
+            "companions": [],
+        },
+    },
 }
 assert actual == expected, f"expected {expected!r}, got {actual!r}"
 PY
@@ -50,66 +64,112 @@ assert_json "$(cat "$test_root/relative/stdout")" \
   "$test_root/relative/notes/work" "$test_root/relative/var/smol"
 test ! -s "$test_root/relative/stderr"
 
-mkdir -p "$test_root/phases"
+mkdir -p "$test_root/preferred"
+printf '%s\n' \
+  '{"phases":{"design":{"owner":"superpowers:brainstorming"},"execute":{"owner":"smolpowers:smol-execute","companions":["superpowers:test-driven-development"],"tdd":"strict"},"finish":{"owner":"superpowers:finishing-a-development-branch","companions":[]}}}' \
+  >"$test_root/preferred/.smolpowers.json"
+run_case preferred
+python3 - "$test_root/preferred/stdout" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1]) as output:
+    actual = json.load(output)
+assert actual["phases"]["design"] == {
+    "owner": "superpowers:brainstorming",
+    "companions": [],
+}
+assert actual["phases"]["plan"] == {
+    "owner": "smolpowers:smol-plan",
+    "companions": [],
+}
+assert actual["phases"]["execute"] == {
+    "owner": "smolpowers:smol-execute",
+    "companions": ["superpowers:test-driven-development"],
+    "tdd": "strict",
+}
+assert actual["phases"]["finish"] == {
+    "owner": "superpowers:finishing-a-development-branch",
+    "companions": [],
+}
+PY
+test ! -s "$test_root/preferred/stderr"
+
+mkdir -p "$test_root/preferred-partial"
+printf '%s\n' \
+  '{"phases":{"execute":{"companions":["superpowers:test-driven-development"]}}}' \
+  >"$test_root/preferred-partial/.smolpowers.json"
+run_case preferred-partial
+python3 - "$test_root/preferred-partial/stdout" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1]) as output:
+    actual = json.load(output)
+assert actual["phases"]["execute"] == {
+    "owner": "smolpowers:smol-execute",
+    "companions": ["superpowers:test-driven-development"],
+    "tdd": "proportional",
+}
+PY
+test ! -s "$test_root/preferred-partial/stderr"
+
+mkdir -p "$test_root/legacy-owners"
 printf '%s\n' \
   '{"design":"superpowers:brainstorming","finish":"superpowers:finishing-a-development-branch"}' \
-  >"$test_root/phases/.smolpowers.json"
-run_case phases
-python3 - "$test_root/phases/stdout" <<'PY'
+  >"$test_root/legacy-owners/.smolpowers.json"
+run_case legacy-owners
+python3 - "$test_root/legacy-owners/stdout" <<'PY'
 import json
 import sys
 
 with open(sys.argv[1]) as output:
     actual = json.load(output)
-assert actual["design"] == "superpowers:brainstorming"
-assert actual["plan"] == "smolpowers:smol-plan"
-assert actual["execute"] == "smolpowers:smol-execute"
-assert actual["finish"] == "superpowers:finishing-a-development-branch"
+assert actual["phases"]["design"] == {
+    "owner": "superpowers:brainstorming",
+    "companions": [],
+}
+assert actual["phases"]["plan"]["owner"] == "smolpowers:smol-plan"
+assert actual["phases"]["execute"]["owner"] == "smolpowers:smol-execute"
+assert actual["phases"]["finish"] == {
+    "owner": "superpowers:finishing-a-development-branch",
+    "companions": [],
+}
 PY
-test ! -s "$test_root/phases/stderr"
+test ! -s "$test_root/legacy-owners/stderr"
 
-mkdir -p "$test_root/phase-chain"
+mkdir -p "$test_root/legacy-chain"
 printf '%s\n' \
   '{"execute":["superpowers:test-driven-development","smolpowers:smol-execute"]}' \
-  >"$test_root/phase-chain/.smolpowers.json"
-run_case phase-chain
-python3 - "$test_root/phase-chain/stdout" <<'PY'
+  >"$test_root/legacy-chain/.smolpowers.json"
+run_case legacy-chain
+python3 - "$test_root/legacy-chain/stdout" <<'PY'
 import json
 import sys
 
 with open(sys.argv[1]) as output:
     actual = json.load(output)
-assert actual["design"] == "smolpowers:smol-design"
-assert actual["plan"] == "smolpowers:smol-plan"
-assert actual["execute"] == [
-    "superpowers:test-driven-development",
-    "smolpowers:smol-execute",
-]
-assert actual["finish"] == "smolpowers:smol-finish"
+assert actual["phases"]["execute"] == {
+    "owner": "smolpowers:smol-execute",
+    "companions": ["superpowers:test-driven-development"],
+    "tdd": "proportional",
+}
 PY
-test ! -s "$test_root/phase-chain/stderr"
+test ! -s "$test_root/legacy-chain/stderr"
 
-mkdir -p "$test_root/tdd-strict"
-printf '%s\n' '{"tdd":"strict"}' >"$test_root/tdd-strict/.smolpowers.json"
-run_case tdd-strict
-python3 - "$test_root/tdd-strict/stdout" <<'PY'
+mkdir -p "$test_root/legacy-tdd-strict"
+printf '%s\n' '{"tdd":"strict"}' \
+  >"$test_root/legacy-tdd-strict/.smolpowers.json"
+run_case legacy-tdd-strict
+python3 - "$test_root/legacy-tdd-strict/stdout" <<'PY'
 import json
 import sys
 
 with open(sys.argv[1]) as output:
     actual = json.load(output)
-assert actual["tdd"] == "strict"
+assert actual["phases"]["execute"]["tdd"] == "strict"
 PY
-test ! -s "$test_root/tdd-strict/stderr"
-
-mkdir -p "$test_root/tdd-proportional"
-printf '%s\n' '{"tdd":"proportional"}' \
-  >"$test_root/tdd-proportional/.smolpowers.json"
-run_case tdd-proportional
-assert_json "$(cat "$test_root/tdd-proportional/stdout")" \
-  "$test_root/tdd-proportional/docs/superpowers" \
-  "$test_root/tdd-proportional/.superpowers"
-test ! -s "$test_root/tdd-proportional/stderr"
+test ! -s "$test_root/legacy-tdd-strict/stderr"
 
 mkdir -p "$test_root/absolute"
 printf '%s\n' '{"docsRoot":"/tmp/smol-docs","stateRoot":"/tmp/smol-state"}' \
@@ -117,10 +177,30 @@ printf '%s\n' '{"docsRoot":"/tmp/smol-docs","stateRoot":"/tmp/smol-state"}' \
 run_case absolute
 assert_json "$(cat "$test_root/absolute/stdout")" "/tmp/smol-docs" "/tmp/smol-state"
 
-for name in malformed unknown atomic unsafe invalid-skill \
-  empty-phase-chain non-string-phase-member empty-phase-member invalid-tdd; do
+invalid_cases=(
+  malformed
+  unknown
+  atomic
+  unsafe
+  legacy-invalid-owner
+  legacy-empty-chain
+  legacy-non-string-member
+  legacy-empty-member
+  legacy-invalid-tdd
+  mixed-shapes
+  unknown-phase
+  unknown-phase-property
+  empty-owner
+  non-array-companions
+  non-string-companion
+  empty-companion
+  misplaced-tdd
+  invalid-nested-tdd
+)
+for name in "${invalid_cases[@]}"; do
   mkdir -p "$test_root/$name"
 done
+
 printf '%s\n' '{not json' >"$test_root/malformed/.smolpowers.json"
 printf '%s\n' '{"docsRoot":"docs","surprise":"value"}' \
   >"$test_root/unknown/.smolpowers.json"
@@ -128,18 +208,36 @@ printf '%s\n' '{"docsRoot":"custom","stateRoot":""}' \
   >"$test_root/atomic/.smolpowers.json"
 printf '%s\n' '{"docsRoot":"bad\npath","stateRoot":"custom"}' \
   >"$test_root/unsafe/.smolpowers.json"
-printf '%s\n' '{"design":""}' >"$test_root/invalid-skill/.smolpowers.json"
+printf '%s\n' '{"design":""}' \
+  >"$test_root/legacy-invalid-owner/.smolpowers.json"
 printf '%s\n' '{"execute":[]}' \
-  >"$test_root/empty-phase-chain/.smolpowers.json"
+  >"$test_root/legacy-empty-chain/.smolpowers.json"
 printf '%s\n' '{"execute":["smolpowers:smol-execute",42]}' \
-  >"$test_root/non-string-phase-member/.smolpowers.json"
+  >"$test_root/legacy-non-string-member/.smolpowers.json"
 printf '%s\n' '{"execute":["","smolpowers:smol-execute"]}' \
-  >"$test_root/empty-phase-member/.smolpowers.json"
+  >"$test_root/legacy-empty-member/.smolpowers.json"
 printf '%s\n' '{"tdd":"sometimes"}' \
-  >"$test_root/invalid-tdd/.smolpowers.json"
+  >"$test_root/legacy-invalid-tdd/.smolpowers.json"
+printf '%s\n' '{"execute":"smolpowers:smol-execute","phases":{}}' \
+  >"$test_root/mixed-shapes/.smolpowers.json"
+printf '%s\n' '{"phases":{"deploy":{"owner":"example:deploy"}}}' \
+  >"$test_root/unknown-phase/.smolpowers.json"
+printf '%s\n' '{"phases":{"design":{"mode":"fast"}}}' \
+  >"$test_root/unknown-phase-property/.smolpowers.json"
+printf '%s\n' '{"phases":{"design":{"owner":""}}}' \
+  >"$test_root/empty-owner/.smolpowers.json"
+printf '%s\n' '{"phases":{"execute":{"companions":"example:tdd"}}}' \
+  >"$test_root/non-array-companions/.smolpowers.json"
+printf '%s\n' '{"phases":{"execute":{"companions":[42]}}}' \
+  >"$test_root/non-string-companion/.smolpowers.json"
+printf '%s\n' '{"phases":{"execute":{"companions":[""]}}}' \
+  >"$test_root/empty-companion/.smolpowers.json"
+printf '%s\n' '{"phases":{"design":{"tdd":"strict"}}}' \
+  >"$test_root/misplaced-tdd/.smolpowers.json"
+printf '%s\n' '{"phases":{"execute":{"tdd":"sometimes"}}}' \
+  >"$test_root/invalid-nested-tdd/.smolpowers.json"
 
-for name in malformed unknown atomic unsafe invalid-skill \
-  empty-phase-chain non-string-phase-member empty-phase-member invalid-tdd; do
+for name in "${invalid_cases[@]}"; do
   run_case "$name"
   assert_json "$(cat "$test_root/$name/stdout")" \
     "$test_root/$name/docs/superpowers" "$test_root/$name/.superpowers"

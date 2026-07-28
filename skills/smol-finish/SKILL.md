@@ -7,13 +7,13 @@ description: Finish a Smolpowers change with full-diff verification and authoriz
 
 Verify requirements and the complete change before making any completion claim.
 
-Resolve and apply the configured `finish` phase chain by following [configuration.md](../smol-activate/references/configuration.md). An explicitly requested `superpowers:finishing-a-development-branch` overrides the entire chain; use the [upstream contract](../smol-activate/references/compatibility.md). Otherwise, if the chain's owner is another skill, invoke that chain and stop this phase.
+Resolve and apply the configured `finish` phase object by following [configuration.md](../smol-activate/references/configuration.md). An explicitly requested `superpowers:finishing-a-development-branch` overrides the entire phase object; use the [upstream contract](../smol-activate/references/compatibility.md). Otherwise, invoke its companions in order. If its owner is another skill, invoke that owner and stop this phase.
 
 ## Validate the Lifecycle
 
 Require the matching spec and plan.
 
-Route to the configured `design` phase chain if the spec is missing or stale. Route to the configured `plan` phase chain if the plan is missing or stale. Route to the configured `execute` phase chain if any task remains incomplete or its outcome is absent. Invoke only that phase and stop.
+Route to the configured `design` phase object if the spec is missing or stale. Route to the configured `plan` phase object if the plan is missing or stale. Route to the configured `execute` phase object if any task remains incomplete or its outcome is absent. Invoke only that phase and stop.
 
 ## Verify the Work
 
@@ -29,7 +29,7 @@ Read [verification.md](references/verification.md), then:
 
 Do not infer that a command passed from partial output or an earlier run. Do not call the work complete when any required check is failing.
 
-If verification fails, report the exact command and failure, preserve the working state, and return to the configured `execute` phase chain only when a code change is authorized.
+If verification fails, report the exact command and failure, preserve the working state, and return to the configured `execute` phase object only when a code change is authorized.
 
 ## Handle Git
 

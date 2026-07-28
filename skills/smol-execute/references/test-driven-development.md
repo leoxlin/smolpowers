@@ -1,6 +1,6 @@
 # Test-Driven Development
 
-Use the section matching the validated `tdd` configuration value. In either mode, test real behavior, avoid mocks unless a dependency cannot be used directly, implement the minimum change, and mark a task complete only after its outcome and specified checks pass.
+Use the section matching the validated `phases.execute.tdd` configuration value. In either mode, test real behavior, avoid mocks unless a dependency cannot be used directly, implement the minimum change, and mark a task complete only after its outcome and specified checks pass.
 
 ## Proportional Mode
 

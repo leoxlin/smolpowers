@@ -7,7 +7,7 @@ description: Plan a Smolpowers implementation from a current spec. Use when the 
 
 Validate the product spec and produce an executable implementation plan.
 
-Resolve and apply the configured `plan` phase chain by following [configuration.md](../smol-activate/references/configuration.md). An explicitly requested `superpowers:writing-plans` overrides the entire chain; use the [upstream contract](../smol-activate/references/compatibility.md). Otherwise, if the chain's owner is another skill, invoke that chain and stop this phase.
+Resolve and apply the configured `plan` phase object by following [configuration.md](../smol-activate/references/configuration.md). An explicitly requested `superpowers:writing-plans` overrides the entire phase object; use the [upstream contract](../smol-activate/references/compatibility.md). Otherwise, invoke its companions in order. If its owner is another skill, invoke that owner and stop this phase.
 
 ## Validate the Prerequisite
 
@@ -15,7 +15,7 @@ Require a current spec at:
 
 `<docsRoot>/specs/YYYY-MM-DD-<slug>-design.md`
 
-Compare the spec to the active request and relevant repository facts. Treat it as stale when its goal, constraints, or chosen approach no longer describe the requested work. If it is missing, incomplete, or stale, invoke the configured `design` phase chain with the configured spec path and stop this phase.
+Compare the spec to the active request and relevant repository facts. Treat it as stale when its goal, constraints, or chosen approach no longer describe the requested work. If it is missing, incomplete, or stale, invoke the configured `design` phase object with the configured spec path and stop this phase.
 
 ## Shape the Implementation
 
@@ -52,6 +52,6 @@ Review the final plan against every spec requirement, then scan for placeholders
 
 ## Transition
 
-If implementation was requested, invoke the configured `execute` phase chain with the exact spec and plan paths.
+If implementation was requested, invoke the configured `execute` phase object with the exact spec and plan paths.
 
 If only an implementation plan was requested, report the artifact path and stop.

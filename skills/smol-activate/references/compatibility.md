@@ -10,18 +10,19 @@
 | `superpowers:executing-plans` | Execute and Finish | Pass the exact plan path. This upstream owner continues into upstream branch finishing instead of returning to Smolpowers. |
 | `superpowers:finishing-a-development-branch` | Finish | Pass both artifact paths and the authorized Git disposition. |
 
-Use this handoff when the upstream skill is configured for the phase or the
-user explicitly requests it for the current run. An explicit request overrides
-the configured owner.
+Use this handoff when the upstream skill is configured as the phase object's
+owner or the user explicitly requests it for the current run. An explicit
+request overrides the configured owner.
 
 After a returning upstream owner completes, continue with the next configured
 phase when the request authorizes it. Do not invoke the replaced default phase
 before or after its upstream owner.
 
 `superpowers:test-driven-development` is an Execute companion, not a phase
-owner. Place it before the configured Execute owner in the phase chain. Invoke
-it first so its red-green-refactor instructions govern implementation; the
-final owner still reconciles plan tasks and transitions the lifecycle.
+owner. Place it in `phases.execute.companions` and retain Smol Execute as the
+explicit owner. Invoke companions first so its red-green-refactor instructions
+govern implementation; the owner still reconciles plan tasks and transitions
+the lifecycle.
 
 Only substitute an upstream skill that is installed. Enabling both complete
 bootstrap plugins simultaneously is not supported because both inject
