@@ -7,6 +7,8 @@ description: Verify a completed Smolpowers implementation against its spec, plan
 
 Verify requirements and the complete change before making any completion claim.
 
+If the user explicitly requested `superpowers:finishing-a-development-branch`, invoke it before doing Finish work using the [upstream contract](../smol-activate/references/compatibility.md), then stop this phase.
+
 ## Validate the Lifecycle
 
 Load configuration through `smol-activate`. Require the matching spec and plan.
@@ -42,5 +44,3 @@ Report:
 - fresh verification evidence;
 - the resulting commit or exact working-tree state;
 - authentication, availability, or integration gaps without claiming unrun coverage.
-
-If the user explicitly requested an upstream finishing skill, let it own this phase and pass the exact spec and plan paths. Do not duplicate its Git handling.

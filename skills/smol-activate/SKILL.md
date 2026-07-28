@@ -39,7 +39,7 @@ Invoke exactly one owner:
 
 Route backward on stale prerequisites. Do not skip a missing phase.
 
-If the user explicitly requests a corresponding upstream skill, invoke that skill as the phase owner instead of its Smolpowers counterpart. Pass the configured artifact path in the invocation. Do not wrap it, duplicate its work, or invoke a second phase.
+If the user explicitly requests a corresponding upstream skill, follow the handoff contract in [compatibility.md](references/compatibility.md) and invoke it instead of the Smolpowers counterpart. When a returning upstream owner completes, continue at the next incomplete phase if the request authorizes it. Do not wrap or duplicate the upstream phase.
 
 ## Continue Automatically
 

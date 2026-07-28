@@ -25,17 +25,6 @@ for heading in ["# [Feature Name] Design", "## Goal", "## Success", "## Scope"]:
     assert heading in spec_template, f"spec template misses {heading}"
 
 with tempfile.TemporaryDirectory() as tmp:
-    sample = Path(tmp) / "sample.md"
-    sample.write_text(template.replace("Task N", "Task 1"))
-    result = subprocess.run(
-        ["bash", str(ROOT / "tests/upstream-task-parser.sh"), str(sample), "1"],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    assert result.stdout.startswith("### Task 1:"), "upstream parser could not find task"
-    assert "**Files:**" in result.stdout and "**Outcome:**" in result.stdout
-
     default_repo = Path(tmp) / "default"
     default_repo.mkdir()
     output = subprocess.check_output(
@@ -73,4 +62,4 @@ with tempfile.TemporaryDirectory() as tmp:
     )
     assert config["stateRoot"] == "/tmp/smol-state"
 
-print("Artifact templates, paths, and upstream task parsing look good")
+print("Artifact templates and paths look good")

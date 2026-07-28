@@ -7,6 +7,8 @@ description: Review and implement a current Smolpowers implementation plan, appl
 
 Review the plan, implement every remaining task, and keep its checkboxes truthful.
 
+If the user explicitly requested `superpowers:subagent-driven-development` or `superpowers:executing-plans`, invoke it before doing Execute work using the [upstream contract](../smol-activate/references/compatibility.md), then stop this phase.
+
 ## Validate and Review
 
 Load configuration through `smol-activate`. Require both the spec and plan artifact for the same slug.
@@ -46,5 +48,3 @@ Do not require subagents. Continue directly when the harness lacks them.
 After every plan task has a verified outcome, invoke `smol-finish` with the exact spec and plan paths.
 
 Do not push, open a pull request, publish, or perform another external side effect unless the user explicitly authorized it.
-
-If the user explicitly requested an upstream execution skill, let it own this phase and pass the exact plan path. Do not run Smolpowers execution in parallel.

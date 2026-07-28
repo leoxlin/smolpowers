@@ -64,6 +64,25 @@ Add `.smolpowers.json` to the repository root to change the artifact locations:
 Both values may be absolute or repository-root-relative. Missing or invalid
 configuration falls back to these defaults.
 
+## Substitute upstream phases
+
+With selected upstream Superpowers skills installed, request one by name to
+replace its Smolpowers phase:
+
+- `superpowers:brainstorming` replaces Plan.
+- `superpowers:writing-plans` replaces Design.
+- `superpowers:subagent-driven-development` replaces Execute.
+- `superpowers:finishing-a-development-branch` replaces Finish.
+
+Smolpowers passes the configured artifact paths and asks returning upstream
+owners to hand control back to its lifecycle. Upstream `executing-plans`
+replaces both Execute and Finish because it continues directly into upstream
+branch finishing.
+
+Do not enable both plugins' session-start bootstraps together. Make only the
+selected upstream skills discoverable alongside the Smolpowers bootstrap.
+[PLEASE VERIFY] this installation shape in your target harness.
+
 ## Verify
 
 ```bash

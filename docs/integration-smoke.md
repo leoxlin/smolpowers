@@ -7,7 +7,8 @@
 - `bash tests/run-all.sh`: passed.
 - Skill validator: all five skills passed.
 - Shell syntax and ShellCheck: passed.
-- Upstream v6.2 task parser fixture: parsed the Smolpowers plan template.
+- Actual upstream task parser: parsed the Smolpowers plan template from the adjacent Superpowers checkout.
+- Upstream substitution contracts: `brainstorming`, `writing-plans`, and `subagent-driven-development` expose return-to-caller handoffs.
 - Plugin-creator validator: rejected only the Codex manifest's inline `"hooks": {}` field. The current Codex plugin contract accepts inline hook objects, and Smolpowers requires the empty object to suppress Claude hook auto-discovery. This validator is behind the current contract. [PLEASE VERIFY]
 
 ## Harness sessions
@@ -28,5 +29,6 @@ The Codex and Kimi sessions exercised native skill discovery without persistentl
 - Existing plan: resumed at Execute, kept two tiny independent tasks inline, completed focused tests, and stopped at Finish when an unrelated environment gate failed.
 - Failing Finish: reported `RELEASE_CHANNEL` as unset and did not rewrite or hide the failing check.
 - Explicit upstream handoff: selected upstream `superpowers:writing-plans` as the Design owner, wrote only the configured `notes/plans/...` artifact, and did not run Smolpowers Design or implementation.
+- Mixed lifecycle: actual upstream phase contracts and task parsing passed through `tests/test-upstream.sh`; a fresh-agent mixed lifecycle remains to be exercised. [PLEASE VERIFY]
 
 Forward-test fixtures lived under `/tmp` and were not part of this repository.

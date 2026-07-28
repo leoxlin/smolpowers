@@ -7,6 +7,8 @@ description: Convert a current Smolpowers product spec into an upstream-compatib
 
 Validate the product spec and produce an executable implementation plan.
 
+If the user explicitly requested `superpowers:writing-plans`, invoke it before doing Design work using the [upstream contract](../smol-activate/references/compatibility.md), then stop this phase.
+
 ## Validate the Prerequisite
 
 Load configuration through `smol-activate`. Require a current spec at:
@@ -53,5 +55,3 @@ Review the final plan against every spec requirement, then scan for placeholders
 If implementation was requested, invoke `smol-execute` with the exact spec and plan paths.
 
 If only an implementation plan was requested, report the artifact path and stop.
-
-If the user explicitly requested an upstream implementation-planning skill, let it own this phase and pass the exact custom plan path. Do not create a duplicate Smolpowers plan.

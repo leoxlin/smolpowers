@@ -7,6 +7,8 @@ description: Establish the goal, success criteria, scope, and chosen product app
 
 Inspect context, decide what to build, and produce the product design artifact.
 
+If the user explicitly requested `superpowers:brainstorming`, invoke it before doing Plan work using the [upstream contract](../smol-activate/references/compatibility.md), then stop this phase.
+
 ## Plan the Product
 
 Inspect the repository, current documentation, recent relevant changes, and the user's request before proposing an approach.
@@ -47,5 +49,3 @@ Fix those issues in the artifact before reporting the phase outcome.
 If implementation was requested, invoke `smol-design` with the exact spec path and configured `docsRoot`.
 
 If only a product plan or specification was requested, report the artifact path and stop.
-
-If the user explicitly requested an upstream product-design skill, let it own this phase and pass the exact custom spec path. Do not create a duplicate Smolpowers spec.

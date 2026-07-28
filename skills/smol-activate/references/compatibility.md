@@ -2,16 +2,17 @@
 
 ## Explicit upstream ownership
 
-| Requested upstream skill | Smolpowers phase | Handoff |
+| Requested upstream skill | Replaced phase | Handoff |
 |---|---|---|
-| `superpowers:brainstorming` | Plan | Pass `<docsRoot>/specs/YYYY-MM-DD-<slug>-design.md` as the required spec path. |
-| `superpowers:writing-plans` | Design | Pass the current spec and `<docsRoot>/plans/YYYY-MM-DD-<slug>.md`. |
-| `superpowers:executing-plans` or `superpowers:subagent-driven-development` | Execute | Pass the exact plan path. |
+| `superpowers:brainstorming` | Plan | Pass `workflow_owner: smolpowers:smol-activate`, the spec path as `output_path`, `tracked_artifact: true`, and `return_to_caller: true`. |
+| `superpowers:writing-plans` | Design | Pass `workflow_owner: smolpowers:smol-activate`, the current spec, the plan path as `output_path`, `tracked_artifact: true`, and `return_to_caller: true`. |
+| `superpowers:subagent-driven-development` | Execute | Pass `workflow_owner: smolpowers:smol-activate`, the exact plan path, and `return_to_caller: true`. |
+| `superpowers:executing-plans` | Execute and Finish | Pass the exact plan path. This upstream owner continues into upstream branch finishing instead of returning to Smolpowers. |
 | `superpowers:finishing-a-development-branch` | Finish | Pass both artifact paths and the authorized Git disposition. |
 
-Do not invoke the Smolpowers counterpart before or after an explicitly requested upstream owner.
+After a returning upstream owner completes, continue with the next Smolpowers phase when the request authorizes it. Do not invoke the replaced Smolpowers phase before or after its upstream owner.
 
-Partial installation of these selected upstream skills is supported. Enabling both complete bootstrap plugins simultaneously is not guaranteed. [PLEASE VERIFY]
+Only substitute an upstream skill that is installed and explicitly requested. Enabling both complete bootstrap plugins simultaneously is not supported because both inject lifecycle owners at session start.
 
 ## Harness tools
 
