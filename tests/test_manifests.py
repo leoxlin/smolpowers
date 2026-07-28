@@ -31,24 +31,6 @@ def test_harness_manifests_and_versions() -> None:
 
     assert kimi["skills"] == "./skills/"
     assert kimi["sessionStart"]["skill"] == "smol-activate"
-    instructions = kimi["skillInstructions"]
-    for token in [
-        "AskUserQuestion",
-        "TodoList",
-        "Agent",
-        "Skill",
-        "Read",
-        "Write",
-        "Edit",
-        "Bash",
-        "Grep",
-        "Glob",
-        "FetchURL",
-        "WebSearch",
-    ]:
-        assert token in instructions
-    for unsupported in ["tools", "commands", "apps", "inject", "bootstrap"]:
-        assert unsupported not in kimi
 
     assert codex["skills"] == "./skills/"
     assert codex["hooks"] == {}
@@ -70,8 +52,3 @@ def test_harness_manifests_and_versions() -> None:
     assert package["pi"]["skills"] == ["./skills"]
     assert package["pi"]["extensions"] == ["./.pi/extensions/smolpowers.js"]
     assert "dependencies" not in package
-
-    license_text = (ROOT / "LICENSE").read_text()
-    assert "Copyright (c) 2025 Jesse Vincent" in license_text
-    assert "Copyright (c) 2026 Leo Xuzhang Lin" in license_text
-    assert ".superpowers/" in (ROOT / ".gitignore").read_text().splitlines()

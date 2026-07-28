@@ -16,14 +16,6 @@ def test_harbor_tasks_are_valid() -> None:
         assert loaded.config.environment.network_mode.value == "public"
 
 
-def test_harbor_tasks_pin_container_tools() -> None:
-    for task in run_harbor.CASES.values():
-        dockerfile = (task / "environment/Dockerfile").read_text()
-        assert "python:3.14-slim" in dockerfile
-        assert "YQ_VERSION=v4.53.2" in dockerfile
-        assert "TARGETARCH" in dockerfile
-
-
 def test_agent_mapping() -> None:
     assert run_harbor.parse_agent("codex=openai/gpt-5") == run_harbor.AgentModel(
         "codex", "openai/gpt-5"

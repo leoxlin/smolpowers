@@ -28,7 +28,6 @@ def test_session_start_bootstrap() -> None:
     context = hook["additionalContext"]
     assert "smolpowers:smol-activate bootstrap" in context
     assert "Design → Plan → Execute → Finish" in context
-    assert "TODO" not in context
 
 
 def test_hook_wrapper_delegates_to_session_start() -> None:

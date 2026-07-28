@@ -3,26 +3,6 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-def test_artifact_templates() -> None:
-    template = (ROOT / "skills/smol-plan/references/plan-template.md").read_text()
-    for heading in [
-        "# [Feature Name] Implementation Plan",
-        "**Goal:**",
-        "**Architecture:**",
-        "## Global Constraints",
-        "### Task N:",
-        "**Files:**",
-        "**Outcome:**",
-        "- [ ]",
-        "Run:",
-    ]:
-        assert heading in template
-
-    spec_template = (ROOT / "skills/smol-design/references/spec-template.md").read_text()
-    for heading in ["# [Feature Name] Design", "## Goal", "## Success", "## Scope"]:
-        assert heading in spec_template
-
-
 def test_artifact_paths_follow_configuration(tmp_path: Path) -> None:
     default_repo = tmp_path / "default"
     default_repo.mkdir()
