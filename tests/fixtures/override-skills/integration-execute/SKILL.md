@@ -7,7 +7,7 @@ description: Test-only Execute owner for the configuration override integration 
 
 Own only the Execute phase of the integration fixture.
 
-1. Locate and run the installed `smol-activate` configuration loader, parse its JSON without `eval`, and require the exact spec and plan passed by Plan beneath `docsRoot`.
+1. Locate and run the Harbor-injected `smol-activate` configuration loader beneath the agent's installed skill directories. Do not assume the skill is inside the project. Parse its JSON without `eval`, and require the exact spec and plan passed by Plan beneath `docsRoot`.
 2. Append `execute|<docsRoot>|<stateRoot>` to `<stateRoot>/phase-calls.log`, using the absolute loader values.
 3. Create repository-root `result.txt` with exactly `override lifecycle passed` plus a newline.
 4. Run `test "$(cat result.txt)" = "override lifecycle passed"`. Only after it passes, mark the plan's single task checked.

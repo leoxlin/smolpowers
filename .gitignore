@@ -1,1 +1,6 @@
 .superpowers/
+!tests/.python-version
+tests/.venv/
+tests/jobs/
+__pycache__/
+.pytest_cache/

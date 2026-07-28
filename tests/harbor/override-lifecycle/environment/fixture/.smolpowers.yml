@@ -1,0 +1,11 @@
+docsRoot: artifacts
+stateRoot: .smol-state
+phases:
+  design:
+    owner: integration-design
+  plan:
+    owner: integration-plan
+  execute:
+    owner: integration-execute
+  finish:
+    owner: integration-finish

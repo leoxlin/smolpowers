@@ -1,0 +1,13 @@
+docsRoot: artifacts
+stateRoot: .smol-state
+phases:
+  design:
+    owner: smol-design
+  plan:
+    owner: writing-plans
+  execute:
+    owner: smol-execute
+    companions:
+      - test-driven-development
+  finish:
+    owner: smol-finish

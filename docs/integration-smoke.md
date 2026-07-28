@@ -2,35 +2,43 @@
 
 **Date:** 2026-07-28
 
-## Deterministic checks
+## Deterministic suite
 
-- `bash tests/run-all.sh`: passed.
-- Skill validator: all five skills passed.
-- Shell syntax and ShellCheck: passed.
-- Actual upstream task parser: parsed the Smolpowers plan template from the adjacent Superpowers checkout.
-- Upstream substitution contracts: `brainstorming`, `writing-plans`, and `subagent-driven-development` expose return-to-caller handoffs.
-- Selected upstream discovery: installed the actual `writing-plans` and `test-driven-development` skill directories beside Smolpowers in an isolated Codex home and verified their exact names in Codex's model-visible prompt.
-- Plugin-creator validator: rejected only the Codex manifest's inline `"hooks": {}` field. The current Codex plugin contract accepts inline hook objects, and Smolpowers requires the empty object to suppress Claude hook auto-discovery. This validator is behind the current contract. [PLEASE VERIFY]
+`bash tests/run-all.sh` runs the locked Python 3.14 pytest project. It covers:
 
-## Harness sessions
+- skill, manifest, artifact, configuration-loader, and hook contracts;
+- shell syntax and ShellCheck;
+- the Pi extension's Node behavior tests;
+- Harbor runner input validation and both Harbor task structures;
+- adjacent upstream substitution checks when a Superpowers checkout is present.
 
-| Harness | Version | Local load path | Result |
-|---|---:|---|---|
-| Claude Code | 2.1.204 | `--plugin-dir <repo>` | Blocked: OAuth access token expired (`401`). No model response was claimed. |
-| Codex | 0.145.0 | temporary `.agents/skills` discovery, `codex exec --ephemeral` | Passed: loaded the bootstrap skill, ran the loader, selected the Design phase. |
-| Codex mixed lifecycle | 0.145.0 | isolated local marketplaces with selected upstream plugin skills | Passed: Smol Design, upstream Plan, upstream TDD companion, Smol Execute, and Smol Finish completed; the immutable Finish verifier passed. |
-| Kimi Code | 0.29.0 | `--skills-dir <repo>/skills` | Passed: ran the loader and selected the Design phase. |
-| Pi | 0.81.1 | `-e <repo> --no-session` | Passed: loaded the package bootstrap and selected the Design phase. |
+Fresh migration verification: `49 passed` with no warnings. Both Harbor
+environment Dockerfiles also built successfully on `linux/amd64`.
 
-The Codex and Kimi sessions exercised native skill discovery without persistently installing the repository marketplace. Their marketplace and manifest shapes are covered by the deterministic manifest tests.
+## Harbor lifecycle cases
 
-## Fresh-agent scenarios
+- `override`: injects Smolpowers and four recorder-owner skills, then verifies
+  configured roots, exact phase order, current artifacts, completed plan, and
+  the absence of default roots.
+- `superpowers`: injects Smolpowers plus upstream `writing-plans` and
+  `test-driven-development`, then verifies the observed failing test, minimum
+  implementation, upstream plan shape, completed artifacts, and in-session
+  Finish verification.
 
-- Tiny feature: invalid configuration warned once, both default roots were used, the artifact pair was written, and two CLI tests passed.
-- Bug fix: reproduced repeated hyphens, recorded the root cause and artifact pair, then passed the focused and full tests.
-- Existing plan: resumed at Execute, kept two tiny independent tasks inline, completed focused tests, and stopped at Finish when an unrelated environment gate failed.
-- Failing Finish: reported `RELEASE_CHANNEL` as unset and did not rewrite or hide the failing check.
-- Explicit upstream handoff: selected upstream `superpowers:writing-plans` as the Plan owner, wrote only the configured `notes/plans/...` artifact, and did not run Smolpowers Plan or implementation.
-- Mixed lifecycle: installed actual upstream `writing-plans` and `test-driven-development` skills beside Smolpowers, produced the upstream plan format, observed the missing-file RED failure, passed GREEN, and completed the immutable Finish verifier through `tests/test-superpowers-integration.sh`.
+Each case uses a clean non-root Git fixture in a Python 3.14 container. A
+root-owned Python verifier writes Harbor's reward, and Harbor stores job
+artifacts under ignored `tests/jobs/`.
 
-Forward-test fixtures were created under ignored `.superpowers/` state and removed on exit.
+## Authenticated runs
+
+The migration does not claim a model-backed result without an explicit
+`AGENT=MODEL` selection and the corresponding provider credentials. Run:
+
+```bash
+uv run --project tests --locked python tests/run_harbor.py \
+  --case override \
+  --case superpowers \
+  --agent codex=PROVIDER/MODEL
+```
+
+Repeat `--agent` to compare supported agents in the same case.

@@ -109,15 +109,25 @@ selected upstream skills discoverable alongside the Smolpowers bootstrap.
 bash tests/run-all.sh
 ```
 
-Run the authenticated, model-backed integration lifecycles separately:
+`tests/` is a Python 3.14
+[uv](https://docs.astral.sh/uv/) project. The wrapper runs the locked pytest
+suite, including Harbor task validation, without making model requests.
+
+Run authenticated, model-backed lifecycle evaluations separately with
+[Harbor](https://www.harborframework.com/):
 
 ```bash
-bash tests/test-overrides-integration.sh
-bash tests/test-superpowers-integration.sh
+uv run --project tests --locked python tests/run_harbor.py \
+  --case override \
+  --case superpowers \
+  --agent codex=PROVIDER/MODEL
 ```
 
-The focused suite runs the selected-Superpowers installation and discovery
-portion without authentication or a model request.
+Repeat `--agent AGENT=MODEL` to evaluate multiple agents concurrently within
+each case. Supported agents are `claude-code`, `codex`, `kimi-cli`, and `pi`.
+Set the provider credentials required by the selected model. The Superpowers
+case reads its checkout from `--superpowers-root`, `SUPERPOWERS_ROOT`, or the
+sibling `../superpowers` directory, in that order.
 
 Integration smoke-test coverage and known gaps are recorded in [docs/integration-smoke.md](docs/integration-smoke.md).
 

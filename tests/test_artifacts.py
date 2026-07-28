@@ -1,31 +1,30 @@
-#!/usr/bin/env python3
 import json
 import subprocess
-import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-template = (ROOT / "skills/smol-plan/references/plan-template.md").read_text()
+def test_artifact_templates() -> None:
+    template = (ROOT / "skills/smol-plan/references/plan-template.md").read_text()
+    for heading in [
+        "# [Feature Name] Implementation Plan",
+        "**Goal:**",
+        "**Architecture:**",
+        "## Global Constraints",
+        "### Task N:",
+        "**Files:**",
+        "**Outcome:**",
+        "- [ ]",
+        "Run:",
+    ]:
+        assert heading in template
 
-for heading in [
-    "# [Feature Name] Implementation Plan",
-    "**Goal:**",
-    "**Architecture:**",
-    "## Global Constraints",
-    "### Task N:",
-    "**Files:**",
-    "**Outcome:**",
-    "- [ ]",
-    "Run:",
-]:
-    assert heading in template, f"plan template misses {heading}"
+    spec_template = (ROOT / "skills/smol-design/references/spec-template.md").read_text()
+    for heading in ["# [Feature Name] Design", "## Goal", "## Success", "## Scope"]:
+        assert heading in spec_template
 
-spec_template = (ROOT / "skills/smol-design/references/spec-template.md").read_text()
-for heading in ["# [Feature Name] Design", "## Goal", "## Success", "## Scope"]:
-    assert heading in spec_template, f"spec template misses {heading}"
 
-with tempfile.TemporaryDirectory() as tmp:
-    default_repo = Path(tmp) / "default"
+def test_artifact_paths_follow_configuration(tmp_path: Path) -> None:
+    default_repo = tmp_path / "default"
     default_repo.mkdir()
     output = subprocess.check_output(
         [
@@ -43,7 +42,7 @@ with tempfile.TemporaryDirectory() as tmp:
         default_repo / "docs/superpowers/plans/2026-07-27-example.md"
     )
 
-    custom_repo = Path(tmp) / "custom"
+    custom_repo = tmp_path / "custom"
     custom_repo.mkdir()
     (custom_repo / ".smolpowers.yml").write_text(
         "docsRoot: project-notes\nstateRoot: /tmp/smol-state\n"
@@ -61,5 +60,3 @@ with tempfile.TemporaryDirectory() as tmp:
         custom_repo / "project-notes/specs/2026-07-27-example-design.md"
     )
     assert config["stateRoot"] == "/tmp/smol-state"
-
-print("Artifact templates and paths look good")
