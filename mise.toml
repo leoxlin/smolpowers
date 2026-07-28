@@ -1,0 +1,18 @@
+[tools]
+node = "24"
+python = "3.14"
+uv = "latest"
+
+[tasks."test:unit"]
+description = "Run unit tests"
+raw_args = true
+run = "bash tests/run-all.sh"
+
+[tasks."test:integration"]
+description = "Run integration tests"
+raw_args = true
+run = "uv run --project tests --locked python tests/run_harbor.py"
+
+[tasks.test]
+description = "Run all tests"
+depends = ["test:unit", "test:integration"]
