@@ -18,6 +18,7 @@ actual = json.loads(sys.argv[1])
 expected = {
     "docsRoot": sys.argv[2],
     "stateRoot": sys.argv[3],
+    "tdd": "proportional",
     "design": "smolpowers:smol-design",
     "plan": "smolpowers:smol-plan",
     "execute": "smolpowers:smol-execute",
@@ -88,6 +89,28 @@ assert actual["finish"] == "smolpowers:smol-finish"
 PY
 test ! -s "$test_root/phase-chain/stderr"
 
+mkdir -p "$test_root/tdd-strict"
+printf '%s\n' '{"tdd":"strict"}' >"$test_root/tdd-strict/.smolpowers.json"
+run_case tdd-strict
+python3 - "$test_root/tdd-strict/stdout" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1]) as output:
+    actual = json.load(output)
+assert actual["tdd"] == "strict"
+PY
+test ! -s "$test_root/tdd-strict/stderr"
+
+mkdir -p "$test_root/tdd-proportional"
+printf '%s\n' '{"tdd":"proportional"}' \
+  >"$test_root/tdd-proportional/.smolpowers.json"
+run_case tdd-proportional
+assert_json "$(cat "$test_root/tdd-proportional/stdout")" \
+  "$test_root/tdd-proportional/docs/superpowers" \
+  "$test_root/tdd-proportional/.superpowers"
+test ! -s "$test_root/tdd-proportional/stderr"
+
 mkdir -p "$test_root/absolute"
 printf '%s\n' '{"docsRoot":"/tmp/smol-docs","stateRoot":"/tmp/smol-state"}' \
   >"$test_root/absolute/.smolpowers.json"
@@ -95,7 +118,7 @@ run_case absolute
 assert_json "$(cat "$test_root/absolute/stdout")" "/tmp/smol-docs" "/tmp/smol-state"
 
 for name in malformed unknown atomic unsafe invalid-skill \
-  empty-phase-chain non-string-phase-member empty-phase-member; do
+  empty-phase-chain non-string-phase-member empty-phase-member invalid-tdd; do
   mkdir -p "$test_root/$name"
 done
 printf '%s\n' '{not json' >"$test_root/malformed/.smolpowers.json"
@@ -112,9 +135,11 @@ printf '%s\n' '{"execute":["smolpowers:smol-execute",42]}' \
   >"$test_root/non-string-phase-member/.smolpowers.json"
 printf '%s\n' '{"execute":["","smolpowers:smol-execute"]}' \
   >"$test_root/empty-phase-member/.smolpowers.json"
+printf '%s\n' '{"tdd":"sometimes"}' \
+  >"$test_root/invalid-tdd/.smolpowers.json"
 
 for name in malformed unknown atomic unsafe invalid-skill \
-  empty-phase-chain non-string-phase-member empty-phase-member; do
+  empty-phase-chain non-string-phase-member empty-phase-member invalid-tdd; do
   run_case "$name"
   assert_json "$(cat "$test_root/$name/stdout")" \
     "$test_root/$name/docs/superpowers" "$test_root/$name/.superpowers"

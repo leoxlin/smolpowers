@@ -12,7 +12,7 @@ Locate `scripts/load-config.sh` under the installed `smol-activate` skill and ru
 bash /absolute/path/to/smol-activate/scripts/load-config.sh /absolute/repo/root
 ```
 
-Parse its JSON output directly. Never use `eval`. Treat `docsRoot` as the artifact root and `stateRoot` as information only. Core Smolpowers never writes `stateRoot`.
+Parse its JSON output directly. Never use `eval`. Treat `docsRoot` as the artifact root and `stateRoot` as information only. Core Smolpowers never writes `stateRoot`. The `tdd` value is either `proportional` (the default) or `strict`.
 
 The `design`, `plan`, `execute`, and `finish` values each contain a phase chain:
 either one skill-name string or a non-empty ordered array of skill-name
@@ -27,5 +27,5 @@ roots, active request, and exact artifact paths available at that point. If any
 skill is not installed, report that exact skill instead of dropping it or
 running a default.
 
-Configuration is loaded when the absolute repository root, both roots, and all
-four phase chains are known.
+Configuration is loaded when the absolute repository root, both roots, `tdd`,
+and all four phase chains are known.

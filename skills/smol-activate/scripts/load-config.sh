@@ -15,6 +15,7 @@ fi
 config_file="$repo_root/.smolpowers.json"
 default_docs="docs/superpowers"
 default_state=".superpowers"
+default_tdd="proportional"
 default_design="smolpowers:smol-design"
 default_plan="smolpowers:smol-plan"
 default_execute="smolpowers:smol-execute"
@@ -41,8 +42,8 @@ emit() {
   local docs state
   docs="$(resolve_path "$1")"
   state="$(resolve_path "$2")"
-  printf '{"docsRoot":"%s","stateRoot":"%s","design":%s,"plan":%s,"execute":%s,"finish":%s}\n' \
-    "$(json_escape "$docs")" "$(json_escape "$state")" \
+  printf '{"docsRoot":"%s","stateRoot":"%s","tdd":"%s","design":%s,"plan":%s,"execute":%s,"finish":%s}\n' \
+    "$(json_escape "$docs")" "$(json_escape "$state")" "$(json_escape "$7")" \
     "$3" "$4" "$5" "$6"
 }
 
@@ -53,7 +54,8 @@ json_string() {
 emit_defaults() {
   emit "$default_docs" "$default_state" \
     "$(json_string "$default_design")" "$(json_string "$default_plan")" \
-    "$(json_string "$default_execute")" "$(json_string "$default_finish")"
+    "$(json_string "$default_execute")" "$(json_string "$default_finish")" \
+    "$default_tdd"
 }
 
 fallback() {
@@ -79,11 +81,12 @@ validation='
     (type == "array" and length > 0 and all(safe_string));
 
   type == "object" and
-  ((keys - ["design", "docsRoot", "execute", "finish", "plan", "stateRoot"]) | length == 0) and
+  ((keys - ["design", "docsRoot", "execute", "finish", "plan", "stateRoot", "tdd"]) | length == 0) and
   ([.docsRoot?, .stateRoot?] | all(
     . == null or
     safe_string
   )) and
+  (.tdd? == null or .tdd == "proportional" or .tdd == "strict") and
   ([.design?, .plan?, .execute?, .finish?] | all(
     . == null or
     phase
@@ -99,6 +102,8 @@ if ! docs="$(
   jq -r --arg default "$default_docs" '.docsRoot // $default' "$config_file"
 )" || ! state="$(
   jq -r --arg default "$default_state" '.stateRoot // $default' "$config_file"
+)" || ! tdd="$(
+  jq -r --arg default "$default_tdd" '.tdd // $default' "$config_file"
 )"; then
   fallback
   exit 0
@@ -117,4 +122,4 @@ if ! design="$(
   exit 0
 fi
 
-emit "$docs" "$state" "$design" "$plan" "$execute" "$finish"
+emit "$docs" "$state" "$design" "$plan" "$execute" "$finish" "$tdd"

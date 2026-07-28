@@ -50,4 +50,30 @@ for name, imperative in SKILLS.items():
             continue
         assert (folder / target).is_file(), f"{name}: broken resource link {target}"
 
+execute = (ROOT / "skills" / "smol-execute" / "SKILL.md").read_text()
+reference_link = "[test-driven-development.md](references/test-driven-development.md)"
+assert reference_link in execute, "smol-execute: missing TDD reference link"
+assert (
+    "NO PRODUCTION CODE WITHOUT AN OBSERVED FAILING TEST FIRST" not in execute
+), "smol-execute: strict TDD detail must live in its reference"
+
+tdd_reference_path = (
+    ROOT / "skills" / "smol-execute" / "references" / "test-driven-development.md"
+)
+assert tdd_reference_path.is_file(), "smol-execute: missing TDD reference"
+tdd_reference = tdd_reference_path.read_text()
+tdd_contract = [
+    "## Proportional Mode",
+    "## Strict Mode",
+    "NO PRODUCTION CODE WITHOUT AN OBSERVED FAILING TEST FIRST",
+    "### Red: Write One Failing Test",
+    "### Green: Make It Pass",
+    "### Refactor: Stay Green",
+]
+for clause in tdd_contract:
+    assert clause in tdd_reference, f"smol-execute: missing TDD contract: {clause}"
+assert [tdd_reference.index(clause) for clause in tdd_contract] == sorted(
+    tdd_reference.index(clause) for clause in tdd_contract
+), "smol-execute: TDD phases are out of order"
+
 print("Skill structure and metadata look good")

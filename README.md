@@ -51,6 +51,7 @@ the skill that owns each phase:
 {
   "docsRoot": "docs/superpowers",
   "stateRoot": ".superpowers",
+  "tdd": "strict",
   "design": "superpowers:brainstorming",
   "finish": "superpowers:finishing-a-development-branch"
 }
@@ -60,7 +61,8 @@ Paths may be absolute or repository-root-relative. The phase keys are
 `design`, `plan`, `execute`, and `finish`; omitted phase keys use their
 `smolpowers:smol-*` owner. A phase may be one skill string or an ordered array:
 leading skills are companions and the final skill is the sole phase owner.
-Missing or invalid configuration falls back to all defaults.
+Set `tdd` to `proportional` (the default) or `strict`. Missing or invalid
+configuration falls back to all defaults.
 
 ## Substitute upstream phases
 
@@ -72,8 +74,8 @@ request it for a single run to replace its Smolpowers phase:
 - `superpowers:subagent-driven-development` replaces Execute.
 - `superpowers:finishing-a-development-branch` replaces Finish.
 
-Use upstream strict TDD as an Execute companion while retaining Smol Execute
-as the phase owner:
+To use the exact upstream TDD skill instead of built-in strict mode, add it as
+an Execute companion while retaining Smol Execute as the phase owner:
 
 ```json
 {

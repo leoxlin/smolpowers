@@ -1,6 +1,6 @@
 ---
 name: smol-execute
-description: Execute a current Smolpowers plan with proportional test-first checks. Use when plan tasks or their verification remain incomplete.
+description: Execute a current Smolpowers plan with configurable test-driven checks. Use when plan tasks or their verification remain incomplete.
 ---
 
 # Smol Execute
@@ -23,15 +23,9 @@ Inspect the worktree before changing it. Preserve unrelated user changes and nev
 
 Execute unchecked tasks in order unless the plan explicitly marks them independent.
 
-For each behavior change:
+Read [test-driven-development.md](references/test-driven-development.md) and follow the mode matching the loaded `tdd` value for every new feature, bug fix, refactor, or production behavior change.
 
-1. Write or identify the smallest check that would fail without the change.
-2. Run it and confirm the failure is caused by the missing behavior, when a new automated test is practical.
-3. Implement the minimum production change.
-4. Run the task's exact check and relevant neighboring checks.
-5. Mark a checkbox complete only after its outcome is present and its check passes.
-
-Use test-first development proportionally. Configuration-only, documentation-only, generated, or untestable harness metadata may use direct validation instead of a contrived unit test. Record why in the task outcome.
+Configuration-only, documentation-only, generated, or harness-metadata changes that do not alter production behavior may use the narrowest direct validation. Record why in the task outcome.
 
 When a check fails unexpectedly, investigate the root cause before editing. Read [debugging.md](references/debugging.md) for the bounded workflow.
 
