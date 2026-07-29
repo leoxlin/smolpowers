@@ -38,6 +38,11 @@ uv run --project tests --locked python tests/run_harbor.py \
   --agent codex=openai/gpt-5.6-sol
 """
 
+[tasks.dashboard]
+description = "Serve the Harbor jobs dashboard (tests/jobs) on http://127.0.0.1:8642/"
+raw_args = true
+run = "uv run --project tests --locked python tests/harbor_dashboard.py"
+
 [tasks.test]
 description = "Run all tests"
 depends = ["test:unit", "test:integration"]
