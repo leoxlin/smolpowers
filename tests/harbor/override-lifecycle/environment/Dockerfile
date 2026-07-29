@@ -7,6 +7,7 @@ RUN apt-get update \
 RUN useradd --create-home --shell /bin/bash agent
 
 COPY fixture/ /app/
+COPY fixture/ /opt/fixture/
 
 RUN git -C /app init -q \
     && git -C /app config user.name "Smolpowers Integration" \

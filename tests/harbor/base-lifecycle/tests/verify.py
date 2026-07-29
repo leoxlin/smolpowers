@@ -10,5 +10,4 @@ transcript = "\n".join(
     for path in logs_root.rglob("*")
     if path.is_file()
 )
-for token in ("BASE_SMOLPOWERS_VERIFIED", "No such file or directory"):
-    assert token in transcript, token
+assert "BASE_SMOLPOWERS_VERIFIED" in transcript

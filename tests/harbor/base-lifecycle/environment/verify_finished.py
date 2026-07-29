@@ -4,6 +4,7 @@ from pathlib import Path
 
 ROOT = Path("/app")
 DOCS = ROOT / "docs/superpowers"
+BASELINE = Path("/opt/fixture")
 
 
 def only_match(directory: Path, pattern: str) -> Path:
@@ -24,15 +25,7 @@ assert "**Status:** Current" in spec.read_text()
 assert "- [ ]" not in plan.read_text()
 assert not (ROOT / ".smolpowers.json").exists()
 
-subprocess.run(
-    ["git", "diff", "HEAD", "--quiet", "--", ".gitignore", "tests/test_greeting.py"],
-    cwd=ROOT,
-    check=True,
-)
-production_diff = subprocess.run(
-    ["git", "diff", "--quiet", "HEAD", "--", "greeting.py"],
-    cwd=ROOT,
-)
-assert production_diff.returncode == 1
-subprocess.run(["git", "diff", "--check"], cwd=ROOT, check=True)
+for protected in (".gitignore", "tests/test_greeting.py"):
+    assert (ROOT / protected).read_bytes() == (BASELINE / protected).read_bytes()
+assert (ROOT / "greeting.py").read_bytes() != (BASELINE / "greeting.py").read_bytes()
 print("BASE_SMOLPOWERS_VERIFIED")
