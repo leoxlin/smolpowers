@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html data-theme="dim" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harbor jobs dashboard — smolpowers</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/daisyui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/themes.css">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4/dist/index.global.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :where(.grid, .flex) > * { min-width: 0; }
+  :where(p, h1, h2, h3, td, th, .badge) { overflow-wrap: anywhere; }
+</style>
+</head>
+<body class="bg-base-200 text-base-content min-h-screen">
+<div class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
+
+  <header class="space-y-1">
+    <h1 class="text-2xl font-bold">Harbor jobs dashboard</h1>
+  </header>
+
+  <div class="stats stats-vertical sm:stats-horizontal shadow bg-base-100 w-full">
+    <div class="stat"><div class="stat-title">Jobs</div><div class="stat-value text-2xl">{{ stats.jobs }}</div></div>
+    <div class="stat"><div class="stat-title">Trials</div><div class="stat-value text-2xl">{{ stats.trials }}</div>
+      <div class="stat-desc">{{ stats.errored }} errored</div></div>
+    <div class="stat"><div class="stat-title">Mean reward</div>
+      <div class="stat-value text-2xl">{{ stats.mean_reward }}</div>
+      <div class="stat-desc">over {{ stats.n_verified }} verified trials</div></div>
+    <div class="stat"><div class="stat-title">Tokens</div>
+      <div class="stat-value text-2xl">{{ stats.tokens_total }}</div>
+      <div class="stat-desc">in {{ stats.tokens_in }} · out {{ stats.tokens_out }}</div></div>
+    <div class="stat"><div class="stat-title">Cost</div>
+      <div class="stat-value text-2xl">{{ stats.cost }}</div></div>
+  </div>
+
+  <section class="space-y-2">
+    <h2 class="text-lg font-semibold">Agent x Model</h2>
+    <div class="overflow-x-auto rounded-box border border-base-content/10 bg-base-100">
+      <table class="table table-zebra table-sm">
+        <thead><tr>
+          <th>Agent</th><th>Model</th><th>Trials</th><th>Errored</th>
+          <th>Mean reward</th><th>Input tokens</th><th>Output tokens</th><th>Cost</th>
+        </tr></thead>
+        <tbody>
+          {% for r in rollup %}
+          <tr>
+            <td class="font-medium">{{ r.agent }}</td>
+            <td class="font-mono text-xs">{{ r.model }}</td>
+            <td>{{ r.trials }}</td>
+            <td>{{ r.errored or "—" }}</td>
+            <td>
+              {% if r.mean_reward is none %}
+                <span class="badge badge-ghost badge-soft badge-sm">no reward</span>
+              {% else %}
+                <span class="badge {{ r.mean_reward | reward_cls }} badge-soft badge-sm">reward {{ r.mean_reward | round(2) }}</span>
+              {% endif %}
+            </td>
+            <td class="font-mono text-xs">{{ r.input | fmt_int }}</td>
+            <td class="font-mono text-xs">{{ r.output | fmt_int }}</td>
+            <td class="font-mono text-xs">{{ r.cost | fmt_cost if r.has_cost else "—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="space-y-3">
+    <div class="flex flex-wrap items-center gap-3">
+      <h2 class="text-lg font-semibold">Jobs</h2>
+      <select id="agent-filter" class="select select-bordered select-sm w-48">
+        <option value="">all agents</option>
+        {% for a in agents %}<option value="{{ a }}">{{ a }}</option>{% endfor %}
+      </select>
+      <select id="status-filter" class="select select-bordered select-sm w-40">
+        <option value="">all statuses</option>
+        <option value="completed">completed</option>
+        <option value="errored">errored</option>
+        <option value="running">running</option>
+      </select>
+      <span id="filter-count" class="text-xs opacity-60"></span>
+    </div>
+    <div id="jobs" class="grid gap-3">
+      {% for job in jobs %}
+      <div class="collapse collapse-arrow bg-base-100 border border-base-content/10 job-row" data-agents="{{ job.agents | join(' ') }}">
+        <input type="checkbox">
+        <div class="collapse-title">
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 pr-6">
+            <span class="font-mono font-semibold text-sm">{{ job.name }}</span>
+            <span class="badge {{ job.status | status_cls }} badge-soft badge-sm">{{ job.status }}</span>
+            <span class="text-xs opacity-60">{{ job.started_label }} · {{ job.duration | fmt_dur }}</span>
+            <span class="text-xs opacity-60">tasks: {{ job.tasks | join(', ') or "?" }}</span>
+            <span class="text-xs opacity-60">agents: {{ job.agents | join(', ') }}</span>
+            <span class="flex gap-1">
+              {% for b in job.count_badges %}<span class="badge {{ b.cls }} badge-xs">{{ b.n }} {{ b.label }}</span>{% endfor %}
+            </span>
+            <span class="text-xs ml-auto">
+              reward {{ job.mean_reward_label }} ·
+              in {{ job.input_tokens | fmt_int }} · out {{ job.output_tokens | fmt_int }} · {{ job.cost_usd | fmt_cost }}
+            </span>
+          </div>
+        </div>
+        <div class="collapse-content">
+          <div class="grid gap-3 pt-2">
+            {% for t in job.trials %}
+            <div class="card bg-base-200 border border-base-content/10" data-agent="{{ t.agent }}" data-status="{{ t.status }}">
+              <div class="card-body p-4 gap-2">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono text-sm font-semibold">{{ t.name }}</span>
+                  <span class="badge {{ t.status | status_cls }} badge-soft badge-sm">{{ t.status }}</span>
+                  {% if t.reward is none %}
+                    <span class="badge badge-ghost badge-soft badge-sm">no reward</span>
+                  {% else %}
+                    <span class="badge {{ t.reward | reward_cls }} badge-soft badge-sm">reward {{ t.reward }}</span>
+                  {% endif %}
+                  <span class="badge badge-outline badge-sm">{{ t.agent }}</span>
+                  <span class="badge badge-outline badge-sm">{{ t.model }}</span>
+                  <span class="text-xs opacity-60 ml-auto">{{ t.started_label }} · {{ t.duration | fmt_dur }}</span>
+                </div>
+                <div class="text-xs opacity-70">
+                  in {{ t.input_tokens | fmt_int }} · cache {{ t.cache_tokens | fmt_int }} · out {{ t.output_tokens | fmt_int }} · {{ t.cost_usd | fmt_cost }}
+                </div>
+                {% if t.phase_segments %}
+                <div class="flex w-full h-2 rounded overflow-hidden bg-base-300">
+                  {% for seg in t.phase_segments %}
+                  <div class="{{ seg.cls }} h-full" style="width:{{ seg.width }}%" title="{{ seg.title }}"></div>
+                  {% endfor %}
+                </div>
+                <div class="text-[11px] opacity-60 mt-1">{{ t.phase_legend }}</div>
+                {% else %}
+                <span class="opacity-50 text-xs">no phase timing</span>
+                {% endif %}
+                {% if t.exception %}
+                <pre class="text-[11px] leading-snug overflow-x-auto whitespace-pre-wrap break-all bg-error/10 border border-error/30 rounded p-2 mt-2">{{ t.exception }}</pre>
+                {% endif %}
+                {% if t.stdout_tail %}
+                <div class="collapse collapse-arrow bg-base-300 mt-2">
+                  <input type="checkbox">
+                  <div class="collapse-title text-xs font-medium py-2 min-h-0">verifier stdout (tail)</div>
+                  <div class="collapse-content"><pre class="text-[11px] leading-snug overflow-x-auto whitespace-pre-wrap break-all">{{ t.stdout_tail }}</pre></div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% else %}
+            <span class="opacity-50 text-sm">no trial dirs</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+</div>
+<script>
+const agentSel = document.getElementById("agent-filter");
+const statusSel = document.getElementById("status-filter");
+const jobsEl = document.getElementById("jobs");
+const countEl = document.getElementById("filter-count");
+function applyFilter() {
+  const agent = agentSel.value, status = statusSel.value;
+  let shownJobs = 0;
+  for (const job of jobsEl.querySelectorAll(".job-row")) {
+    let visible = true;
+    if (agent && !job.dataset.agents.split(" ").includes(agent)) visible = false;
+    if (visible && status) {
+      let any = false;
+      for (const trial of job.querySelectorAll("[data-status]")) {
+        const ok = trial.dataset.status === status && (!agent || trial.dataset.agent === agent);
+        trial.style.display = ok ? "" : "none";
+        any = any || ok;
+      }
+      visible = any;
+    } else {
+      for (const trial of job.querySelectorAll("[data-status]")) trial.style.display = "";
+    }
+    job.style.display = visible ? "" : "none";
+    if (visible) shownJobs++;
+  }
+  countEl.textContent = (agent || status) ? shownJobs + " jobs match" : "";
+}
+agentSel.addEventListener("change", applyFilter);
+statusSel.addEventListener("change", applyFilter);
+</script>
+</body>
+</html>

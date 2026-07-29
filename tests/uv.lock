@@ -1272,6 +1272,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "harbor" },
+    { name = "jinja2" },
     { name = "pipx" },
     { name = "pytest" },
 ]
@@ -1279,6 +1280,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "harbor", specifier = "==0.20.0" },
+    { name = "jinja2", specifier = "==3.1.6" },
     { name = "pipx", specifier = "==1.16.1" },
     { name = "pytest", specifier = "==8.4.1" },
 ]
