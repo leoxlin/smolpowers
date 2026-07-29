@@ -18,6 +18,7 @@ class PluginCodex(Codex):
             '["smol-activate","smol-design","smol-execute","smol-finish","smol-plan"]'
         )
         return (
+            "if [ -s ~/.nvm/nvm.sh ]; then . ~/.nvm/nvm.sh; fi; "
             "codex plugin marketplace add /opt/smolpowers --json "
             "> /logs/agent/marketplace-install.json && "
             "codex plugin add smolpowers@smolpowers --json "
