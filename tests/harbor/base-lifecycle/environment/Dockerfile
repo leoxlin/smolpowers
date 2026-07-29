@@ -11,6 +11,12 @@ COPY fixture/ /opt/fixture/
 COPY plugin/ /opt/smolpowers/
 COPY verify_finished.py /opt/verify_finished.py
 
+RUN git -C /opt/smolpowers init -q \
+    && git -C /opt/smolpowers config user.name "Smolpowers Plugin Integration" \
+    && git -C /opt/smolpowers config user.email "integration@example.invalid" \
+    && git -C /opt/smolpowers add . \
+    && git -C /opt/smolpowers commit -qm "test: stage plugin"
+
 RUN git -C /app init -q \
     && git -C /app config user.name "Smolpowers Integration" \
     && git -C /app config user.email "integration@example.invalid" \
