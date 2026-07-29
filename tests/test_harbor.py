@@ -77,6 +77,7 @@ def test_base_job_config() -> None:
         Path("/unused-superpowers"),
         run_harbor.CASES["base"],
     )
+    assert config.debug
     assert config.tasks[0].path == run_harbor.CASES["base"]
     assert config.agents[0].skills == [str(path) for path in run_harbor.SMOL_SKILLS]
 

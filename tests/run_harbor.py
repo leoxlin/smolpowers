@@ -148,6 +148,7 @@ def build_job_config(
     return JobConfig(
         job_name=f"{case}-{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}",
         jobs_dir=TESTS / "jobs",
+        debug=True,
         n_concurrent_trials=len(agents),
         tasks=[TaskConfig(path=task_path)],
         agents=[
