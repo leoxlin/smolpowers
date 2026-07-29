@@ -1,4 +1,5 @@
 import argparse
+import os
 from pathlib import Path
 
 import pytest
@@ -65,7 +66,7 @@ def test_agent_mapping() -> None:
 def test_override_job_config() -> None:
     agents = [
         run_harbor.AgentModel("codex", "openai/gpt-5"),
-        run_harbor.AgentModel("pi", "anthropic/claude-sonnet"),
+        run_harbor.AgentModel("pi", "openai-codex/gpt-5"),
     ]
     config = run_harbor.build_job_config(
         "override",
@@ -74,10 +75,14 @@ def test_override_job_config() -> None:
         run_harbor.CASES["override"],
     )
     assert config.n_concurrent_trials == 2
-    assert [agent.name for agent in config.agents] == ["codex", "pi"]
+    assert [agent.name for agent in config.agents] == ["codex", None]
+    assert [agent.import_path for agent in config.agents] == [
+        None,
+        "harbor_agents:SubscriptionPi",
+    ]
     assert [agent.model_name for agent in config.agents] == [
         "openai/gpt-5",
-        "anthropic/claude-sonnet",
+        "openai-codex/gpt-5",
     ]
     assert len(config.agents[0].skills) == 9
 
@@ -103,7 +108,7 @@ def test_validation_fails_before_run_for_missing_upstream(tmp_path: Path) -> Non
     with pytest.raises(FileNotFoundError, match="writing-plans"):
         run_harbor.validate_inputs(
             ["superpowers"],
-            [run_harbor.AgentModel("codex", "model")],
+            [run_harbor.AgentModel("codex", "openai/gpt-5")],
             tmp_path,
         )
 
@@ -127,3 +132,89 @@ def test_validation_rejects_non_codex_base_agent() -> None:
             [run_harbor.AgentModel("pi", "model")],
             Path("/unused-superpowers"),
         )
+
+
+def test_validation_rejects_non_subscription_models() -> None:
+    with pytest.raises(ValueError, match="openai/… model"):
+        run_harbor.validate_inputs(
+            ["override"],
+            [run_harbor.AgentModel("codex", "azure/gpt-5")],
+            Path("/unused-superpowers"),
+        )
+    with pytest.raises(ValueError, match="openai-codex/… model"):
+        run_harbor.validate_inputs(
+            ["override"],
+            [run_harbor.AgentModel("pi", "openai/gpt-5")],
+            Path("/unused-superpowers"),
+        )
+    with pytest.raises(ValueError, match="kimi/… model"):
+        run_harbor.validate_inputs(
+            ["override"],
+            [run_harbor.AgentModel("kimi-cli", "moonshot/k3")],
+            Path("/unused-superpowers"),
+        )
+
+
+def test_kimi_subscription_token(tmp_path: Path) -> None:
+    credentials = tmp_path / "kimi-code.json"
+    credentials.write_text('{"access_token": "token-123"}')
+    assert run_harbor.kimi_subscription_token(credentials) == "token-123"
+
+    with pytest.raises(ValueError, match="cannot read Kimi subscription credentials"):
+        run_harbor.kimi_subscription_token(tmp_path / "missing.json")
+
+    credentials.write_text("{}")
+    with pytest.raises(ValueError, match="lack an access token"):
+        run_harbor.kimi_subscription_token(credentials)
+
+
+def test_apply_subscription_auth_codex_and_pi(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    codex_auth = tmp_path / "codex-auth.json"
+    codex_auth.write_text("{}")
+    pi_auth = tmp_path / "pi-auth.json"
+    pi_auth.write_text("{}")
+    monkeypatch.setattr(run_harbor, "CODEX_AUTH_JSON", codex_auth)
+    monkeypatch.setattr(run_harbor, "PI_AUTH_JSON", pi_auth)
+    monkeypatch.setattr("os.environ", {})
+
+    agents = [
+        run_harbor.AgentModel("codex", "openai/gpt-5"),
+        run_harbor.AgentModel("pi", "openai-codex/gpt-5"),
+    ]
+    run_harbor.apply_subscription_auth(agents)
+    assert os.environ["CODEX_FORCE_AUTH_JSON"] == "1"
+    assert "KIMI_API_KEY" not in os.environ
+
+    codex_auth.unlink()
+    with pytest.raises(ValueError, match="codex login"):
+        run_harbor.apply_subscription_auth(agents)
+
+    codex_auth.write_text("{}")
+    pi_auth.unlink()
+    with pytest.raises(ValueError, match="openai-codex"):
+        run_harbor.apply_subscription_auth(agents)
+
+
+def test_apply_subscription_auth_kimi_agents(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    credentials = tmp_path / "kimi-code.json"
+    credentials.write_text('{"access_token": "token-123"}')
+    monkeypatch.setattr(run_harbor, "KIMI_CREDENTIALS", credentials)
+    monkeypatch.setattr("os.environ", {"KIMI_API_KEY": "preset"})
+
+    agents = [
+        run_harbor.AgentModel("kimi-cli", "kimi/k3"),
+        run_harbor.AgentModel("claude-code", "kimi-for-coding"),
+    ]
+    run_harbor.apply_subscription_auth(agents)
+    assert os.environ["KIMI_API_KEY"] == "preset"
+    assert os.environ["ANTHROPIC_AUTH_TOKEN"] == "token-123"
+    assert os.environ["ANTHROPIC_BASE_URL"] == run_harbor.KIMI_ANTHROPIC_BASE_URL
+    assert "CODEX_FORCE_AUTH_JSON" not in os.environ
+
+    credentials.unlink()
+    with pytest.raises(ValueError, match="cannot read Kimi subscription credentials"):
+        run_harbor.apply_subscription_auth(agents)

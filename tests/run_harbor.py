@@ -2,6 +2,7 @@
 
 import argparse
 import asyncio
+import json
 import os
 import shutil
 import tempfile
@@ -33,6 +34,16 @@ SMOL_SKILLS = tuple(
 )
 PLUGIN_PATHS = (".agents", ".codex-plugin", "hooks", "skills")
 BASE_CODEX_AGENT = "harbor_agents:PluginCodex"
+PI_SUBSCRIPTION_AGENT = "harbor_agents:SubscriptionPi"
+CODEX_AUTH_JSON = Path.home() / ".codex/auth.json"
+PI_AUTH_JSON = Path.home() / ".pi/agent/auth.json"
+KIMI_CREDENTIALS = Path.home() / ".kimi-code/credentials/kimi-code.json"
+KIMI_ANTHROPIC_BASE_URL = "https://api.kimi.com/coding/anthropic"
+SUBSCRIPTION_MODEL_PREFIXES = {
+    "codex": "openai",
+    "kimi-cli": "kimi",
+    "pi": "openai-codex",
+}
 OVERRIDE_SKILLS = tuple(
     TESTS / f"fixtures/override-skills/{name}"
     for name in (
@@ -120,6 +131,14 @@ def validate_inputs(
             f"each agent may be selected once: {', '.join(sorted(duplicate_agents))}"
         )
 
+    for spec in agents:
+        prefix = SUBSCRIPTION_MODEL_PREFIXES.get(spec.agent)
+        if prefix and not spec.model.startswith(f"{prefix}/"):
+            raise ValueError(
+                f"{spec.agent} uses a subscription login and requires a "
+                f"{prefix}/… model, got {spec.model!r}"
+            )
+
     for case in cases:
         task = CASES[case]
         if not Task.is_valid_dir(task):
@@ -158,6 +177,55 @@ def stage_task(case: str, destination_root: Path) -> Path:
     return staged
 
 
+def kimi_subscription_token(credentials_path: Path) -> str:
+    try:
+        token = json.loads(credentials_path.read_text()).get("access_token")
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError(
+            f"cannot read Kimi subscription credentials: {credentials_path}"
+        ) from error
+    if not token:
+        raise ValueError(
+            f"Kimi subscription credentials lack an access token: {credentials_path}"
+        )
+    return token
+
+
+def apply_subscription_auth(agents: list[AgentModel]) -> None:
+    """Wire host subscription logins for the selected agents.
+
+    Codex and Pi run on the Codex (ChatGPT) subscription; kimi-cli and
+    claude-code run on the Kimi subscription. Variables already present in
+    the environment take precedence.
+    """
+    selected = {spec.agent for spec in agents}
+    if "codex" in selected:
+        if not CODEX_AUTH_JSON.is_file():
+            raise ValueError(
+                "codex uses the Codex subscription; log in with `codex login` "
+                f"so {CODEX_AUTH_JSON} exists"
+            )
+        os.environ.setdefault("CODEX_FORCE_AUTH_JSON", "1")
+    if "pi" in selected and not PI_AUTH_JSON.is_file():
+        raise ValueError(
+            "pi uses the Codex subscription; log in to the openai-codex "
+            f"provider in pi so {PI_AUTH_JSON} exists"
+        )
+    if selected & {"claude-code", "kimi-cli"}:
+        token = kimi_subscription_token(KIMI_CREDENTIALS)
+        os.environ.setdefault("KIMI_API_KEY", token)
+        os.environ.setdefault("ANTHROPIC_AUTH_TOKEN", token)
+        os.environ.setdefault("ANTHROPIC_BASE_URL", KIMI_ANTHROPIC_BASE_URL)
+
+
+def agent_import_path(case: str, agent: str) -> str | None:
+    if case == "base":
+        return BASE_CODEX_AGENT
+    if agent == "pi":
+        return PI_SUBSCRIPTION_AGENT
+    return None
+
+
 def build_job_config(
     case: str,
     agents: list[AgentModel],
@@ -172,8 +240,8 @@ def build_job_config(
         tasks=[TaskConfig(path=task_path)],
         agents=[
             AgentConfig(
-                name=None if case == "base" else spec.agent,
-                import_path=BASE_CODEX_AGENT if case == "base" else None,
+                name=spec.agent if agent_import_path(case, spec.agent) is None else None,
+                import_path=agent_import_path(case, spec.agent),
                 model_name=spec.model,
                 skills=[] if case == "base" else list(skills_for(case, superpowers_root)),
                 env=(
@@ -245,6 +313,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     superpowers_root = resolve_superpowers_root(args.superpowers_root)
     validate_inputs(args.case, args.agent, superpowers_root)
+    apply_subscription_auth(args.agent)
     return asyncio.run(run_cases(args.case, args.agent, superpowers_root))
 
 
