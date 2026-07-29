@@ -3,6 +3,8 @@
 import argparse
 import asyncio
 import os
+import shutil
+import tempfile
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -18,6 +20,7 @@ from harbor.models.trial.config import AgentConfig, TaskConfig
 
 ROOT = Path(__file__).resolve().parents[1]
 TESTS = ROOT / "tests"
+FAKE_PROJECT = TESTS / "fixtures/fake-project"
 SUPPORTED_AGENTS = ("claude-code", "codex", "kimi-cli", "pi")
 CASES = {
     "base": TESTS / "harbor/base-lifecycle",
@@ -121,16 +124,32 @@ def validate_inputs(
                 raise FileNotFoundError(f"missing injected skill: {skill / 'SKILL.md'}")
 
 
+def stage_task(case: str, destination_root: Path) -> Path:
+    staged = shutil.copytree(
+        CASES[case],
+        destination_root / case,
+        ignore=shutil.ignore_patterns("__pycache__"),
+    )
+    shutil.copytree(
+        FAKE_PROJECT,
+        staged / "environment/fixture",
+        dirs_exist_ok=True,
+        ignore=shutil.ignore_patterns("__pycache__"),
+    )
+    return staged
+
+
 def build_job_config(
     case: str,
     agents: list[AgentModel],
     superpowers_root: Path,
+    task_path: Path,
 ) -> JobConfig:
     return JobConfig(
         job_name=f"{case}-{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}",
         jobs_dir=TESTS / "jobs",
         n_concurrent_trials=len(agents),
-        tasks=[TaskConfig(path=CASES[case])],
+        tasks=[TaskConfig(path=task_path)],
         agents=[
             AgentConfig(
                 name=spec.agent,
@@ -149,8 +168,12 @@ async def run_cases(
 ) -> int:
     failures: list[str] = []
     for case in dict.fromkeys(cases):
-        job = await Job.create(build_job_config(case, agents, superpowers_root))
-        result = await job.run()
+        with tempfile.TemporaryDirectory(prefix=f"smolpowers-{case}-") as temporary:
+            task = stage_task(case, Path(temporary))
+            job = await Job.create(
+                build_job_config(case, agents, superpowers_root, task)
+            )
+            result = await job.run()
         if len(result.trial_results) != len(agents):
             failures.append(
                 f"{case}: expected {len(agents)} trials, got {len(result.trial_results)}"

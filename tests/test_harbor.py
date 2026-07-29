@@ -16,6 +16,30 @@ def test_harbor_tasks_are_valid() -> None:
         assert loaded.config.environment.network_mode.value == "public"
 
 
+def test_staged_tasks_use_isolated_fake_project(tmp_path: Path) -> None:
+    source_files = {
+        path.relative_to(run_harbor.FAKE_PROJECT): path.read_bytes()
+        for path in run_harbor.FAKE_PROJECT.rglob("*")
+        if path.is_file() and "__pycache__" not in path.parts
+    }
+
+    for case in run_harbor.CASES:
+        staged = run_harbor.stage_task(case, tmp_path)
+
+        assert Task.is_valid_dir(staged)
+        assert not list(staged.rglob("__pycache__"))
+        for relative_path, content in source_files.items():
+            assert (staged / "environment/fixture" / relative_path).read_bytes() == content
+
+        configured = case != "base"
+        assert (staged / "environment/fixture/.smolpowers.json").exists() == configured
+
+        (staged / "environment/fixture/greeting.py").write_text("changed\n")
+        assert (run_harbor.FAKE_PROJECT / "greeting.py").read_bytes() == source_files[
+            Path("greeting.py")
+        ]
+
+
 def test_agent_mapping() -> None:
     assert run_harbor.parse_agent("codex=openai/gpt-5") == run_harbor.AgentModel(
         "codex", "openai/gpt-5"
@@ -32,7 +56,10 @@ def test_override_job_config() -> None:
         run_harbor.AgentModel("pi", "anthropic/claude-sonnet"),
     ]
     config = run_harbor.build_job_config(
-        "override", agents, Path("/unused-superpowers")
+        "override",
+        agents,
+        Path("/unused-superpowers"),
+        run_harbor.CASES["override"],
     )
     assert config.n_concurrent_trials == 2
     assert [agent.name for agent in config.agents] == ["codex", "pi"]
@@ -48,6 +75,7 @@ def test_base_job_config() -> None:
         "base",
         [run_harbor.AgentModel("codex", "openai/gpt-5")],
         Path("/unused-superpowers"),
+        run_harbor.CASES["base"],
     )
     assert config.tasks[0].path == run_harbor.CASES["base"]
     assert config.agents[0].skills == [str(path) for path in run_harbor.SMOL_SKILLS]

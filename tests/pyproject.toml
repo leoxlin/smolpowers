@@ -13,6 +13,6 @@ package = false
 
 [tool.pytest.ini_options]
 addopts = "-ra"
-norecursedirs = [".venv", "harbor", "jobs"]
+norecursedirs = [".venv", "fixtures", "harbor", "jobs"]
 python_files = ["test_*.py"]
 testpaths = ["."]

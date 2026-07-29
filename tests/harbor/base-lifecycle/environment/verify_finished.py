@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 ROOT = Path("/app")
-DOCS = ROOT / ".superpowers/docs"
+DOCS = ROOT / "docs/superpowers"
 
 
 def only_match(directory: Path, pattern: str) -> Path:
@@ -13,13 +13,10 @@ def only_match(directory: Path, pattern: str) -> Path:
 
 
 subprocess.run(
-    ["python", "-m", "unittest", "tests/test_greet.py"],
+    ["python", "-m", "unittest", "tests/test_greeting.py"],
     cwd=ROOT,
     check=True,
 )
-greet = ROOT / "bin/greet.sh"
-assert greet.is_file()
-assert greet.stat().st_mode & 0o111
 
 spec = only_match(DOCS / "specs", "*-base-lifecycle-design.md")
 plan = only_match(DOCS / "plans", "*-base-lifecycle.md")
@@ -28,9 +25,14 @@ assert "- [ ]" not in plan.read_text()
 assert not (ROOT / ".smolpowers.json").exists()
 
 subprocess.run(
-    ["git", "diff", "HEAD", "--quiet", "--", "README.md", "tests/test_greet.py"],
+    ["git", "diff", "HEAD", "--quiet", "--", ".gitignore", "tests/test_greeting.py"],
     cwd=ROOT,
     check=True,
 )
+production_diff = subprocess.run(
+    ["git", "diff", "--quiet", "HEAD", "--", "greeting.py"],
+    cwd=ROOT,
+)
+assert production_diff.returncode == 1
 subprocess.run(["git", "diff", "--check"], cwd=ROOT, check=True)
 print("BASE_SMOLPOWERS_VERIFIED")

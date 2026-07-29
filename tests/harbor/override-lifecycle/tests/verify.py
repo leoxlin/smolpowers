@@ -1,3 +1,4 @@
+import subprocess
 from pathlib import Path
 
 
@@ -19,7 +20,31 @@ assert calls == [
     f"execute|{DOCS}|{STATE}",
     f"finish|{DOCS}|{STATE}",
 ]
-assert (ROOT / "result.txt").read_text() == "override lifecycle passed\n"
+
+subprocess.run(
+    ["python", "-m", "unittest", "tests/test_greeting.py"],
+    cwd=ROOT,
+    check=True,
+)
+subprocess.run(
+    [
+        "git",
+        "diff",
+        "HEAD",
+        "--quiet",
+        "--",
+        ".gitignore",
+        ".smolpowers.json",
+        "tests/test_greeting.py",
+    ],
+    cwd=ROOT,
+    check=True,
+)
+production_diff = subprocess.run(
+    ["git", "diff", "--quiet", "HEAD", "--", "greeting.py"],
+    cwd=ROOT,
+)
+assert production_diff.returncode == 1
 
 spec = only_match(DOCS / "specs", "*-override-lifecycle-design.md")
 plan = only_match(DOCS / "plans", "*-override-lifecycle.md")
@@ -27,3 +52,4 @@ assert "Status: Current" in spec.read_text()
 assert "- [ ]" not in plan.read_text()
 assert not (ROOT / "docs/superpowers").exists()
 assert not (ROOT / ".superpowers").exists()
+subprocess.run(["git", "diff", "--check"], cwd=ROOT, check=True)
