@@ -8,6 +8,7 @@ RUN useradd --create-home --shell /bin/bash agent
 
 COPY fixture/ /app/
 COPY fixture/ /opt/fixture/
+COPY plugin/ /opt/smolpowers/
 COPY verify_finished.py /opt/verify_finished.py
 
 RUN git -C /app init -q \

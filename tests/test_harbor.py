@@ -33,6 +33,18 @@ def test_staged_tasks_use_isolated_fake_project(tmp_path: Path) -> None:
 
         configured = case != "base"
         assert (staged / "environment/fixture/.smolpowers.json").exists() == configured
+        if case == "base":
+            plugin = staged / "environment/plugin"
+            assert (plugin / ".codex-plugin/plugin.json").is_file()
+            assert (plugin / ".agents/plugins/marketplace.json").is_file()
+            assert (plugin / "hooks/hooks.json").is_file()
+            assert sorted(path.parent.name for path in plugin.glob("skills/*/SKILL.md")) == [
+                "smol-activate",
+                "smol-design",
+                "smol-execute",
+                "smol-finish",
+                "smol-plan",
+            ]
 
         (staged / "environment/fixture/greeting.py").write_text("changed\n")
         assert (run_harbor.FAKE_PROJECT / "greeting.py").read_bytes() == source_files[
@@ -79,7 +91,12 @@ def test_base_job_config() -> None:
     )
     assert config.debug
     assert config.tasks[0].path == run_harbor.CASES["base"]
-    assert config.agents[0].skills == [str(path) for path in run_harbor.SMOL_SKILLS]
+    assert config.agents[0].name is None
+    assert config.agents[0].import_path == "harbor_agents:PluginCodex"
+    assert config.agents[0].skills == []
+    assert config.agents[0].env == {
+        "SMOLPOWERS_ACTIVATION_LOG": "/logs/agent/smolpowers-activation.json"
+    }
 
 
 def test_validation_fails_before_run_for_missing_upstream(tmp_path: Path) -> None:
@@ -99,5 +116,14 @@ def test_validation_rejects_duplicate_agents() -> None:
                 run_harbor.AgentModel("codex", "model-a"),
                 run_harbor.AgentModel("codex", "model-b"),
             ],
+            Path("/unused-superpowers"),
+        )
+
+
+def test_validation_rejects_non_codex_base_agent() -> None:
+    with pytest.raises(ValueError, match="base lifecycle supports only codex"):
+        run_harbor.validate_inputs(
+            ["base"],
+            [run_harbor.AgentModel("pi", "model")],
             Path("/unused-superpowers"),
         )

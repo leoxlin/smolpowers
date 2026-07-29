@@ -1,3 +1,4 @@
+import re
 import subprocess
 from pathlib import Path
 
@@ -19,13 +20,15 @@ subprocess.run(
     check=True,
 )
 
-spec = only_match(DOCS / "specs", "*-base-lifecycle-design.md")
-plan = only_match(DOCS / "plans", "*-base-lifecycle.md")
-assert "**Status:** Current" in spec.read_text()
-assert "- [ ]" not in plan.read_text()
+spec = only_match(DOCS / "specs", "*-design.md")
+plan = only_match(DOCS / "plans", "*.md")
+assert plan.stem == spec.stem.removesuffix("-design")
+checkbox_states = re.findall(r"^- \[([ xX])\]", plan.read_text(), re.MULTILINE)
+assert checkbox_states
+assert all(state.lower() == "x" for state in checkbox_states)
 assert not (ROOT / ".smolpowers.json").exists()
 
-for protected in (".gitignore", "tests/test_greeting.py"):
+for protected in ("AGENTS.md", ".gitignore", "tests/test_greeting.py"):
     assert (ROOT / protected).read_bytes() == (BASELINE / protected).read_bytes()
 assert (ROOT / "greeting.py").read_bytes() != (BASELINE / "greeting.py").read_bytes()
 print("BASE_SMOLPOWERS_VERIFIED")

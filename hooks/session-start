@@ -5,6 +5,13 @@ script_dir="$(cd "$(dirname "$0")" && pwd)"
 plugin_root="$(cd "$script_dir/.." && pwd)"
 skill_content="$(<"$plugin_root/skills/smol-activate/SKILL.md")"
 
+if [[ -n "${SMOLPOWERS_ACTIVATION_LOG:-}" ]]; then
+  mkdir -p "$(dirname "$SMOLPOWERS_ACTIVATION_LOG")"
+  printf '%s\n' \
+    '{"hookEventName":"SessionStart","skill":"smol-activate","activation":"full"}' \
+    > "$SMOLPOWERS_ACTIVATION_LOG"
+fi
+
 json_escape() {
   local value="$1"
   value="${value//\\/\\\\}"

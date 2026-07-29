@@ -31,6 +31,8 @@ SMOL_SKILLS = tuple(
     ROOT / f"skills/{name}"
     for name in ("smol-activate", "smol-design", "smol-plan", "smol-execute", "smol-finish")
 )
+PLUGIN_PATHS = (".agents", ".codex-plugin", "hooks", "skills")
+BASE_CODEX_AGENT = "harbor_agents:PluginCodex"
 OVERRIDE_SKILLS = tuple(
     TESTS / f"fixtures/override-skills/{name}"
     for name in (
@@ -107,6 +109,9 @@ def validate_inputs(
     agents: list[AgentModel],
     superpowers_root: Path,
 ) -> None:
+    if "base" in cases and any(spec.agent != "codex" for spec in agents):
+        raise ValueError("base lifecycle supports only codex")
+
     duplicate_agents = {
         spec.agent for spec in agents if sum(item.agent == spec.agent for item in agents) > 1
     }
@@ -119,6 +124,14 @@ def validate_inputs(
         task = CASES[case]
         if not Task.is_valid_dir(task):
             raise ValueError(f"invalid Harbor task: {task}")
+        if case == "base":
+            for path in (
+                ROOT / ".agents/plugins/marketplace.json",
+                ROOT / ".codex-plugin/plugin.json",
+                ROOT / "hooks/hooks.json",
+            ):
+                if not path.is_file():
+                    raise FileNotFoundError(f"missing plugin file: {path}")
         for skill in skills_for(case, superpowers_root):
             if not (skill / "SKILL.md").is_file():
                 raise FileNotFoundError(f"missing injected skill: {skill / 'SKILL.md'}")
@@ -136,6 +149,12 @@ def stage_task(case: str, destination_root: Path) -> Path:
         dirs_exist_ok=True,
         ignore=shutil.ignore_patterns("__pycache__"),
     )
+    if case == "base":
+        for relative in PLUGIN_PATHS:
+            shutil.copytree(
+                ROOT / relative,
+                staged / "environment/plugin" / relative,
+            )
     return staged
 
 
@@ -153,9 +172,19 @@ def build_job_config(
         tasks=[TaskConfig(path=task_path)],
         agents=[
             AgentConfig(
-                name=spec.agent,
+                name=None if case == "base" else spec.agent,
+                import_path=BASE_CODEX_AGENT if case == "base" else None,
                 model_name=spec.model,
-                skills=list(skills_for(case, superpowers_root)),
+                skills=[] if case == "base" else list(skills_for(case, superpowers_root)),
+                env=(
+                    {
+                        "SMOLPOWERS_ACTIVATION_LOG": (
+                            "/logs/agent/smolpowers-activation.json"
+                        )
+                    }
+                    if case == "base"
+                    else {}
+                ),
             )
             for spec in agents
         ],
