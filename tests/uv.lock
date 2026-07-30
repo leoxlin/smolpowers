@@ -1275,6 +1275,8 @@ dependencies = [
     { name = "jinja2" },
     { name = "pipx" },
     { name = "pytest" },
+    { name = "pyyaml" },
+    { name = "tiktoken" },
 ]
 
 [package.metadata]
@@ -1283,6 +1285,8 @@ requires-dist = [
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "pipx", specifier = "==1.16.1" },
     { name = "pytest", specifier = "==8.4.1" },
+    { name = "pyyaml", specifier = "==6.0.3" },
+    { name = "tiktoken", specifier = "==0.13.0" },
 ]
 
 [[package]]
