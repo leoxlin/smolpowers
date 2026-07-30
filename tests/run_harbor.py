@@ -19,9 +19,6 @@ from harbor.models.job.config import JobConfig
 from harbor.models.task.task import Task
 from harbor.models.trial.config import AgentConfig, TaskConfig
 
-from lifecycle_eval import normalize_checks
-
-
 ROOT = Path(__file__).resolve().parents[1]
 TESTS = ROOT / "tests"
 SMOLURL = TESTS / "fixtures/smolurl"
@@ -144,8 +141,8 @@ def validate_inputs(
 
     for case in cases:
         task = CASES[case]
-        if not Task.is_valid_dir(task):
-            raise ValueError(f"invalid Harbor task: {task}")
+        if not task.is_dir():
+            raise FileNotFoundError(f"missing Harbor task template: {task}")
         if case == "base":
             for path in (
                 ROOT / ".agents/plugins/marketplace.json",
@@ -171,14 +168,23 @@ def stage_task(case: str, destination_root: Path) -> Path:
         dirs_exist_ok=True,
         ignore=shutil.ignore_patterns("__pycache__"),
     )
-    for verifier_file in ("lifecycle_eval.py", "verify_lifecycle.py"):
-        shutil.copy2(TESTS / verifier_file, staged / "tests" / verifier_file)
+    fixture_tests = TESTS / "fixtures/tests"
+    for source in fixture_tests.glob("*.*"):
+        shutil.copy2(source, staged / "tests" / source.name)
+    shutil.copytree(
+        fixture_tests / case,
+        staged / "tests",
+        dirs_exist_ok=True,
+        ignore=shutil.ignore_patterns("__pycache__"),
+    )
     if case == "base":
         for relative in PLUGIN_PATHS:
             shutil.copytree(
                 ROOT / relative,
                 staged / "environment/plugin" / relative,
             )
+    if not Task.is_valid_dir(staged):
+        raise ValueError(f"invalid staged Harbor task: {staged}")
     return staged
 
 
@@ -311,10 +317,13 @@ async def run_cases(
                 if trial.verifier_result is not None
                 else None
             )
-            checks = normalize_checks(values)
+            failed_checks = [
+                name for name, value in (values or {}).items() if value != 1
+            ]
             passed = (
                 trial.exception_info is None
-                and checks["passed"]
+                and bool(values)
+                and not failed_checks
             )
             status = "PASS" if passed else "FAIL"
             model = (
@@ -333,17 +342,10 @@ async def run_cases(
             if not passed:
                 if trial.exception_info is not None:
                     detail = trial.exception_info.exception_message
-                elif checks["kind"] == "named":
-                    detail = "failed checks: " + ", ".join(
-                        name
-                        for name in (
-                            "skills_in_order",
-                            "requested_change_completed",
-                        )
-                        if checks[name] != 1
-                    )
+                elif failed_checks:
+                    detail = "failed checks: " + ", ".join(failed_checks)
                 else:
-                    detail = f"{checks['kind']} verifier result"
+                    detail = "missing verifier result"
                 failures.append(
                     f"{case}/{trial.agent_info.name}={model}: {detail}"
                 )

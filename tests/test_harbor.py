@@ -8,8 +8,9 @@ from harbor.models.task.task import Task
 import run_harbor
 
 
-def test_harbor_tasks_are_valid() -> None:
-    for task in run_harbor.CASES.values():
+def test_harbor_tasks_are_valid(tmp_path: Path) -> None:
+    for case in run_harbor.CASES:
+        task = run_harbor.stage_task(case, tmp_path)
         assert Task.is_valid_dir(task)
         loaded = Task(task)
         assert loaded.config.agent.user == "agent"
@@ -31,6 +32,10 @@ def test_staged_tasks_use_isolated_smolurl(tmp_path: Path) -> None:
         assert not list(staged.rglob("__pycache__"))
         assert (staged / "tests/lifecycle_eval.py").is_file()
         assert (staged / "tests/verify_lifecycle.py").is_file()
+        for source in (run_harbor.TESTS / f"fixtures/tests/{case}").iterdir():
+            assert (
+                staged / "tests" / source.name
+            ).read_bytes() == source.read_bytes()
         for relative_path, content in source_files.items():
             assert (staged / "environment/fixture" / relative_path).read_bytes() == content
 

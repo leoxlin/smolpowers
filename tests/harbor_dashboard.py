@@ -22,7 +22,7 @@ from urllib.parse import unquote, urlparse
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from lifecycle_eval import (
+from fixtures.tests.lifecycle_eval import (
     activation_evidence,
     evaluate_lifecycle,
     expected_skills,

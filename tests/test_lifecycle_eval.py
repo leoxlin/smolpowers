@@ -1,4 +1,4 @@
-import lifecycle_eval
+from fixtures.tests import lifecycle_eval
 
 
 EXPECTED = ["smol-activate", "smol-design", "smol-plan"]
