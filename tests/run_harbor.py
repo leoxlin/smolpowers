@@ -21,7 +21,7 @@ from harbor.models.trial.config import AgentConfig, TaskConfig
 
 ROOT = Path(__file__).resolve().parents[1]
 TESTS = ROOT / "tests"
-FAKE_PROJECT = TESTS / "fixtures/fake-project"
+SMOLURL = TESTS / "fixtures/smolurl"
 SUPPORTED_AGENTS = ("claude-code", "codex", "kimi-cli", "pi")
 CASES = {
     "base": TESTS / "harbor/base-lifecycle",
@@ -163,7 +163,7 @@ def stage_task(case: str, destination_root: Path) -> Path:
         ignore=shutil.ignore_patterns("__pycache__"),
     )
     shutil.copytree(
-        FAKE_PROJECT,
+        SMOLURL,
         staged / "environment/fixture",
         dirs_exist_ok=True,
         ignore=shutil.ignore_patterns("__pycache__"),

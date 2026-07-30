@@ -17,10 +17,10 @@ def test_harbor_tasks_are_valid() -> None:
         assert loaded.config.environment.network_mode.value == "public"
 
 
-def test_staged_tasks_use_isolated_fake_project(tmp_path: Path) -> None:
+def test_staged_tasks_use_isolated_smolurl(tmp_path: Path) -> None:
     source_files = {
-        path.relative_to(run_harbor.FAKE_PROJECT): path.read_bytes()
-        for path in run_harbor.FAKE_PROJECT.rglob("*")
+        path.relative_to(run_harbor.SMOLURL): path.read_bytes()
+        for path in run_harbor.SMOLURL.rglob("*")
         if path.is_file() and "__pycache__" not in path.parts
     }
 
@@ -48,7 +48,7 @@ def test_staged_tasks_use_isolated_fake_project(tmp_path: Path) -> None:
             ]
 
         (staged / "environment/fixture/app.py").write_text("changed\n")
-        assert (run_harbor.FAKE_PROJECT / "app.py").read_bytes() == source_files[
+        assert (run_harbor.SMOLURL / "app.py").read_bytes() == source_files[
             Path("app.py")
         ]
 
