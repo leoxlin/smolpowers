@@ -23,10 +23,13 @@
   <div class="stats stats-vertical sm:stats-horizontal shadow bg-base-100 w-full">
     <div class="stat"><div class="stat-title">Jobs</div><div class="stat-value text-2xl">{{ stats.jobs }}</div></div>
     <div class="stat"><div class="stat-title">Trials</div><div class="stat-value text-2xl">{{ stats.trials }}</div>
-      <div class="stat-desc">{{ stats.errored }} errored</div></div>
-    <div class="stat"><div class="stat-title">Mean reward</div>
-      <div class="stat-value text-2xl">{{ stats.mean_reward }}</div>
-      <div class="stat-desc">over {{ stats.n_verified }} verified trials</div></div>
+      <div class="stat-desc">{{ stats.errors }} errors</div></div>
+    <div class="stat"><div class="stat-title">Overall pass</div>
+      <div class="stat-value text-2xl">{{ stats.overall_rate }}</div></div>
+    <div class="stat"><div class="stat-title">Skill order</div>
+      <div class="stat-value text-2xl">{{ stats.skills_rate }}</div></div>
+    <div class="stat"><div class="stat-title">Requested outcome</div>
+      <div class="stat-value text-2xl">{{ stats.requested_rate }}</div></div>
     <div class="stat"><div class="stat-title">Tokens</div>
       <div class="stat-value text-2xl">{{ stats.tokens_total }}</div>
       <div class="stat-desc">in {{ stats.tokens_in }} · out {{ stats.tokens_out }}</div></div>
@@ -39,8 +42,9 @@
     <div class="overflow-x-auto rounded-box border border-base-content/10 bg-base-100">
       <table class="table table-zebra table-sm">
         <thead><tr>
-          <th>Agent</th><th>Model</th><th>Trials</th><th>Errored</th>
-          <th>Mean reward</th><th>Input tokens</th><th>Output tokens</th><th>Cost</th>
+          <th>Agent</th><th>Model</th><th>Trials</th><th>Errors</th>
+          <th>Overall</th><th>Skill order</th><th>Requested outcome</th>
+          <th>Avg tokens</th><th>Cost</th>
         </tr></thead>
         <tbody>
           {% for r in rollup %}
@@ -48,16 +52,11 @@
             <td class="font-medium">{{ r.agent }}</td>
             <td class="font-mono text-xs">{{ r.model }}</td>
             <td>{{ r.trials }}</td>
-            <td>{{ r.errored or "—" }}</td>
-            <td>
-              {% if r.mean_reward is none %}
-                <span class="badge badge-ghost badge-soft badge-sm">no reward</span>
-              {% else %}
-                <span class="badge {{ r.mean_reward | reward_cls }} badge-soft badge-sm">reward {{ r.mean_reward | round(2) }}</span>
-              {% endif %}
-            </td>
-            <td class="font-mono text-xs">{{ r.input | fmt_int }}</td>
-            <td class="font-mono text-xs">{{ r.output | fmt_int }}</td>
+            <td>{{ r.errors or "—" }}</td>
+            <td>{{ r.overall_rate | fmt_rate }}</td>
+            <td>{{ r.skills_rate | fmt_rate }}</td>
+            <td>{{ r.requested_rate | fmt_rate }}</td>
+            <td class="font-mono text-xs">{{ r.average_tokens | fmt_int }}</td>
             <td class="font-mono text-xs">{{ r.cost | fmt_cost if r.has_cost else "—" }}</td>
           </tr>
           {% endfor %}
@@ -75,9 +74,11 @@
       </select>
       <select id="status-filter" class="select select-bordered select-sm w-40">
         <option value="">all statuses</option>
-        <option value="completed">completed</option>
-        <option value="errored">errored</option>
+        <option value="passed">passed</option>
+        <option value="failed">failed</option>
+        <option value="error">error</option>
         <option value="running">running</option>
+        <option value="pending">pending</option>
       </select>
       <span id="filter-count" class="text-xs opacity-60"></span>
     </div>
@@ -96,7 +97,7 @@
               {% for b in job.count_badges %}<span class="badge {{ b.cls }} badge-xs">{{ b.n }} {{ b.label }}</span>{% endfor %}
             </span>
             <span class="text-xs ml-auto">
-              reward {{ job.mean_reward_label }} ·
+              pass {{ job.overall_rate }} · skill {{ job.skills_rate }} · outcome {{ job.requested_rate }} ·
               in {{ job.input_tokens | fmt_int }} · out {{ job.output_tokens | fmt_int }} · {{ job.cost_usd | fmt_cost }}
             </span>
           </div>
@@ -109,17 +110,18 @@
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="font-mono text-sm font-semibold">{{ t.name }}</span>
                   <span class="badge {{ t.status | status_cls }} badge-soft badge-sm">{{ t.status }}</span>
-                  {% if t.reward is none %}
-                    <span class="badge badge-ghost badge-soft badge-sm">no reward</span>
-                  {% else %}
-                    <span class="badge {{ t.reward | reward_cls }} badge-soft badge-sm">reward {{ t.reward }}</span>
+                  {% if t.checks.kind == "named" %}
+                    <span class="badge {{ t.checks.skills_in_order | check_cls }} badge-soft badge-sm">skill order {{ "pass" if t.checks.skills_in_order == 1 else "fail" }}</span>
+                    <span class="badge {{ t.checks.requested_change_completed | check_cls }} badge-soft badge-sm">requested outcome {{ "pass" if t.checks.requested_change_completed == 1 else "fail" }}</span>
+                  {% elif t.checks.kind == "legacy" %}
+                    <span class="badge {{ "badge-success" if t.checks.passed else "badge-error" }} badge-soft badge-sm">legacy verifier {{ "pass" if t.checks.passed else "fail" }}</span>
                   {% endif %}
                   <span class="badge badge-outline badge-sm">{{ t.agent }}</span>
                   <span class="badge badge-outline badge-sm">{{ t.model }}</span>
                   <span class="text-xs opacity-60 ml-auto">{{ t.started_label }} · {{ t.duration | fmt_dur }}</span>
                 </div>
                 <div class="text-xs opacity-70">
-                  in {{ t.input_tokens | fmt_int }} · cache {{ t.cache_tokens | fmt_int }} · out {{ t.output_tokens | fmt_int }} · {{ t.cost_usd | fmt_cost }}
+                  total {{ t.tokens_total | fmt_int }} · input {{ t.input_tokens | fmt_int }} · cached input {{ t.cache_tokens | fmt_int }} · output {{ t.output_tokens | fmt_int }} · reasoning {{ t.reasoning_tokens | fmt_int }} · {{ t.cost_usd | fmt_cost }}
                 </div>
                 {% if t.trace %}
                 <div class="flex flex-wrap items-center gap-2 text-xs">
@@ -127,7 +129,13 @@
                     trace · {{ t.trace.steps }} steps · {{ t.trace.tool_calls }} tool calls
                   </a>
                   {% if t.trace.reasoning %}<span class="badge badge-secondary badge-soft badge-sm">{{ t.trace.reasoning }} reasoning</span>{% endif %}
-                  {% if t.trace.skills %}<span class="opacity-60">skills: {{ t.trace.skills | join(', ') }}</span>{% endif %}
+                  {% for activation in t.trace.lifecycle %}
+                    {% if activation.href %}
+                    <a class="badge badge-warning badge-soft badge-sm" href="{{ t.trace_href }}{{ activation.href }}">{{ activation.skill }} · #{{ activation.step_id }}</a>
+                    {% else %}
+                    <span class="badge badge-error badge-soft badge-sm">{{ activation.skill }} · missing</span>
+                    {% endif %}
+                  {% endfor %}
                 </div>
                 {% endif %}
                 {% if t.phase_segments %}

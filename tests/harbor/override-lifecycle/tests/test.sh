@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 
-if python /tests/verify.py; then
-  reward=1
-else
-  reward=0
-fi
+skills_in_order=0
+requested_change_completed=0
+
+python /tests/verify_lifecycle.py override && skills_in_order=1
+python /tests/verify.py && requested_change_completed=1
 
 mkdir -p /logs/verifier
-printf '%s\n' "$reward" > /logs/verifier/reward.txt
+python -c "
+import json
+json.dump(
+    {
+        'skills_in_order': $skills_in_order,
+        'requested_change_completed': $requested_change_completed,
+    },
+    open('/logs/verifier/reward.json', 'w'),
+)
+"
 exit 0

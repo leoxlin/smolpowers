@@ -62,7 +62,7 @@
 
   <div id="steps" class="grid gap-2">
     {% for s in trace.steps %}
-    <div class="card bg-base-100 border border-base-content/10 step"
+    <div id="step-{{ s.id }}" class="card bg-base-100 border border-base-content/10 step scroll-mt-4"
          data-source="{{ s.source }}"
          data-tools="{{ s.tool_calls | map(attribute='name') | join(' ') }}"
          data-skills="{{ s.skills | join(' ') }}">

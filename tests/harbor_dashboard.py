@@ -5,7 +5,7 @@ Usage:
     uv run --project tests python tests/harbor_dashboard.py [jobs_dir] [--port 8642]
 
 Reads each job's config.json / result.json plus per-trial result.json,
-verifier reward and test stdout tail, and renders tests/harbor_dashboard.html.j2
+verifier checks and test stdout tail, and renders tests/harbor_dashboard.html.j2
 (Tailwind + DaisyUI via CDN). Jobs are re-scanned on every request, so the
 page always shows the latest runs — just refresh.
 """
@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from collections import Counter
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -23,10 +22,15 @@ from urllib.parse import unquote, urlparse
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+from lifecycle_eval import (
+    activation_evidence,
+    evaluate_lifecycle,
+    expected_skills,
+    normalize_checks,
+)
+
 STDOUT_TAIL_LINES = 60
 EXCEPTION_TAIL_CHARS = 1200
-
-SKILL_REF_RE = re.compile(r"skills/([\w.-]+)/SKILL\.md")
 
 PHASES = [
     ("environment_setup", "env setup"),
@@ -37,8 +41,8 @@ PHASES = [
 PHASE_COLORS = ["bg-neutral", "bg-info", "bg-primary", "bg-secondary"]
 
 STATUS_CLS = {
-    "completed": "badge-success", "finished": "badge-success",
-    "errored": "badge-error", "stalled": "badge-error",
+    "passed": "badge-success", "finished": "badge-success",
+    "failed": "badge-error", "error": "badge-error", "stalled": "badge-error",
     "running": "badge-info", "pending": "badge-ghost",
 }
 
@@ -88,12 +92,16 @@ def status_cls(status: str) -> str:
     return STATUS_CLS.get(status, "badge-ghost")
 
 
-def reward_cls(reward) -> str:
-    if reward >= 1:
-        return "badge-success"
-    if reward > 0:
-        return "badge-warning"
-    return "badge-error"
+def check_cls(value) -> str:
+    return "badge-success" if value == 1 else "badge-error"
+
+
+def pass_rate(values: list) -> float | None:
+    return sum(value == 1 for value in values) / len(values) if values else None
+
+
+def fmt_rate(value: float | None) -> str:
+    return f"{value:.0%}" if value is not None else "—"
 
 
 def tail_lines(path: Path, n: int) -> str:
@@ -113,27 +121,44 @@ def read_trajectory(trial_dir: Path) -> dict | None:
     return data if isinstance(data, dict) else None
 
 
-def trace_overview(trial_dir: Path) -> dict | None:
+def trace_overview(trial_dir: Path, task: str | None = None) -> dict | None:
     """Lightweight trace summary for the jobs list: counts and touched skills."""
     data = read_trajectory(trial_dir)
     if data is None:
         return None
     steps = data.get("steps") or []
     tool_calls = [tc for s in steps for tc in (s.get("tool_calls") or [])]
-    skills = sorted(
-        {
-            match.group(1)
-            for tc in tool_calls
-            for match in SKILL_REF_RE.finditer(
-                json.dumps(tc.get("arguments") or {}, ensure_ascii=False)
-            )
-        }
-    )
+    evidence = activation_evidence(data)
+    lifecycle = []
+    if task:
+        try:
+            evaluation = evaluate_lifecycle(data, expected_skills(task))
+        except KeyError:
+            evaluation = None
+        if evaluation:
+            for skill in evaluation["expected"]:
+                activation = next(
+                    (item for item in evaluation["observed"] if item["skill"] == skill),
+                    None,
+                )
+                step_id = activation["step_id"] if activation else None
+                lifecycle.append(
+                    {
+                        "skill": skill,
+                        "step_id": step_id,
+                        "href": f"#step-{step_id}" if step_id is not None else None,
+                    }
+                )
+    final = data.get("final_metrics") or {}
     return {
         "steps": len(steps),
         "tool_calls": len(tool_calls),
         "reasoning": sum(1 for s in steps if s.get("reasoning_content")),
-        "skills": skills,
+        "skills": list(dict.fromkeys(item["skill"] for item in evidence)),
+        "lifecycle": lifecycle,
+        "reasoning_tokens": (final.get("extra") or {}).get(
+            "reasoning_output_tokens"
+        ),
     }
 
 
@@ -160,11 +185,17 @@ def load_trace(trial_dir: Path) -> dict | None:
             )
             name = tc.get("function_name", "?")
             tool_names[name] += 1
+            skills = [
+                item["skill"]
+                for item in activation_evidence(
+                    {"steps": [{"step_id": s.get("step_id"), "tool_calls": [tc]}]}
+                )
+            ]
             tool_calls.append(
                 {
                     "name": name,
                     "arguments": args,
-                    "skills": sorted(set(SKILL_REF_RE.findall(args))),
+                    "skills": list(dict.fromkeys(skills)),
                 }
             )
         metrics = s.get("metrics") or {}
@@ -231,9 +262,11 @@ def load_trial(trial_dir: Path) -> dict:
         trial = {
             "name": trial_dir.name, "task": trial_dir.name.split("__")[0],
             "dir": trial_dir.name,
-            "agent": "?", "model": "?", "status": "pending", "reward": None,
+            "agent": "?", "model": "?", "status": "pending",
+            "checks": normalize_checks(None), "evaluation_label": "pending",
             "exception": "", "started_label": "—", "duration": None,
             "input_tokens": None, "cache_tokens": None, "output_tokens": None,
+            "reasoning_tokens": None, "tokens_total": None,
             "cost_usd": None, "phases": [], "stdout_tail": "",
             "trace": None,
         }
@@ -252,7 +285,8 @@ def load_trial(trial_dir: Path) -> dict:
     finished = parse_ts(r.get("finished_at"))
     model_info = (r.get("agent_info") or {}).get("model_info") or {}
     agent_result = r.get("agent_result") or {}
-    rewards = ((r.get("verifier_result") or {}).get("rewards")) or {}
+    values = ((r.get("verifier_result") or {}).get("rewards")) or {}
+    checks = normalize_checks(values)
 
     phases = []
     for key, label in PHASES:
@@ -261,10 +295,10 @@ def load_trial(trial_dir: Path) -> dict:
         dur = (p_end - p_start).total_seconds() if p_start and p_end else None
         phases.append({"label": label, "seconds": dur})
 
-    status = "completed"
+    status = "passed" if checks["passed"] else "failed"
     if exception:
-        status = "errored"
-    elif finished is None:
+        status = "error"
+    elif not values and finished is None:
         status = "running"
 
     exc_text = ""
@@ -274,24 +308,38 @@ def load_trial(trial_dir: Path) -> dict:
         if len(exc_text) > EXCEPTION_TAIL_CHARS:
             exc_text = "…" + exc_text[-EXCEPTION_TAIL_CHARS:]
 
+    task = r.get("task_name", "?")
+    trace = trace_overview(trial_dir, task)
+    input_tokens = agent_result.get("n_input_tokens")
+    output_tokens = agent_result.get("n_output_tokens")
     return {
         "name": r.get("trial_name", trial_dir.name),
         "dir": trial_dir.name,
-        "task": r.get("task_name", "?"),
+        "task": task,
         "agent": (r.get("agent_info") or {}).get("name", "?"),
         "model": model_info.get("name", "?"),
         "status": status,
-        "reward": rewards.get("reward"),
+        "checks": checks,
+        "evaluation_label": (
+            "legacy verifier" if checks["kind"] == "legacy" else checks["kind"]
+        ),
         "exception": exc_text,
         "started_label": fmt_ts(started),
         "duration": (finished - started).total_seconds() if started and finished else None,
-        "input_tokens": agent_result.get("n_input_tokens"),
+        "input_tokens": input_tokens,
         "cache_tokens": agent_result.get("n_cache_tokens"),
-        "output_tokens": agent_result.get("n_output_tokens"),
+        "output_tokens": output_tokens,
+        "reasoning_tokens": trace.get("reasoning_tokens") if trace else None,
+        "tokens_total": (
+            input_tokens + output_tokens
+            if isinstance(input_tokens, (int, float))
+            and isinstance(output_tokens, (int, float))
+            else None
+        ),
         "cost_usd": agent_result.get("cost_usd"),
         "phases": phases,
         "stdout_tail": tail_lines(trial_dir / "verifier" / "test-stdout.txt", STDOUT_TAIL_LINES),
-        "trace": trace_overview(trial_dir),
+        "trace": trace,
     }
 
 
@@ -343,25 +391,45 @@ def load_job(job_dir: Path) -> dict:
     agents = sorted({t.get("agent", "?") for t in trials} or
                     {agent_name(a) for a in config.get("agents", [])})
 
-    counts = {"completed": 0, "errored": 0, "running": 0, "pending": 0}
+    counts = {
+        "passed": 0,
+        "failed": 0,
+        "error": 0,
+        "running": 0,
+        "pending": 0,
+    }
     for t in trials:
         counts[t["status"]] = counts.get(t["status"], 0) + 1
     count_badges = [
         {"label": label, "n": counts[key], "cls": cls}
         for key, label, cls in [
-            ("completed", "done", "badge-success badge-soft"),
-            ("errored", "err", "badge-error badge-soft"),
+            ("passed", "pass", "badge-success badge-soft"),
+            ("failed", "fail", "badge-error badge-soft"),
+            ("error", "error", "badge-error badge-soft"),
             ("running", "run", "badge-info badge-soft"),
             ("pending", "pend", "badge-ghost"),
         ] if counts[key]
     ]
 
-    rewards = [t["reward"] for t in trials if isinstance(t.get("reward"), (int, float))]
-    mean_reward = sum(rewards) / len(rewards) if rewards else None
+    overall = [
+        int(t["checks"]["passed"])
+        for t in trials
+        if t["checks"]["kind"] in {"named", "legacy"}
+    ]
+    skills = [
+        t["checks"]["skills_in_order"]
+        for t in trials
+        if t["checks"]["kind"] == "named"
+    ]
+    requested = [
+        t["checks"]["requested_change_completed"]
+        for t in trials
+        if t["checks"]["kind"] == "named"
+    ]
 
     if finished:
         job_status = "finished"
-    elif counts["errored"] and not counts["running"]:
+    elif counts["error"] and not counts["running"]:
         job_status = "stalled"
     else:
         job_status = "running"
@@ -374,7 +442,9 @@ def load_job(job_dir: Path) -> dict:
         "agents": agents,
         "tasks": sorted({Path(t.get("path", "?")).name for t in config.get("tasks", [])}),
         "count_badges": count_badges,
-        "mean_reward_label": f"{mean_reward:.2f}" if mean_reward is not None else "—",
+        "overall_rate": fmt_rate(pass_rate(overall)),
+        "skills_rate": fmt_rate(pass_rate(skills)),
+        "requested_rate": fmt_rate(pass_rate(requested)),
         "input_tokens": stats.get("n_input_tokens"),
         "output_tokens": stats.get("n_output_tokens"),
         "cost_usd": stats.get("cost_usd"),
@@ -388,35 +458,66 @@ def agent_rollup(jobs: list[dict]) -> list[dict]:
         for t in job["trials"]:
             key = (t.get("agent", "?"), t.get("model", "?"))
             bucket = rollup.setdefault(key, {
-                "agent": key[0], "model": key[1], "trials": 0, "errored": 0,
-                "rewards": [], "input": 0, "output": 0, "cost": 0.0, "has_cost": False,
+                "agent": key[0], "model": key[1], "trials": 0, "errors": 0,
+                "overall": [], "skills": [], "requested": [], "token_totals": [],
+                "cost": 0.0, "has_cost": False,
             })
             bucket["trials"] += 1
-            bucket["errored"] += 1 if t["status"] == "errored" else 0
-            if isinstance(t.get("reward"), (int, float)):
-                bucket["rewards"].append(t["reward"])
-            bucket["input"] += t.get("input_tokens") or 0
-            bucket["output"] += t.get("output_tokens") or 0
+            bucket["errors"] += 1 if t["status"] == "error" else 0
+            checks = t["checks"]
+            if checks["kind"] in {"named", "legacy"}:
+                bucket["overall"].append(int(checks["passed"]))
+            if checks["kind"] == "named":
+                bucket["skills"].append(checks["skills_in_order"])
+                bucket["requested"].append(checks["requested_change_completed"])
+            if isinstance(t.get("input_tokens"), (int, float)) and isinstance(
+                t.get("output_tokens"), (int, float)
+            ):
+                bucket["token_totals"].append(
+                    t["input_tokens"] + t["output_tokens"]
+                )
             if isinstance(t.get("cost_usd"), (int, float)):
                 bucket["cost"] += t["cost_usd"]
                 bucket["has_cost"] = True
     rows = sorted(rollup.values(), key=lambda b: (b["agent"], b["model"]))
     for b in rows:
-        b["mean_reward"] = sum(b["rewards"]) / len(b["rewards"]) if b["rewards"] else None
+        b["overall_rate"] = pass_rate(b["overall"])
+        b["skills_rate"] = pass_rate(b["skills"])
+        b["requested_rate"] = pass_rate(b["requested"])
+        b["average_tokens"] = (
+            sum(b["token_totals"]) / len(b["token_totals"])
+            if b["token_totals"]
+            else None
+        )
     return rows
 
 
 def page_stats(jobs: list[dict]) -> dict:
-    rewards = [t["reward"] for j in jobs for t in j["trials"]
-               if isinstance(t.get("reward"), (int, float))]
-    total_in = sum(j["input_tokens"] or 0 for j in jobs)
-    total_out = sum(j["output_tokens"] or 0 for j in jobs)
+    trials = [t for job in jobs for t in job["trials"]]
+    overall = [
+        int(t["checks"]["passed"])
+        for t in trials
+        if t["checks"]["kind"] in {"named", "legacy"}
+    ]
+    skills = [
+        t["checks"]["skills_in_order"]
+        for t in trials
+        if t["checks"]["kind"] == "named"
+    ]
+    requested = [
+        t["checks"]["requested_change_completed"]
+        for t in trials
+        if t["checks"]["kind"] == "named"
+    ]
+    total_in = sum(t.get("input_tokens") or 0 for t in trials)
+    total_out = sum(t.get("output_tokens") or 0 for t in trials)
     return {
         "jobs": len(jobs),
-        "trials": sum(len(j["trials"]) for j in jobs),
-        "errored": sum(1 for j in jobs for t in j["trials"] if t["status"] == "errored"),
-        "mean_reward": f"{sum(rewards) / len(rewards):.2f}" if rewards else "—",
-        "n_verified": len(rewards),
+        "trials": len(trials),
+        "errors": sum(t["status"] == "error" for t in trials),
+        "overall_rate": fmt_rate(pass_rate(overall)),
+        "skills_rate": fmt_rate(pass_rate(skills)),
+        "requested_rate": fmt_rate(pass_rate(requested)),
         "tokens_total": fmt_int(total_in + total_out),
         "tokens_in": fmt_int(total_in),
         "tokens_out": fmt_int(total_out),
@@ -433,7 +534,8 @@ def make_env(template_dir: Path) -> Environment:
     env.filters["fmt_int"] = fmt_int
     env.filters["fmt_cost"] = fmt_cost
     env.filters["status_cls"] = status_cls
-    env.filters["reward_cls"] = reward_cls
+    env.filters["check_cls"] = check_cls
+    env.filters["fmt_rate"] = fmt_rate
     return env
 
 

@@ -22,9 +22,10 @@ Run model-backed evaluations separately with
 
 ```bash
 uv run --project tests --locked python tests/run_harbor.py \
+  --case base \
   --case override \
   --case superpowers \
-  --agent codex=PROVIDER/MODEL
+  --agent codex=openai/gpt-5.6-sol
 ```
 
 Repeat `--agent AGENT=MODEL` to evaluate multiple agents concurrently within
@@ -66,10 +67,16 @@ uv run --project tests --locked python tests/harbor_dashboard.py
 ```
 
 The dashboard at http://127.0.0.1:8642/ re-scans on every refresh and lists
-jobs, rewards, phases, and token usage per trial. Trials link to a trace
+jobs, lifecycle evaluation checks, phases, and token usage per trial. A trial
+passes only when `skills_in_order` and `requested_change_completed` both equal
+`1` and Harbor reports no exception. Older jobs are labeled `legacy verifier`.
+Trials link to a trace
 explorer at `/trace/<job>/<trial>` that renders the trial's ATIF trajectory
 (`agent/trajectory.json`): every message, tool call with arguments and
 observations, and skill usage, filterable by source, tool, skill, and text.
+
+Token totals are input plus output. Cached input and reasoning tokens are shown
+as subsets of input and output respectively and are not added again.
 
 Codex trials run with `model_reasoning_summary=detailed`, so their
 trajectories also include the agent's reasoning per step, shown in the trace

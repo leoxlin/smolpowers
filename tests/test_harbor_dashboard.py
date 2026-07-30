@@ -81,6 +81,8 @@ def test_trace_overview_counts_steps_tools_and_skills(tmp_path: Path) -> None:
         "tool_calls": 2,
         "reasoning": 1,
         "skills": ["smol-plan"],
+        "lifecycle": [],
+        "reasoning_tokens": 7,
     }
 
 
@@ -151,9 +153,19 @@ def test_load_trial_exposes_trace_overview(tmp_path: Path) -> None:
         json.dumps(
             {
                 "trial_name": "task__abc",
-                "task_name": "task",
+                "task_name": "base-lifecycle",
                 "agent_info": {"name": "codex", "model_info": {"name": "gpt-5"}},
-                "verifier_result": {"rewards": {"reward": 1}},
+                "agent_result": {
+                    "n_input_tokens": 300,
+                    "n_cache_tokens": 250,
+                    "n_output_tokens": 30,
+                },
+                "verifier_result": {
+                    "rewards": {
+                        "skills_in_order": 1,
+                        "requested_change_completed": 1,
+                    }
+                },
             }
         )
     )
@@ -161,8 +173,95 @@ def test_load_trial_exposes_trace_overview(tmp_path: Path) -> None:
 
     loaded = harbor_dashboard.load_trial(trial)
     assert loaded["dir"] == "task__abc"
+    assert loaded["status"] == "passed"
+    assert loaded["checks"]["kind"] == "named"
+    assert loaded["tokens_total"] == 330
+    assert loaded["cache_tokens"] == 250
+    assert loaded["reasoning_tokens"] == 7
     assert loaded["trace"]["steps"] == 3
     assert loaded["trace"]["skills"] == ["smol-plan"]
+    assert loaded["trace"]["lifecycle"][0] == {
+        "skill": "smol-activate",
+        "step_id": None,
+        "href": None,
+    }
+    assert loaded["trace"]["lifecycle"][2] == {
+        "skill": "smol-plan",
+        "step_id": 2,
+        "href": "#step-2",
+    }
+
+
+def test_load_trial_normalizes_legacy_verifier(tmp_path: Path) -> None:
+    trial = tmp_path / "task__legacy"
+    trial.mkdir()
+    (trial / "result.json").write_text(
+        json.dumps(
+            {
+                "trial_name": "task__legacy",
+                "task_name": "task",
+                "agent_info": {"name": "codex", "model_info": {"name": "gpt-5"}},
+                "verifier_result": {"rewards": {"reward": 0}},
+            }
+        )
+    )
+
+    loaded = harbor_dashboard.load_trial(trial)
+    assert loaded["status"] == "failed"
+    assert loaded["checks"]["kind"] == "legacy"
+    assert loaded["evaluation_label"] == "legacy verifier"
+
+
+def test_rollups_calculate_pass_rates_and_average_total_tokens() -> None:
+    trials = [
+        {
+            "agent": "codex",
+            "model": "gpt-5",
+            "status": "passed",
+            "checks": {
+                "kind": "named",
+                "passed": True,
+                "skills_in_order": 1,
+                "requested_change_completed": 1,
+            },
+            "input_tokens": 100,
+            "output_tokens": 20,
+            "cost_usd": None,
+        },
+        {
+            "agent": "codex",
+            "model": "gpt-5",
+            "status": "failed",
+            "checks": {
+                "kind": "named",
+                "passed": False,
+                "skills_in_order": 0,
+                "requested_change_completed": 1,
+            },
+            "input_tokens": 200,
+            "output_tokens": 40,
+            "cost_usd": None,
+        },
+    ]
+    jobs = [
+        {
+            "trials": trials,
+            "input_tokens": 300,
+            "output_tokens": 60,
+            "cost_usd": None,
+        }
+    ]
+
+    row = harbor_dashboard.agent_rollup(jobs)[0]
+    stats = harbor_dashboard.page_stats(jobs)
+    assert row["overall_rate"] == 0.5
+    assert row["skills_rate"] == 0.5
+    assert row["requested_rate"] == 1
+    assert row["average_tokens"] == 180
+    assert stats["overall_rate"] == "50%"
+    assert stats["skills_rate"] == "50%"
+    assert stats["requested_rate"] == "100%"
+    assert stats["tokens_total"] == "360"
 
 
 def test_render_trace_includes_step_content(tmp_path: Path) -> None:
@@ -174,3 +273,4 @@ def test_render_trace_includes_step_content(tmp_path: Path) -> None:
     assert "I should load smol-plan first." in html
     assert "exec_command" in html
     assert "# Smol Plan" in html
+    assert 'id="step-2"' in html

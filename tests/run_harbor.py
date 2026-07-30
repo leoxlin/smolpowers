@@ -9,6 +9,7 @@ import tempfile
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 
 os.environ.setdefault("HARBOR_TELEMETRY", "off")
@@ -17,6 +18,8 @@ from harbor.job import Job
 from harbor.models.job.config import JobConfig
 from harbor.models.task.task import Task
 from harbor.models.trial.config import AgentConfig, TaskConfig
+
+from lifecycle_eval import normalize_checks
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -168,6 +171,8 @@ def stage_task(case: str, destination_root: Path) -> Path:
         dirs_exist_ok=True,
         ignore=shutil.ignore_patterns("__pycache__"),
     )
+    for verifier_file in ("lifecycle_eval.py", "verify_lifecycle.py"):
+        shutil.copy2(TESTS / verifier_file, staged / "tests" / verifier_file)
     if case == "base":
         for relative in PLUGIN_PATHS:
             shutil.copytree(
@@ -263,6 +268,21 @@ def build_job_config(
     )
 
 
+def reasoning_tokens(trial) -> int | None:
+    uri = urlparse(str(trial.trial_uri))
+    if uri.scheme != "file":
+        return None
+    try:
+        trajectory = json.loads(
+            (Path(unquote(uri.path)) / "agent/trajectory.json").read_text()
+        )
+    except (OSError, json.JSONDecodeError):
+        return None
+    return ((trajectory.get("final_metrics") or {}).get("extra") or {}).get(
+        "reasoning_output_tokens"
+    )
+
+
 async def run_cases(
     cases: list[str],
     agents: list[AgentModel],
@@ -281,15 +301,15 @@ async def run_cases(
                 f"{case}: expected {len(agents)} trials, got {len(result.trial_results)}"
             )
         for trial in result.trial_results:
-            rewards = (
+            values = (
                 trial.verifier_result.rewards
                 if trial.verifier_result is not None
                 else None
             )
+            checks = normalize_checks(values)
             passed = (
                 trial.exception_info is None
-                and rewards is not None
-                and rewards.get("reward") == 1
+                and checks["passed"]
             )
             status = "PASS" if passed else "FAIL"
             model = (
@@ -297,13 +317,28 @@ async def run_cases(
                 if trial.agent_info.model_info is not None
                 else "unknown-model"
             )
-            print(f"{status} {case} {trial.agent_info.name}={model}")
+            usage = trial.agent_result
+            total_tokens = usage.n_input_tokens + usage.n_output_tokens
+            print(
+                f"{status} {case} {trial.agent_info.name}={model} "
+                f"tokens=total:{total_tokens} input:{usage.n_input_tokens} "
+                f"cached-input:{usage.n_cache_tokens} output:{usage.n_output_tokens} "
+                f"reasoning:{reasoning_tokens(trial)}"
+            )
             if not passed:
-                detail = (
-                    trial.exception_info.exception_message
-                    if trial.exception_info is not None
-                    else f"rewards={rewards!r}"
-                )
+                if trial.exception_info is not None:
+                    detail = trial.exception_info.exception_message
+                elif checks["kind"] == "named":
+                    detail = "failed checks: " + ", ".join(
+                        name
+                        for name in (
+                            "skills_in_order",
+                            "requested_change_completed",
+                        )
+                        if checks[name] != 1
+                    )
+                else:
+                    detail = f"{checks['kind']} verifier result"
                 failures.append(
                     f"{case}/{trial.agent_info.name}={model}: {detail}"
                 )

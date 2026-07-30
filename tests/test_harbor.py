@@ -29,6 +29,8 @@ def test_staged_tasks_use_isolated_smolurl(tmp_path: Path) -> None:
 
         assert Task.is_valid_dir(staged)
         assert not list(staged.rglob("__pycache__"))
+        assert (staged / "tests/lifecycle_eval.py").is_file()
+        assert (staged / "tests/verify_lifecycle.py").is_file()
         for relative_path, content in source_files.items():
             assert (staged / "environment/fixture" / relative_path).read_bytes() == content
 
