@@ -192,7 +192,7 @@ def test_load_trial_exposes_trace_overview(tmp_path: Path) -> None:
     }
 
 
-def test_load_trial_normalizes_legacy_verifier(tmp_path: Path) -> None:
+def test_load_trial_does_not_support_legacy_verifier(tmp_path: Path) -> None:
     trial = tmp_path / "task__legacy"
     trial.mkdir()
     (trial / "result.json").write_text(
@@ -208,8 +208,8 @@ def test_load_trial_normalizes_legacy_verifier(tmp_path: Path) -> None:
 
     loaded = harbor_dashboard.load_trial(trial)
     assert loaded["status"] == "failed"
-    assert loaded["checks"]["kind"] == "legacy"
-    assert loaded["evaluation_label"] == "legacy verifier"
+    assert loaded["checks"]["kind"] == "missing"
+    assert loaded["evaluation_label"] == "missing"
 
 
 def test_rollups_calculate_pass_rates_and_average_total_tokens() -> None:

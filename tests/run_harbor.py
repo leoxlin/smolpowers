@@ -251,7 +251,12 @@ def build_job_config(
                 skills=[] if case == "base" else list(skills_for(case, superpowers_root)),
                 # Reasoning summaries land in trajectory.json as reasoning_content.
                 kwargs=(
-                    {"reasoning_summary": "detailed"} if spec.agent == "codex" else {}
+                    {
+                        "reasoning_effort": "medium",
+                        "reasoning_summary": "detailed",
+                    }
+                    if spec.agent == "codex"
+                    else {}
                 ),
                 env=(
                     {

@@ -286,7 +286,11 @@ def load_trial(trial_dir: Path) -> dict:
     model_info = (r.get("agent_info") or {}).get("model_info") or {}
     agent_result = r.get("agent_result") or {}
     values = ((r.get("verifier_result") or {}).get("rewards")) or {}
-    checks = normalize_checks(values)
+    checks = normalize_checks(
+        values
+        if "skills_in_order" in values or "requested_change_completed" in values
+        else None
+    )
 
     phases = []
     for key, label in PHASES:
@@ -320,9 +324,7 @@ def load_trial(trial_dir: Path) -> dict:
         "model": model_info.get("name", "?"),
         "status": status,
         "checks": checks,
-        "evaluation_label": (
-            "legacy verifier" if checks["kind"] == "legacy" else checks["kind"]
-        ),
+        "evaluation_label": checks["kind"],
         "exception": exc_text,
         "started_label": fmt_ts(started),
         "duration": (finished - started).total_seconds() if started and finished else None,
@@ -414,7 +416,7 @@ def load_job(job_dir: Path) -> dict:
     overall = [
         int(t["checks"]["passed"])
         for t in trials
-        if t["checks"]["kind"] in {"named", "legacy"}
+        if t["checks"]["kind"] == "named"
     ]
     skills = [
         t["checks"]["skills_in_order"]
@@ -465,7 +467,7 @@ def agent_rollup(jobs: list[dict]) -> list[dict]:
             bucket["trials"] += 1
             bucket["errors"] += 1 if t["status"] == "error" else 0
             checks = t["checks"]
-            if checks["kind"] in {"named", "legacy"}:
+            if checks["kind"] == "named":
                 bucket["overall"].append(int(checks["passed"]))
             if checks["kind"] == "named":
                 bucket["skills"].append(checks["skills_in_order"])
@@ -497,7 +499,7 @@ def page_stats(jobs: list[dict]) -> dict:
     overall = [
         int(t["checks"]["passed"])
         for t in trials
-        if t["checks"]["kind"] in {"named", "legacy"}
+        if t["checks"]["kind"] == "named"
     ]
     skills = [
         t["checks"]["skills_in_order"]

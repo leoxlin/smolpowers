@@ -113,8 +113,6 @@
                   {% if t.checks.kind == "named" %}
                     <span class="badge {{ t.checks.skills_in_order | check_cls }} badge-soft badge-sm">skill order {{ "pass" if t.checks.skills_in_order == 1 else "fail" }}</span>
                     <span class="badge {{ t.checks.requested_change_completed | check_cls }} badge-soft badge-sm">requested outcome {{ "pass" if t.checks.requested_change_completed == 1 else "fail" }}</span>
-                  {% elif t.checks.kind == "legacy" %}
-                    <span class="badge {{ "badge-success" if t.checks.passed else "badge-error" }} badge-soft badge-sm">legacy verifier {{ "pass" if t.checks.passed else "fail" }}</span>
                   {% endif %}
                   <span class="badge badge-outline badge-sm">{{ t.agent }}</span>
                   <span class="badge badge-outline badge-sm">{{ t.model }}</span>

@@ -69,7 +69,7 @@ uv run --project tests --locked python tests/harbor_dashboard.py
 The dashboard at http://127.0.0.1:8642/ re-scans on every refresh and lists
 jobs, lifecycle evaluation checks, phases, and token usage per trial. A trial
 passes only when `skills_in_order` and `requested_change_completed` both equal
-`1` and Harbor reports no exception. Older jobs are labeled `legacy verifier`.
+`1` and Harbor reports no exception.
 Trials link to a trace
 explorer at `/trace/<job>/<trial>` that renders the trial's ATIF trajectory
 (`agent/trajectory.json`): every message, tool call with arguments and
