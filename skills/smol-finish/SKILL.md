@@ -1,46 +1,53 @@
 ---
 name: smol-finish
-description: Finish a Smolpowers change with full-diff verification and authorized Git handling. Use after all plan tasks pass or before completion and Git handoff.
+description: Finish a Smolpowers change with complete verification and approved Git actions. Use after all plan tasks pass.
 ---
 
 # Smol Finish
 
-Verify requirements and the complete change before making any completion claim.
+Verify the requirements and the complete change before you report completion.
 
-Resolve and apply the configured `finish` phase object by following [configuration.md](../smol-activate/references/configuration.md). An explicitly requested `superpowers:finishing-a-development-branch` overrides the entire phase object; use the [upstream contract](../smol-activate/references/compatibility.md). Otherwise, invoke its companions in order. If its owner is another skill, invoke that owner and stop this phase.
+Follow [configuration.md](../smol-activate/references/configuration.md) and apply the configured `finish` phase.
+
+A request for `superpowers:finishing-a-development-branch` replaces this phase. Use the [upstream contract](../smol-activate/references/compatibility.md).
+
+Otherwise, start each companion in its configured sequence. If a different skill owns the phase, start it and stop.
 
 ## Validate the Lifecycle
 
-Require the matching spec and plan.
+Require a matching specification and plan. Both artifacts must use ASD-STE100.
 
-Route to the configured `design` phase object if the spec is missing or stale. Route to the configured `plan` phase object if the plan is missing or stale. Route to the configured `execute` phase object if any task remains incomplete or its outcome is absent. Invoke only that phase and stop.
+Start `design` if the specification is absent or stale. Start `plan` if the plan is absent or stale.
+
+Start `execute` if a task or its result is incomplete. Start only one phase and stop.
 
 ## Verify the Work
 
-Read [verification.md](references/verification.md), then:
+Read [verification.md](references/verification.md). Then, do these steps:
 
-1. Map every spec requirement to implemented evidence.
-2. Map every task outcome to the diff and its verification result.
-3. Inspect the complete diff, including untracked files, for scope drift, placeholders, secrets, debug output, missing failure handling, and unrelated changes.
-4. Run every exact plan verification command fresh.
-5. Run the repository's complete relevant test, lint, type, and build commands.
-6. Reproduce the original symptom for bug fixes.
-7. Record commands, exit status, pass/fail counts, and any skipped coverage.
+1. Connect each specification requirement to implementation evidence.
+2. Connect each task result to the diff and verification result.
+3. Examine the complete diff, which includes untracked files.
+4. Find unwanted scope, placeholders, secrets, debug output, and unrelated changes.
+5. Run each exact plan command again.
+6. Run all applicable test, lint, type, and build commands.
+7. Reproduce the original symptom for a defect correction.
+8. Record commands, exit status, counts, and omitted coverage.
 
-Do not infer that a command passed from partial output or an earlier run. Do not call the work complete when any required check is failing.
+Do not use partial output or an old result as evidence. Do not report completion if a required check fails.
 
-If verification fails, report the exact command and failure, preserve the working state, and return to the configured `execute` phase object only when a code change is authorized.
+If verification fails, report the command and failure. Keep the worktree state. Return to `execute` only if a code change has approval.
 
 ## Handle Git
 
-Read [git-disposition.md](references/git-disposition.md), inspect the current branch and remotes, and perform only the disposition already authorized by the user.
+Read [git-disposition.md](references/git-disposition.md). Examine the current branch and remotes. Do only the Git action that the user approved.
 
-A local commit is not authorization to push. A request to implement is not authorization to open a pull request, merge, publish, discard work, or delete a branch. Use conventional commit messages when committing.
+A local commit does not give approval to push. An implementation request does not give approval for other Git actions.
 
-Report:
+Use a conventional commit message. Report this information:
 
-- the artifact paths;
-- the implemented outcome;
-- fresh verification evidence;
-- the resulting commit or exact working-tree state;
-- authentication, availability, or integration gaps without claiming unrun coverage.
+- The artifact paths
+- The implementation result
+- Current verification evidence
+- The commit or exact worktree state
+- Each authentication, availability, or integration problem

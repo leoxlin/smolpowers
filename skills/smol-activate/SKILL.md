@@ -1,60 +1,64 @@
 ---
 name: smol-activate
-description: Route qualifying work through the earliest incomplete Design → Plan → Execute → Finish phase. Use when the user explicitly invokes Smolpowers or requests a new feature, large refactor, or other non-trivial change.
+description: Route applicable work through the first incomplete Design → Plan → Execute → Finish phase. Use when the user requests Smolpowers or a large change.
 ---
 
 # Smol Activate
 
-Load configuration, apply activation, then inspect the artifact pair and invoke exactly one phase object when the request qualifies.
+Load the configuration. Apply the activation level. Examine the artifacts. Start one phase when the request is applicable.
+
+Write all Smolpowers text in ASD-STE100 Simplified Technical English.
 
 ## Bootstrap
 
-Load the repository root, roots, activation level, and phase objects by following [configuration.md](references/configuration.md).
+Follow [configuration.md](references/configuration.md). Load the repository root, configured roots, activation level, and phase objects.
 
 ## Activation
 
-Apply the configured activation level:
+Use the configured activation level:
 
 | Level | Activate Smolpowers for |
 |---|---|
-| `lite` | Explicit requests to use or resume Smolpowers. |
-| `full` | `lite`, plus new features, large refactors, and other non-trivial changes with material scope, behavior, risk, or cross-cutting impact. |
-| `ultra` | `full`, plus every requested code change. |
+| `lite` | A request to use or continue Smolpowers. |
+| `full` | `lite` work, new features, large refactors, and other important changes. |
+| `ultra` | `full` work and each requested code change. |
 
-When the request does not qualify, continue with the normal agent workflow.
+If the request is not applicable, use the normal agent process.
 
-Read [lifecycle.md](references/lifecycle.md) when choosing a phase is not obvious. Read [compatibility.md](references/compatibility.md) when a configured or explicitly requested owner is an upstream Superpowers skill, or the active harness needs a tool mapping.
+Read [lifecycle.md](references/lifecycle.md) if the correct phase is not clear.
+
+Read [compatibility.md](references/compatibility.md) if an upstream Superpowers skill owns the phase.
 
 ## Select One Phase
 
-Inspect the user's request, relevant repository state, and artifacts under:
+Examine the request, the repository, and these artifacts:
 
 - `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
 - `<specDir>/plans/YYYY-MM-DD-<slug>.md`
 
-Prefer an explicitly named artifact or slug. Otherwise choose the artifact pair most clearly associated with the request; do not select an unrelated file merely because it is newest.
+Use an artifact or slug that the user gives. Otherwise, use the artifact pair that agrees with the request.
 
-Invoke exactly one configured phase object:
+Start only one configured phase:
 
-1. Invoke the configured `design` phase object when the product spec is missing, incomplete, contradicted by the current request, or based on repository facts that materially changed.
-2. Invoke the configured `plan` phase object when the spec is current but its implementation plan is missing, incomplete, or no longer implements the spec.
-3. Invoke the configured `execute` phase object when the plan is current and any task remains unchecked, or when implementation exists but the plan and checks have not been reconciled.
-4. Invoke the configured `finish` phase object when all plan tasks are complete and the implementation needs final requirements, diff, verification, or Git handling.
+1. Start `design` if the product specification is absent, incomplete, incorrect, or stale.
+2. Start `plan` if the specification is current and the implementation plan is not current.
+3. Start `execute` if a plan task or its verification is not complete.
+4. Start `finish` if all plan tasks are complete and the change needs final verification.
 
-When selecting Execute, create todos for every unchecked task when task tracking is available; the Execute owner keeps their statuses synchronized.
+If task tracking is available, make one task record for each unchecked plan task.
 
-Route backward on stale prerequisites. Do not skip a missing phase.
+Return to a prerequisite phase if its artifact is stale. Do not omit a missing phase.
 
-If the user explicitly requests a corresponding upstream skill, it overrides
-the entire configured phase object for this run. Follow the handoff contract in
-[compatibility.md](references/compatibility.md). When a returning owner
-completes, continue at the next incomplete configured phase if the request
-authorizes it. Do not wrap or duplicate the selected phase.
+An upstream skill that the user requests replaces the configured phase.
+
+Follow the contract in [compatibility.md](references/compatibility.md). Continue with the next incomplete phase when the upstream skill returns.
 
 ## Continue Automatically
 
-Treat requests to build, implement, change, or fix as authorization to advance through the lifecycle. Each phase owns its own transition to the next phase.
+Treat a request to build, change, or correct as approval to continue through the lifecycle.
 
-Pause only for material ambiguity, scope expansion, destructive operations, or external side effects. Stop after the requested artifact when the user asked only for planning or design.
+Pause for an important ambiguity, larger scope, destructive action, or external effect.
 
-Do not create worktrees, dispatch subagents, push, open pull requests, publish, or write external paths unless the request and normal approval rules authorize them.
+Stop after the requested artifact if the user requests only a design or a plan.
+
+Do not create worktrees, use subagents, push, publish, or write external files without approval.

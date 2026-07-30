@@ -2,7 +2,9 @@
 
 ## Artifact states
 
-Treat an artifact as incomplete when it has placeholders, unresolved decisions, missing required headings, or an outcome that cannot be verified.
+Treat an artifact as incomplete if it does not use ASD-STE100 Simplified Technical English.
+
+An artifact is also incomplete if it has placeholders, unresolved decisions, or missing required headings.
 
 Treat a spec as stale when the active request or relevant repository behavior materially contradicts its goal, scope, constraints, or chosen approach.
 

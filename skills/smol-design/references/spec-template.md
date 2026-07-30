@@ -5,12 +5,12 @@
 
 ## Goal
 
-[State the user-visible or system outcome in one sentence.]
+[State the user or system result in one sentence.]
 
 ## Success
 
-- [List an observable success criterion.]
-- [Name the command, behavior, or evidence that proves it.]
+- [Give an observable success criterion.]
+- [Give the command, behavior, or evidence that proves it.]
 
 ## Scope
 
@@ -24,30 +24,32 @@
 
 ## Current Context
 
-[Describe relevant repository behavior. For a bug, include reproduction, observed result, expected result, and root cause or exact investigation blocker.]
+[Describe the applicable repository behavior.]
+
+[For a defect, give the reproduction, actual result, correct result, and cause.]
 
 ## Constraints
 
-- [Record compatibility, dependency, platform, safety, and delivery constraints with exact values.]
+- [Give compatibility, dependency, platform, safety, and delivery limits with exact values.]
 
 ## Considered Approaches
 
 ### Chosen: [Approach]
 
-[Explain why this is the smallest suitable product approach.]
+[Explain why this is the smallest correct product approach.]
 
 ### Rejected: [Alternative]
 
-[State the material tradeoff that rules it out.]
+[Give the important reason that removes this alternative.]
 
 ## Product Design
 
-[Describe components, behavior, data flow, failure behavior, and user-facing effects at product-design depth.]
+[Describe components, behavior, data flow, failures, and user effects.]
 
 ## Verification Strategy
 
-[Define how implementation will demonstrate every success criterion.]
+[Define how the implementation will prove each success criterion.]
 
 ## Assumptions
 
-- [State only assumptions that remain relevant, marking uncertain claims `[PLEASE VERIFY]`.]
+- [Give only applicable assumptions. Add `[PLEASE VERIFY]` to each uncertain statement.]

@@ -1,20 +1,20 @@
 # [Feature Name] Implementation Plan
 
-> **For agentic workers:** Implement this plan task by task and update each checkbox only after its outcome is verified.
+> **For agents:** Do each task in sequence. Update a checkbox only after you verify its result.
 
-**Goal:** [One sentence describing what this builds.]
+**Goal:** [Describe the result in one sentence.]
 
-**Architecture:** [Two or three sentences describing the implementation shape and boundaries.]
+**Architecture:** [Describe the implementation and its limits in two or three sentences.]
 
-**Tech Stack:** [Languages, native tools, and existing dependencies.]
+**Tech Stack:** [Give the languages, native tools, and current dependencies.]
 
 ## Global Constraints
 
-- [Copy each project-wide constraint from the spec with its exact value.]
+- [Copy each project constraint from the specification with its exact value.]
 
 ---
 
-### Task N: [Outcome-oriented task name]
+### Task N: [Task result]
 
 **Files:**
 
@@ -24,20 +24,22 @@
 
 **Interfaces:**
 
-- Consumes: [Existing inputs and exact signatures.]
-- Produces: [New or changed names, parameters, return values, formats, or events.]
+- Consumes: [Give current inputs and exact signatures.]
+- Produces: [Give new or changed names, parameters, results, formats, or events.]
 
 **Failure handling:**
 
-- [Define the expected failure, recovery, cleanup, or propagation behavior.]
+- [Define the failure, recovery, cleanup, or propagation behavior.]
 
 **Outcome:**
 
-[State the independently observable result of completing this task.]
+[Give the independent and observable task result.]
 
 - [ ] **Step 1: Add the failing check**
 
-[Show the exact test or validation content. For metadata-only work, state the direct validator and why a failing unit test is not useful.]
+[Give the exact test or validation content.]
+
+[For metadata work, give the direct check and why a failing unit test is not useful.]
 
 - [ ] **Step 2: Run the check and confirm the expected failure**
 
@@ -47,7 +49,7 @@ Expected: FAIL because [missing behavior], not because of syntax or environment 
 
 - [ ] **Step 3: Implement the minimum change**
 
-[Show exact edits, signatures, algorithms, and command details needed by an engineer without hidden context.]
+[Give exact edits, signatures, algorithms, and commands.]
 
 - [ ] **Step 4: Verify the task outcome**
 
@@ -57,7 +59,7 @@ Expected: PASS with [specific output or count].
 
 - [ ] **Step 5: Record the outcome**
 
-[Mark the task complete only after the files, interfaces, failure behavior, and check match this plan.]
+[Complete the task only when the files, interfaces, failure behavior, and check agree with this plan.]
 
 ## Complete Verification
 

@@ -1,5 +1,7 @@
 # Repository Guidelines
 - Keep the cross-agent runtime lightweight and evidence-driven across Design → Plan → Execute → Finish.
+- Write all documentation in ASD-STE100 Simplified Technical English.
+- Make all Smolpowers design and plan artifacts comply with ASD-STE100.
 - Use `.smolpowers.json`; keep parsing, validation, path resolution, and defaults in `load-config.py`.
 - Invalid or unsafe configuration must warn once and fall back atomically to all defaults.
 - Test observable behavior and structured interfaces, not prose, headings, or static file substrings.

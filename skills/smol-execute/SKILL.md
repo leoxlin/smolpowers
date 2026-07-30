@@ -1,46 +1,54 @@
 ---
 name: smol-execute
-description: Execute a current Smolpowers plan with configurable test-driven checks. Use when plan tasks or their verification remain incomplete.
+description: Do a current Smolpowers plan with configured test-first checks. Use when a plan task or its verification is incomplete.
 ---
 
 # Smol Execute
 
-Review the plan, implement every remaining task, and keep its checkboxes truthful.
+Review the plan. Do each remaining task. Keep each checkbox correct.
 
-Resolve and apply the configured `execute` phase object by following [configuration.md](../smol-activate/references/configuration.md). An explicitly requested `superpowers:subagent-driven-development` or `superpowers:executing-plans` overrides the entire phase object; use the [upstream contract](../smol-activate/references/compatibility.md). Otherwise, invoke its companions in order. If its owner is another skill, invoke that owner and stop this phase.
+Follow [configuration.md](../smol-activate/references/configuration.md) and apply the configured `execute` phase.
+
+A requested upstream Execute skill replaces this phase. Use the [upstream contract](../smol-activate/references/compatibility.md).
+
+Otherwise, start each companion in its configured sequence. If a different skill owns the phase, start it and stop.
 
 ## Validate and Review
 
-Require both the spec and plan artifact for the same slug.
+Require the specification and plan for the same slug. Both artifacts must use ASD-STE100.
 
-Route to the configured `design` phase object when the spec is missing or stale. Route to the configured `plan` phase object when the plan is missing, contradicts the spec, relies on materially changed repository facts, or lacks executable verification. Invoke only the prerequisite phase and stop.
+Start `design` if the specification is absent or stale.
 
-Read the complete plan before editing. Resolve only blocking contradictions; do not reopen settled product choices because another approach is merely possible.
+Start `plan` if the plan is absent, stale, inconsistent, or not verifiable. Start only the prerequisite phase and stop.
 
-Inspect the worktree before changing it. Preserve unrelated user changes and never treat a dirty tree as permission to discard them.
+Read the complete plan before you edit files. Resolve only a conflict that blocks the work.
+
+Examine the worktree before you change it. Keep unrelated user changes.
 
 ## Implement Tasks
 
-Execute unchecked tasks in order unless the plan explicitly marks them independent.
+Do unchecked tasks in sequence unless the plan identifies independent tasks.
 
-When task tracking is available, create todos for every unchecked task. Mark each `in_progress` before implementation and `completed` only after its outcome and checks pass.
+If task tracking is available, make one task record for each unchecked task.
 
-Read [test-driven-development.md](references/test-driven-development.md) and follow the mode matching `phases.execute.tdd` for every new feature, bug fix, refactor, or production behavior change.
+Set a task to `in_progress` before the change. Set it to `completed` only after its checks pass.
 
-Configuration-only, documentation-only, generated, or harness-metadata changes that do not alter production behavior may use the narrowest direct validation. Record why in the task outcome.
+Read [test-driven-development.md](references/test-driven-development.md). Use the mode in `phases.execute.tdd` for each production behavior change.
 
-When a check fails unexpectedly, investigate the root cause before editing. Read [debugging.md](references/debugging.md) for the bounded workflow.
+Use the smallest direct check for configuration, documents, generated files, or harness metadata. Record the reason in the task result.
 
-## Delegate Sparingly
+If a check has an unexpected failure, find the cause before you edit. Read [debugging.md](references/debugging.md).
 
-Execute directly by default. Read [delegation.md](references/delegation.md) only when delegation is available and potentially useful.
+## Use Subagents
 
-Delegate only for at least two independent, non-overlapping tasks, bounded exploration, or risk-justified review. Keep dependent edits sequential. The primary agent integrates every result, inspects the diff, and runs the complete verification.
+Do the work directly by default. Read [delegation.md](references/delegation.md) only if subagents are available and useful.
 
-Do not require subagents. Continue directly when the harness lacks them.
+Use subagents only for independent tasks, separate research, or an important review.
+
+The primary agent must examine each result and run the complete verification. Do not require subagents.
 
 ## Transition
 
-After every plan task has a verified outcome, invoke the configured `finish` phase object with the exact spec and plan paths.
+After each plan task has a verified result, start the configured `finish` phase. Give it the exact artifact paths.
 
-Do not push, open a pull request, publish, or perform another external side effect unless the user explicitly authorized it.
+Do not push, publish, or cause another external effect without user approval.

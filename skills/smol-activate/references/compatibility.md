@@ -14,6 +14,8 @@ Use this handoff when the upstream skill is configured as the phase object's
 owner or the user explicitly requests it for the current run. An explicit
 request overrides the configured owner.
 
+Tell each upstream Design or Plan owner to write its artifact in ASD-STE100.
+
 After a returning upstream owner completes, continue with the next configured
 phase when the request authorizes it. Do not invoke the replaced default phase
 before or after its upstream owner.

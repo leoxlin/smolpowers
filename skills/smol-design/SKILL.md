@@ -1,51 +1,58 @@
 ---
 name: smol-design
-description: Design a Smolpowers change in a product spec. Use when the spec is missing, incomplete, or stale.
+description: Make a Smolpowers product specification. Use when the specification is absent, incomplete, or stale.
 ---
 
 # Smol Design
 
-Inspect context, decide what to build, and produce the product design artifact.
+Examine the context. Select the product change. Write the product specification.
 
-Resolve and apply the configured `design` phase object by following [configuration.md](../smol-activate/references/configuration.md). An explicitly requested `superpowers:brainstorming` overrides the entire phase object; use the [upstream contract](../smol-activate/references/compatibility.md). Otherwise, invoke its companions in order. If its owner is another skill, invoke that owner and stop this phase.
+Follow [configuration.md](../smol-activate/references/configuration.md) and apply the configured `design` phase.
+
+A user request for `superpowers:brainstorming` replaces this phase. Use the [upstream contract](../smol-activate/references/compatibility.md).
+
+Otherwise, start each companion in its configured sequence. If a different skill owns the phase, start it and stop.
 
 ## Design the Product
 
-Inspect the repository, current documentation, recent relevant changes, and the user's request before proposing an approach.
+Examine the repository, current documents, applicable changes, and the user request before you select an approach.
 
-For a bug, reproduce the reported behavior or record the exact environmental blocker before choosing a fix. Read [debugging-and-testing.md](references/debugging-and-testing.md) when reproduction, root-cause tracing, or test strategy needs more detail.
+For a defect, reproduce the reported behavior. If this is not possible, record the exact environment problem.
 
-Establish:
+Read [debugging-and-testing.md](references/debugging-and-testing.md) if you need more test or cause information.
 
-- the concrete goal and observable success criteria;
-- in-scope and out-of-scope behavior;
-- constraints and compatibility requirements;
-- the current behavior or root cause for bugs;
-- viable approaches and their material tradeoffs;
-- one chosen product approach.
+Specify this information:
 
-Use reasonable defaults for minor details. Pause only when different answers would materially change scope, behavior, destructive impact, or external effects.
+- The goal and observable success criteria
+- The included and excluded behavior
+- The constraints and compatibility requirements
+- The current behavior or defect cause
+- The possible approaches and important differences
+- The selected product approach
+
+Use reasonable values for small details. Pause only if an answer can change scope, behavior, damage risk, or external effects.
 
 ## Write the Spec
 
-Write:
+Write this file:
 
 `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
 
-Use [spec-template.md](references/spec-template.md). Replace every placeholder with concrete content and preserve its core headings. Create parent directories only when they are inside an authorized writable location.
+Use [spec-template.md](references/spec-template.md). Replace each placeholder and keep the primary headings.
 
-Review the written spec for:
+Write the complete artifact in ASD-STE100. Review it for these problems:
 
-- missing requirements or success criteria;
-- placeholders and vague language;
-- contradictions between scope and approach;
-- assumptions that repository evidence disproves;
-- work unrelated to the request.
+- A missing requirement or success criterion
+- A placeholder or unclear statement
+- A conflict between the scope and the approach
+- An assumption that conflicts with repository evidence
+- Work that is not part of the request
+- An unapproved word, long sentence, contraction, passive sentence, or semicolon
 
-Fix those issues in the artifact before reporting the phase outcome.
+Correct each problem before you report the phase result.
 
 ## Transition
 
-If implementation was requested, invoke the configured `plan` phase object with the exact spec path and configured roots.
+If the user requested implementation, start the configured `plan` phase. Give it the exact specification path and configured roots.
 
-If only a product design or specification was requested, report the artifact path and stop.
+If the user requested only a design, report the artifact path and stop.
