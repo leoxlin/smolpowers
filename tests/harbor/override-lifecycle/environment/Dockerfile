@@ -11,6 +11,8 @@ RUN useradd --create-home --shell /bin/bash agent
 COPY fixture/ /app/
 COPY fixture/ /opt/fixture/
 
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
 RUN git -C /app init -q \
     && git -C /app config user.name "Smolpowers Integration" \
     && git -C /app config user.email "integration@example.invalid" \

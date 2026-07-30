@@ -13,6 +13,8 @@ COPY fixture/ /opt/fixture/
 COPY plugin/ /opt/smolpowers/
 COPY verify_finished.py /opt/verify_finished.py
 
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
 RUN git -C /opt/smolpowers init -q \
     && git -C /opt/smolpowers config user.name "Smolpowers Plugin Integration" \
     && git -C /opt/smolpowers config user.email "integration@example.invalid" \

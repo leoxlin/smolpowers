@@ -47,9 +47,9 @@ def test_staged_tasks_use_isolated_fake_project(tmp_path: Path) -> None:
                 "smol-plan",
             ]
 
-        (staged / "environment/fixture/greeting.py").write_text("changed\n")
-        assert (run_harbor.FAKE_PROJECT / "greeting.py").read_bytes() == source_files[
-            Path("greeting.py")
+        (staged / "environment/fixture/app.py").write_text("changed\n")
+        assert (run_harbor.FAKE_PROJECT / "app.py").read_bytes() == source_files[
+            Path("app.py")
         ]
 
 

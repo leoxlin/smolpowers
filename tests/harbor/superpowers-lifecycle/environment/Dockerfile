@@ -12,6 +12,8 @@ COPY fixture/ /app/
 COPY fixture/ /opt/fixture/
 COPY verify_finished.py /opt/verify_finished.py
 
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
 RUN git -C /app init -q \
     && git -C /app config user.name "Smolpowers Integration" \
     && git -C /app config user.email "integration@example.invalid" \
