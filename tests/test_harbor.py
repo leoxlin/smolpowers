@@ -85,6 +85,8 @@ def test_override_job_config() -> None:
         "openai-codex/gpt-5",
     ]
     assert len(config.agents[0].skills) == 9
+    assert config.agents[0].kwargs == {"reasoning_summary": "detailed"}
+    assert config.agents[1].kwargs == {}
 
 
 def test_base_job_config() -> None:
@@ -99,6 +101,7 @@ def test_base_job_config() -> None:
     assert config.agents[0].name is None
     assert config.agents[0].import_path == "harbor_agents:PluginCodex"
     assert config.agents[0].skills == []
+    assert config.agents[0].kwargs == {"reasoning_summary": "detailed"}
     assert config.agents[0].env == {
         "SMOLPOWERS_ACTIVATION_LOG": "/logs/agent/smolpowers-activation.json"
     }

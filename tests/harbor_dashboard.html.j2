@@ -121,6 +121,15 @@
                 <div class="text-xs opacity-70">
                   in {{ t.input_tokens | fmt_int }} · cache {{ t.cache_tokens | fmt_int }} · out {{ t.output_tokens | fmt_int }} · {{ t.cost_usd | fmt_cost }}
                 </div>
+                {% if t.trace %}
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                  <a class="badge badge-info badge-soft badge-sm" href="{{ t.trace_href }}">
+                    trace · {{ t.trace.steps }} steps · {{ t.trace.tool_calls }} tool calls
+                  </a>
+                  {% if t.trace.reasoning %}<span class="badge badge-secondary badge-soft badge-sm">{{ t.trace.reasoning }} reasoning</span>{% endif %}
+                  {% if t.trace.skills %}<span class="opacity-60">skills: {{ t.trace.skills | join(', ') }}</span>{% endif %}
+                </div>
+                {% endif %}
                 {% if t.phase_segments %}
                 <div class="flex w-full h-2 rounded overflow-hidden bg-base-300">
                   {% for seg in t.phase_segments %}

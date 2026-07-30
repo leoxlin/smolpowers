@@ -56,3 +56,22 @@ uv run --project tests --locked python tests/run_harbor.py \
 
 The Superpowers case reads its checkout from `--superpowers-root`,
 `SUPERPOWERS_ROOT`, or the sibling `../superpowers` directory, in that order.
+
+## Job dashboard and traces
+
+Serve job outputs under `tests/jobs` with:
+
+```bash
+uv run --project tests --locked python tests/harbor_dashboard.py
+```
+
+The dashboard at http://127.0.0.1:8642/ re-scans on every refresh and lists
+jobs, rewards, phases, and token usage per trial. Trials link to a trace
+explorer at `/trace/<job>/<trial>` that renders the trial's ATIF trajectory
+(`agent/trajectory.json`): every message, tool call with arguments and
+observations, and skill usage, filterable by source, tool, skill, and text.
+
+Codex trials run with `model_reasoning_summary=detailed`, so their
+trajectories also include the agent's reasoning per step, shown in the trace
+explorer. Trajectories written before that flag was set have no reasoning
+content.

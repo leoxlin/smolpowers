@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html data-theme="dim" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trace {{ trial }} — {{ job }}</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/daisyui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/themes.css">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4/dist/index.global.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :where(.grid, .flex) > * { min-width: 0; }
+  :where(p, h1, h2, h3, td, th, .badge) { overflow-wrap: anywhere; }
+</style>
+</head>
+<body class="bg-base-200 text-base-content min-h-screen">
+<div class="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
+
+  <header class="space-y-1">
+    <a href="/" class="link link-hover text-xs opacity-70">&larr; all jobs</a>
+    <h1 class="text-xl font-bold font-mono">{{ trial }}</h1>
+    <div class="flex flex-wrap items-center gap-2 text-xs opacity-70">
+      <span class="badge badge-outline badge-sm">{{ trace.agent_name }}</span>
+      <span class="badge badge-outline badge-sm">{{ trace.model_name }}</span>
+      <span>job {{ job }}</span>
+      {% if trace.session_id %}<span class="font-mono">session {{ trace.session_id }}</span>{% endif %}
+    </div>
+  </header>
+
+  <div class="stats stats-vertical sm:stats-horizontal shadow bg-base-100 w-full">
+    <div class="stat"><div class="stat-title">Steps</div><div class="stat-value text-2xl">{{ trace.steps | length }}</div></div>
+    <div class="stat"><div class="stat-title">Tool calls</div><div class="stat-value text-2xl">{{ trace.tools | sum(attribute='n') }}</div></div>
+    <div class="stat"><div class="stat-title">Reasoning</div><div class="stat-value text-2xl">{{ trace.n_reasoning }}</div>
+      <div class="stat-desc">{{ trace.final.reasoning_tokens | fmt_int }} reasoning tokens</div></div>
+    <div class="stat"><div class="stat-title">Tokens</div>
+      <div class="stat-value text-2xl">{{ ((trace.final.prompt_tokens or 0) + (trace.final.completion_tokens or 0)) | fmt_int }}</div>
+      <div class="stat-desc">in {{ trace.final.prompt_tokens | fmt_int }} · cache {{ trace.final.cached_tokens | fmt_int }} · out {{ trace.final.completion_tokens | fmt_int }}</div></div>
+    <div class="stat"><div class="stat-title">Cost</div><div class="stat-value text-2xl">{{ trace.final.cost_usd | fmt_cost }}</div></div>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3 bg-base-100 rounded-box border border-base-content/10 p-3">
+    <span class="text-xs font-semibold uppercase opacity-60">filter</span>
+    {% for src in trace.sources %}
+    <label class="label cursor-pointer gap-1 py-0">
+      <input type="checkbox" class="checkbox checkbox-xs source-filter" value="{{ src }}" checked>
+      <span class="label-text text-xs">{{ src }}</span>
+    </label>
+    {% endfor %}
+    <select id="tool-filter" class="select select-bordered select-xs w-44">
+      <option value="">all tools</option>
+      {% for tool in trace.tools %}<option value="{{ tool.name }}">{{ tool.name }} ({{ tool.n }})</option>{% endfor %}
+    </select>
+    {% if trace.skills %}
+    <select id="skill-filter" class="select select-bordered select-xs w-44">
+      <option value="">all skills</option>
+      {% for skill in trace.skills %}<option value="{{ skill }}">{{ skill }}</option>{% endfor %}
+    </select>
+    {% endif %}
+    <input id="trace-search" type="text" placeholder="search text…" class="input input-bordered input-xs w-52">
+    <span id="trace-count" class="text-xs opacity-60 ml-auto"></span>
+  </div>
+
+  <div id="steps" class="grid gap-2">
+    {% for s in trace.steps %}
+    <div class="card bg-base-100 border border-base-content/10 step"
+         data-source="{{ s.source }}"
+         data-tools="{{ s.tool_calls | map(attribute='name') | join(' ') }}"
+         data-skills="{{ s.skills | join(' ') }}">
+      <div class="card-body p-3 gap-2">
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="font-mono font-semibold">#{{ s.id }}</span>
+          {% if s.source == "agent" %}
+            <span class="badge badge-primary badge-soft badge-xs">agent</span>
+          {% elif s.source == "user" %}
+            <span class="badge badge-accent badge-soft badge-xs">user</span>
+          {% else %}
+            <span class="badge badge-ghost badge-xs">{{ s.source }}</span>
+          {% endif %}
+          <span class="opacity-50 font-mono">{{ s.time }}</span>
+          {% for skill in s.skills %}<span class="badge badge-warning badge-soft badge-xs">{{ skill }}</span>{% endfor %}
+          <span class="opacity-50 ml-auto">
+            {% if s.prompt_tokens is not none %}in {{ s.prompt_tokens | fmt_int }} · out {{ s.completion_tokens | fmt_int }}{% endif %}
+            {% if s.reasoning_tokens %}· reasoning {{ s.reasoning_tokens | fmt_int }}{% endif %}
+          </span>
+        </div>
+        {% if s.message %}
+          {% if s.source == "system" %}
+          <details>
+            <summary class="text-xs cursor-pointer opacity-70">system message ({{ s.message | length }} chars)</summary>
+            <pre class="text-[11px] leading-snug whitespace-pre-wrap break-all bg-base-300 rounded p-2 mt-1 max-h-96 overflow-y-auto">{{ s.message }}</pre>
+          </details>
+          {% else %}
+          <pre class="text-[11px] leading-snug whitespace-pre-wrap break-all bg-base-200 rounded p-2 max-h-96 overflow-y-auto">{{ s.message }}</pre>
+          {% endif %}
+        {% endif %}
+        {% if s.reasoning %}
+        <details class="bg-secondary/10 border border-secondary/20 rounded">
+          <summary class="text-xs cursor-pointer px-2 py-1 text-secondary">reasoning</summary>
+          <pre class="text-[11px] leading-snug whitespace-pre-wrap break-all p-2 max-h-96 overflow-y-auto">{{ s.reasoning }}</pre>
+        </details>
+        {% endif %}
+        {% for tc in s.tool_calls %}
+        <details class="bg-base-300 rounded">
+          <summary class="text-xs cursor-pointer px-2 py-1 font-mono">
+            {{ tc.name }}
+            {% for skill in tc.skills %}<span class="badge badge-warning badge-soft badge-xs ml-1">{{ skill }}</span>{% endfor %}
+          </summary>
+          <pre class="text-[11px] leading-snug whitespace-pre-wrap break-all p-2 max-h-96 overflow-y-auto">{{ tc.arguments }}</pre>
+        </details>
+        {% endfor %}
+        {% if s.observation %}
+        <details class="bg-base-300 rounded">
+          <summary class="text-xs cursor-pointer px-2 py-1 opacity-70">observation ({{ s.observation | length }} chars)</summary>
+          <pre class="text-[11px] leading-snug whitespace-pre-wrap break-all p-2 max-h-96 overflow-y-auto">{{ s.observation }}</pre>
+        </details>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+<script>
+const stepsEl = document.getElementById("steps");
+const countEl = document.getElementById("trace-count");
+const toolSel = document.getElementById("tool-filter");
+const skillSel = document.getElementById("skill-filter");
+const searchEl = document.getElementById("trace-search");
+function applyTraceFilter() {
+  const sources = new Set(
+    [...document.querySelectorAll(".source-filter:checked")].map(c => c.value)
+  );
+  const tool = toolSel.value;
+  const skill = skillSel ? skillSel.value : "";
+  const query = searchEl.value.trim().toLowerCase();
+  let shown = 0, total = 0;
+  for (const step of stepsEl.querySelectorAll(".step")) {
+    total++;
+    let visible = sources.has(step.dataset.source);
+    if (visible && tool) visible = step.dataset.tools.split(" ").includes(tool);
+    if (visible && skill) visible = step.dataset.skills.split(" ").includes(skill);
+    if (visible && query) visible = step.textContent.toLowerCase().includes(query);
+    step.style.display = visible ? "" : "none";
+    if (visible) shown++;
+  }
+  countEl.textContent = shown === total ? total + " steps" : shown + " / " + total + " steps";
+}
+for (const el of document.querySelectorAll(".source-filter")) el.addEventListener("change", applyTraceFilter);
+toolSel.addEventListener("change", applyTraceFilter);
+if (skillSel) skillSel.addEventListener("change", applyTraceFilter);
+searchEl.addEventListener("input", applyTraceFilter);
+applyTraceFilter();
+</script>
+</body>
+</html>

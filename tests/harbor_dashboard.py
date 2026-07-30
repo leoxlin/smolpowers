@@ -14,14 +14,19 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
+from collections import Counter
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 STDOUT_TAIL_LINES = 60
 EXCEPTION_TAIL_CHARS = 1200
+
+SKILL_REF_RE = re.compile(r"skills/([\w.-]+)/SKILL\.md")
 
 PHASES = [
     ("environment_setup", "env setup"),
@@ -99,6 +104,123 @@ def tail_lines(path: Path, n: int) -> str:
     return "\n".join(lines[-n:])
 
 
+def read_trajectory(trial_dir: Path) -> dict | None:
+    """Read a trial's ATIF trajectory (agent/trajectory.json), if present."""
+    try:
+        data = json.loads((trial_dir / "agent" / "trajectory.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def trace_overview(trial_dir: Path) -> dict | None:
+    """Lightweight trace summary for the jobs list: counts and touched skills."""
+    data = read_trajectory(trial_dir)
+    if data is None:
+        return None
+    steps = data.get("steps") or []
+    tool_calls = [tc for s in steps for tc in (s.get("tool_calls") or [])]
+    skills = sorted(
+        {
+            match.group(1)
+            for tc in tool_calls
+            for match in SKILL_REF_RE.finditer(
+                json.dumps(tc.get("arguments") or {}, ensure_ascii=False)
+            )
+        }
+    )
+    return {
+        "steps": len(steps),
+        "tool_calls": len(tool_calls),
+        "reasoning": sum(1 for s in steps if s.get("reasoning_content")),
+        "skills": skills,
+    }
+
+
+def _observation_text(step: dict) -> str:
+    results = (step.get("observation") or {}).get("results") or []
+    return "\n".join(
+        str(r.get("content", "")) for r in results if isinstance(r, dict)
+    )
+
+
+def load_trace(trial_dir: Path) -> dict | None:
+    """Full trace view-model for one trial's trajectory, for the trace page."""
+    data = read_trajectory(trial_dir)
+    if data is None:
+        return None
+
+    steps = []
+    tool_names: Counter[str] = Counter()
+    for s in data.get("steps") or []:
+        tool_calls = []
+        for tc in s.get("tool_calls") or []:
+            args = json.dumps(
+                tc.get("arguments") or {}, indent=2, ensure_ascii=False
+            )
+            name = tc.get("function_name", "?")
+            tool_names[name] += 1
+            tool_calls.append(
+                {
+                    "name": name,
+                    "arguments": args,
+                    "skills": sorted(set(SKILL_REF_RE.findall(args))),
+                }
+            )
+        metrics = s.get("metrics") or {}
+        started = parse_ts(s.get("timestamp"))
+        steps.append(
+            {
+                "id": s.get("step_id"),
+                "time": started.strftime("%H:%M:%S") if started else "—",
+                "source": s.get("source", "?"),
+                "message": s.get("message") or "",
+                "reasoning": s.get("reasoning_content") or "",
+                "tool_calls": tool_calls,
+                "observation": _observation_text(s),
+                "skills": sorted({sk for tc in tool_calls for sk in tc["skills"]}),
+                "prompt_tokens": metrics.get("prompt_tokens"),
+                "completion_tokens": metrics.get("completion_tokens"),
+                "reasoning_tokens": (metrics.get("extra") or {}).get(
+                    "reasoning_output_tokens"
+                ),
+            }
+        )
+
+    agent = data.get("agent") or {}
+    final = data.get("final_metrics") or {}
+    return {
+        "session_id": data.get("session_id"),
+        "agent_name": agent.get("name", "?"),
+        "model_name": agent.get("model_name", "?"),
+        "steps": steps,
+        "sources": sorted({s["source"] for s in steps}),
+        "tools": [
+            {"name": name, "n": n} for name, n in tool_names.most_common()
+        ],
+        "skills": sorted({sk for s in steps for sk in s["skills"]}),
+        "n_reasoning": sum(1 for s in steps if s["reasoning"]),
+        "final": {
+            "prompt_tokens": final.get("total_prompt_tokens"),
+            "completion_tokens": final.get("total_completion_tokens"),
+            "cached_tokens": final.get("total_cached_tokens"),
+            "cost_usd": final.get("total_cost_usd"),
+            "reasoning_tokens": (final.get("extra") or {}).get(
+                "reasoning_output_tokens"
+            ),
+        },
+    }
+
+
+def resolve_trial_dir(jobs_dir: Path, job: str, trial: str) -> Path | None:
+    """Resolve a /trace/<job>/<trial> request to a trial dir, rejecting escapes."""
+    root = jobs_dir.resolve()
+    trial_dir = (root / job / trial).resolve()
+    if not trial_dir.is_relative_to(root) or trial_dir.parent.parent != root:
+        return None
+    return trial_dir if trial_dir.is_dir() else None
+
+
 def load_trial(trial_dir: Path) -> dict:
     try:
         r = json.loads((trial_dir / "result.json").read_text())
@@ -108,10 +230,12 @@ def load_trial(trial_dir: Path) -> dict:
     if r is None:
         trial = {
             "name": trial_dir.name, "task": trial_dir.name.split("__")[0],
+            "dir": trial_dir.name,
             "agent": "?", "model": "?", "status": "pending", "reward": None,
             "exception": "", "started_label": "—", "duration": None,
             "input_tokens": None, "cache_tokens": None, "output_tokens": None,
             "cost_usd": None, "phases": [], "stdout_tail": "",
+            "trace": None,
         }
         try:
             cfg = json.loads((trial_dir / "config.json").read_text())
@@ -152,6 +276,7 @@ def load_trial(trial_dir: Path) -> dict:
 
     return {
         "name": r.get("trial_name", trial_dir.name),
+        "dir": trial_dir.name,
         "task": r.get("task_name", "?"),
         "agent": (r.get("agent_info") or {}).get("name", "?"),
         "model": model_info.get("name", "?"),
@@ -166,6 +291,7 @@ def load_trial(trial_dir: Path) -> dict:
         "cost_usd": agent_result.get("cost_usd"),
         "phases": phases,
         "stdout_tail": tail_lines(trial_dir / "verifier" / "test-stdout.txt", STDOUT_TAIL_LINES),
+        "trace": trace_overview(trial_dir),
     }
 
 
@@ -212,6 +338,7 @@ def load_job(job_dir: Path) -> dict:
     ]
     for t in trials:
         t["phase_segments"], t["phase_legend"] = phase_view(t.pop("phases"))
+        t["trace_href"] = f"/trace/{job_dir.name}/{t['dir']}" if t["trace"] else None
 
     agents = sorted({t.get("agent", "?") for t in trials} or
                     {agent_name(a) for a in config.get("agents", [])})
@@ -297,7 +424,7 @@ def page_stats(jobs: list[dict]) -> dict:
     }
 
 
-def render(jobs: list[dict], template_dir: Path) -> str:
+def make_env(template_dir: Path) -> Environment:
     env = Environment(
         loader=FileSystemLoader(template_dir),
         autoescape=select_autoescape(["html", "j2"]),
@@ -307,13 +434,22 @@ def render(jobs: list[dict], template_dir: Path) -> str:
     env.filters["fmt_cost"] = fmt_cost
     env.filters["status_cls"] = status_cls
     env.filters["reward_cls"] = reward_cls
-    template = env.get_template("harbor_dashboard.html.j2")
+    return env
+
+
+def render(jobs: list[dict], template_dir: Path) -> str:
+    template = make_env(template_dir).get_template("harbor_dashboard.html.j2")
     return template.render(
         stats=page_stats(jobs),
         rollup=agent_rollup(jobs),
         agents=sorted({a for j in jobs for a in j["agents"]}),
         jobs=jobs,
     )
+
+
+def render_trace(trace: dict, template_dir: Path, job: str, trial: str) -> str:
+    template = make_env(template_dir).get_template("harbor_trace.html.j2")
+    return template.render(trace=trace, job=job, trial=trial)
 
 
 def load_jobs(jobs_dir: Path) -> list[dict]:
@@ -326,16 +462,29 @@ def load_jobs(jobs_dir: Path) -> list[dict]:
 
 def make_handler(jobs_dir: Path, template_dir: Path) -> type[BaseHTTPRequestHandler]:
     class DashboardHandler(BaseHTTPRequestHandler):
-        def do_GET(self) -> None:
-            if self.path not in ("/", "/index.html"):
-                self.send_error(404)
-                return
-            body = render(load_jobs(jobs_dir), template_dir).encode()
+        def _send_html(self, body: str) -> None:
+            data = body.encode()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Content-Length", str(len(data)))
             self.end_headers()
-            self.wfile.write(body)
+            self.wfile.write(data)
+
+        def do_GET(self) -> None:
+            path = urlparse(self.path).path
+            if path in ("/", "/index.html"):
+                self._send_html(render(load_jobs(jobs_dir), template_dir))
+                return
+            parts = [unquote(p) for p in path.strip("/").split("/")]
+            if len(parts) == 3 and parts[0] == "trace":
+                trial_dir = resolve_trial_dir(jobs_dir, parts[1], parts[2])
+                trace = load_trace(trial_dir) if trial_dir else None
+                if trace is not None:
+                    self._send_html(
+                        render_trace(trace, template_dir, parts[1], parts[2])
+                    )
+                    return
+            self.send_error(404)
 
         def log_message(self, format: str, *args) -> None:
             pass

@@ -244,6 +244,10 @@ def build_job_config(
                 import_path=agent_import_path(case, spec.agent),
                 model_name=spec.model,
                 skills=[] if case == "base" else list(skills_for(case, superpowers_root)),
+                # Reasoning summaries land in trajectory.json as reasoning_content.
+                kwargs=(
+                    {"reasoning_summary": "detailed"} if spec.agent == "codex" else {}
+                ),
                 env=(
                     {
                         "SMOLPOWERS_ACTIVATION_LOG": (
