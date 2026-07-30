@@ -19,17 +19,19 @@ worktrees, or mandatory subagents.
 
 By default, specs and plans are written under `docs/superpowers/`.
 
-## Use
+## Quickstart
 
-Ask your agent to use Smolpowers for a change:
+Install Smolpowers:
 
-```text
-Use Smolpowers to add account deletion.
+```bash
+npx skills add leoxlin/smolpowers
 ```
 
-Smolpowers will start at the first phase that is not already complete and
-continue through the lifecycle. You can also request a specific phase or resume
-an existing spec and plan.
+Then run:
+
+```text
+/smol-activate [Describe the task]
+```
 
 ## Documentation
 
