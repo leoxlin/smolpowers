@@ -4,6 +4,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git jq ripgrep \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip install --no-cache-dir pipx==1.16.1
+
 RUN useradd --create-home --shell /bin/bash agent
 
 COPY fixture/ /app/
