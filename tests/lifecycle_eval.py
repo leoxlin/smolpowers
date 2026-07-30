@@ -76,14 +76,19 @@ def evaluate_lifecycle(trajectory: dict, expected: list | tuple) -> dict:
     observed = activation_evidence(trajectory)
     first_positions = {}
     for index, item in enumerate(observed):
-        first_positions.setdefault(item["skill"], index)
+        first_positions.setdefault(item["skill"], (index, item["step_id"]))
     missing = [skill for skill in expected if skill not in first_positions]
     positions = [first_positions[skill] for skill in expected if skill in first_positions]
+    ordered = all(
+        left[0] <= right[0]
+        or (left[1] is not None and left[1] == right[1])
+        for left, right in zip(positions, positions[1:])
+    )
     return {
         "expected": expected,
         "observed": observed,
         "missing": missing,
-        "passed": not missing and positions == sorted(positions),
+        "passed": not missing and ordered,
     }
 
 

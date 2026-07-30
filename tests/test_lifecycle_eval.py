@@ -99,6 +99,21 @@ def test_missing_and_inverted_required_skills_fail() -> None:
     assert inverted["passed"] is False
 
 
+def test_required_skills_in_the_same_parallel_step_are_not_inverted() -> None:
+    data = trajectory(path_call("smol-activate"))
+    data["steps"].append(
+        {
+            "step_id": 2,
+            "tool_calls": [
+                path_call("smol-plan"),
+                path_call("smol-design"),
+            ],
+        }
+    )
+
+    assert lifecycle_eval.evaluate_lifecycle(data, EXPECTED)["passed"] is True
+
+
 def test_named_check_and_legacy_normalization() -> None:
     assert lifecycle_eval.normalize_checks(
         {"skills_in_order": 1, "requested_change_completed": 1}

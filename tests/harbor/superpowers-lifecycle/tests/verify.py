@@ -12,7 +12,7 @@ transcript = "\n".join(
 )
 for token in (
     "MIXED_SUPERPOWERS_VERIFIED",
-    "No such file or directory",
+    "AssertionError",
     "writing-plans",
     "test-driven-development",
 ):
