@@ -15,7 +15,7 @@ run = """
 ANTHROPIC_API_KEY="$OPENROUTER_API_KEY" \
 ANTHROPIC_BASE_URL="https://openrouter.ai/api" \
 CODEX_FORCE_AUTH_JSON=1 \
-uv run --project tests --locked python tests/run_harbor.py \
+uv run --locked python harbor/run_harbor.py \
   --case override \
   --case superpowers \
   --agent claude-code=openrouter/moonshotai/kimi-k2.7-code \
@@ -23,7 +23,7 @@ uv run --project tests --locked python tests/run_harbor.py \
   --agent kimi-cli=openrouter/moonshotai/kimi-k2.7-code \
   --agent pi=openrouter/moonshotai/kimi-k2.7-code
 CODEX_FORCE_AUTH_JSON=1 \
-uv run --project tests --locked python tests/run_harbor.py \
+uv run --locked python harbor/run_harbor.py \
   --case base \
   --agent codex=openai/gpt-5.6-sol
 """
@@ -33,7 +33,7 @@ description = "Run the base lifecycle integration test in Codex"
 raw_args = true
 run = """
 CODEX_FORCE_AUTH_JSON=1 \
-uv run --project tests --locked python tests/run_harbor.py \
+uv run --locked python harbor/run_harbor.py \
   --case base \
   --case override \
   --case superpowers \
@@ -41,9 +41,9 @@ uv run --project tests --locked python tests/run_harbor.py \
 """
 
 [tasks.dashboard]
-description = "Serve the Harbor jobs dashboard (tests/jobs) on http://127.0.0.1:8642/"
+description = "Serve the Harbor jobs dashboard (harbor/jobs) on http://127.0.0.1:8642/"
 raw_args = true
-run = "uv run --project tests --locked python tests/harbor_dashboard.py"
+run = "uv run --locked python harbor/harbor_dashboard.py"
 
 [tasks.test]
 description = "Run all tests"

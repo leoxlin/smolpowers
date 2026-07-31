@@ -30,7 +30,7 @@ def test_staged_tasks_use_isolated_smolurl(tmp_path: Path) -> None:
 
         assert Task.is_valid_dir(staged)
         assert not list(staged.rglob("__pycache__"))
-        common_task_fixtures = run_harbor.TESTS / "fixtures/tasks/common"
+        common_task_fixtures = run_harbor.FIXTURES / "tasks/common"
         assert common_task_fixtures.is_dir()
         assert (common_task_fixtures / "environment/verify_finished.py").is_file()
         for source in common_task_fixtures.rglob("*"):
@@ -42,7 +42,7 @@ def test_staged_tasks_use_isolated_smolurl(tmp_path: Path) -> None:
         ).read_bytes()
         assert (staged / "tests/lifecycle_eval.py").is_file()
         assert (staged / "tests/verify_lifecycle.py").is_file()
-        for source in (run_harbor.TESTS / "fixtures/tests").glob("*.*"):
+        for source in (run_harbor.FIXTURES / "tests").glob("*.*"):
             assert (staged / "tests" / source.name).read_bytes() == source.read_bytes()
         for relative_path, content in source_files.items():
             assert (staged / "environment/fixture" / relative_path).read_bytes() == content

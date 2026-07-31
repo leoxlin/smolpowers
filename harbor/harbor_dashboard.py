@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Serve a live HTML dashboard for Harbor job outputs under tests/jobs.
+"""Serve a live HTML dashboard for Harbor job outputs under harbor/jobs.
 
 Usage:
-    uv run --project tests python tests/harbor_dashboard.py [jobs_dir] [--port 8642]
+    uv run python harbor/harbor_dashboard.py [jobs_dir] [--port 8642]
 
 Reads each job's config.json / result.json plus per-trial result.json,
-verifier checks and test stdout tail, and renders tests/harbor_dashboard.html.j2
+verifier checks and test stdout tail, and renders harbor/harbor_dashboard.html.j2
 (Tailwind + DaisyUI via CDN). Jobs are re-scanned on every request, so the
 page always shows the latest runs — just refresh.
 """
@@ -122,7 +122,7 @@ def read_trajectory(trial_dir: Path) -> dict | None:
 
 
 def expected_skills(task: str) -> list[str]:
-    config = Path(__file__).parent / "harbor" / task / "task.toml"
+    config = Path(__file__).parent / task / "task.toml"
     data = tomllib.loads(config.read_text())
     return json.loads(data["verifier"]["env"]["EXPECTED_SKILLS"])
 

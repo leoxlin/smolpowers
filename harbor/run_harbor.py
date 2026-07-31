@@ -20,14 +20,15 @@ from harbor.models.task.task import Task
 from harbor.models.trial.config import AgentConfig, TaskConfig
 
 ROOT = Path(__file__).resolve().parents[1]
-TESTS = ROOT / "tests"
-SMOLURL = TESTS / "fixtures/smolurl"
-TASK_FIXTURES = TESTS / "fixtures/tasks"
+HARBOR = Path(__file__).resolve().parent
+FIXTURES = HARBOR / "fixtures"
+SMOLURL = FIXTURES / "smolurl"
+TASK_FIXTURES = FIXTURES / "tasks"
 SUPPORTED_AGENTS = ("claude-code", "codex", "kimi-cli", "pi")
 CASES = {
-    "base": TESTS / "harbor/base",
-    "override": TESTS / "harbor/override",
-    "superpowers": TESTS / "harbor/superpowers",
+    "base": HARBOR / "base",
+    "override": HARBOR / "override",
+    "superpowers": HARBOR / "superpowers",
 }
 SMOL_SKILLS = tuple(
     ROOT / f"skills/{name}"
@@ -46,7 +47,7 @@ SUBSCRIPTION_MODEL_PREFIXES = {
     "pi": "openai-codex",
 }
 OVERRIDE_SKILLS = tuple(
-    TESTS / f"fixtures/override-skills/{name}"
+    FIXTURES / f"override-skills/{name}"
     for name in (
         "integration-design",
         "integration-plan",
@@ -175,7 +176,7 @@ def stage_task(case: str, destination_root: Path) -> Path:
         dirs_exist_ok=True,
         ignore=shutil.ignore_patterns("__pycache__"),
     )
-    fixture_tests = TESTS / "fixtures/tests"
+    fixture_tests = FIXTURES / "tests"
     for source in fixture_tests.glob("*.*"):
         shutil.copy2(source, staged / "tests" / source.name)
     if case == "base":
@@ -246,7 +247,7 @@ def build_job_config(
 ) -> JobConfig:
     return JobConfig(
         job_name=f"{case}-{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}",
-        jobs_dir=TESTS / "jobs",
+        jobs_dir=HARBOR / "jobs",
         debug=True,
         n_concurrent_trials=len(agents),
         tasks=[TaskConfig(path=task_path)],

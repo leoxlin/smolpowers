@@ -21,7 +21,7 @@ Run model-backed evaluations separately with
 [Harbor](https://www.harborframework.com/):
 
 ```bash
-uv run --project tests --locked python tests/run_harbor.py \
+uv run --locked python harbor/run_harbor.py \
   --case base \
   --case override \
   --case superpowers \
@@ -47,7 +47,7 @@ agents; variables already present in the environment take precedence.
   `ANTHROPIC_BASE_URL=https://api.kimi.com/coding/anthropic` for claude-code.
 
 ```bash
-uv run --project tests --locked python tests/run_harbor.py \
+uv run --locked python harbor/run_harbor.py \
   --case override \
   --agent codex=openai/gpt-5.6-sol \
   --agent pi=openai-codex/gpt-5.6-sol \
@@ -60,10 +60,10 @@ The Superpowers case reads its checkout from `--superpowers-root`,
 
 ## Job dashboard and traces
 
-Serve job outputs under `tests/jobs` with:
+Serve job outputs under `harbor/jobs` with:
 
 ```bash
-uv run --project tests --locked python tests/harbor_dashboard.py
+uv run --locked python harbor/harbor_dashboard.py
 ```
 
 The dashboard at http://127.0.0.1:8642/ re-scans on every refresh and lists
