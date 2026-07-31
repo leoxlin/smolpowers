@@ -38,9 +38,6 @@ The agents use the Codex subscription. Run `codex login` before the evaluation
 so that `~/.codex/auth.json` exists. Set `CODEX_FORCE_AUTH_JSON=1` so Harbor
 uses this file.
 
-The configuration reads Superpowers skills from the sibling
-`../superpowers/skills` directory.
-
 ## Job dashboard and traces
 
 Serve job outputs under `harbor/jobs` with:

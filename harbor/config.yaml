@@ -10,7 +10,7 @@ agents:
     import_path: agents:CodexSp
     model_name: openai/gpt-5.6-sol
     skills:
-      - ../superpowers/skills
+      - https://github.com/obra/superpowers/tree/v6.2.0/skills
     kwargs:
       reasoning_effort: medium
       reasoning_summary: detailed
@@ -31,8 +31,8 @@ agents:
     model_name: openai/gpt-5.6-sol
     skills:
       - ./skills
-      - ../superpowers/skills/writing-plans
-      - ../superpowers/skills/test-driven-development
+      - https://github.com/obra/superpowers/tree/v6.2.0/skills/writing-plans
+      - https://github.com/obra/superpowers/tree/v6.2.0/skills/test-driven-development
     kwargs:
       reasoning_effort: medium
       reasoning_summary: detailed
