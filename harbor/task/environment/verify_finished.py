@@ -56,7 +56,10 @@ else:
 for relative_path in protected:
     assert (ROOT / relative_path).read_bytes() == (
         BASELINE / relative_path
-    ).read_bytes()
+    ).read_bytes(), (
+        f"{relative_path} is protected and must match the fixture;"
+        " revert the edit and delete generated files instead of hiding them"
+    )
 assert (ROOT / "app.py").read_bytes() != (BASELINE / "app.py").read_bytes()
 
 phase_log = ROOT / config.get("stateDir", ".superpowers") / "phase-calls.log"
