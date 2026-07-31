@@ -198,6 +198,12 @@ function applyFilter() {
 }
 agentSel.addEventListener("change", applyFilter);
 statusSel.addEventListener("change", applyFilter);
+
+const jobsVersion = {{ jobs_version | tojson }};
+setInterval(async () => {
+  const response = await fetch("/jobs-version", {cache: "no-store"});
+  if (response.ok && await response.text() !== jobsVersion) location.reload();
+}, 1000);
 </script>
 </body>
 </html>
