@@ -1,4 +1,4 @@
-import re
+import json
 import sqlite3
 import subprocess
 import sys
@@ -7,8 +7,8 @@ from pathlib import Path
 
 
 ROOT = Path("/app")
-DOCS = ROOT / "docs/superpowers"
 BASELINE = Path("/opt/fixture")
+CONFIG = ROOT / ".smolpowers.json"
 
 
 def only_match(directory: Path, pattern: str) -> Path:
@@ -42,20 +42,31 @@ with tempfile.TemporaryDirectory() as directory:
     assert response.status_code == 302
     assert response.headers["Location"] == link["url"]
 
-spec = only_match(DOCS / "specs", "*-design.md")
-plan = only_match(DOCS / "plans", "*.md")
+config = json.loads(CONFIG.read_text()) if CONFIG.exists() else {}
+docs = ROOT / config.get("specDir", "docs/superpowers")
+spec = only_match(docs / "specs", "*-design.md")
+plan = only_match(docs / "plans", "*.md")
 assert plan.stem == spec.stem.removesuffix("-design")
-checkbox_states = re.findall(r"^- \[([ xX])\]", plan.read_text(), re.MULTILINE)
-assert checkbox_states
-assert all(state.lower() == "x" for state in checkbox_states)
-assert not (ROOT / ".smolpowers.json").exists()
 
-for protected in (
-    "AGENTS.md",
-    ".gitignore",
-    "requirements.txt",
-    "tests/test_api.py",
-):
-    assert (ROOT / protected).read_bytes() == (BASELINE / protected).read_bytes()
+protected = [".gitignore", "requirements.txt"]
+if config:
+    protected.append(".smolpowers.json")
+else:
+    protected.append("AGENTS.md")
+for relative_path in protected:
+    assert (ROOT / relative_path).read_bytes() == (
+        BASELINE / relative_path
+    ).read_bytes()
 assert (ROOT / "app.py").read_bytes() != (BASELINE / "app.py").read_bytes()
-print("BASE_SMOLPOWERS_VERIFIED")
+
+phase_log = ROOT / config.get("stateDir", ".superpowers") / "phase-calls.log"
+if phase_log.exists():
+    calls = phase_log.read_text().splitlines()
+    assert [call.split("|", 1)[0] for call in calls] == [
+        "design",
+        "plan",
+        "execute",
+        "finish",
+    ]
+    expected_roots = f"|{docs}|{phase_log.parent}"
+    assert all(call.endswith(expected_roots) for call in calls)

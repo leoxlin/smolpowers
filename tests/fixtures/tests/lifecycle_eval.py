@@ -4,36 +4,7 @@ import json
 import re
 
 
-EXPECTED_SKILLS = {
-    "base": (
-        "smol-activate",
-        "smol-design",
-        "smol-plan",
-        "smol-execute",
-        "smol-finish",
-    ),
-    "override": (
-        "smol-activate",
-        "integration-design",
-        "integration-plan",
-        "integration-execute",
-        "integration-finish",
-    ),
-    "superpowers": (
-        "smol-activate",
-        "smol-design",
-        "writing-plans",
-        "smol-execute",
-        "test-driven-development",
-        "smol-finish",
-    ),
-}
 SKILL_PATH_RE = re.compile(r"(?:^|[/\\])skills[/\\]([\w.-]+)[/\\]SKILL\.md\b")
-
-
-def expected_skills(case_or_task: str) -> tuple[str, ...]:
-    case = case_or_task.removesuffix("-lifecycle")
-    return EXPECTED_SKILLS[case]
 
 
 def _canonical_skill(value: str) -> str:

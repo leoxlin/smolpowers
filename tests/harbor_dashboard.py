@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import tomllib
 from collections import Counter
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -25,7 +26,6 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from fixtures.tests.lifecycle_eval import (
     activation_evidence,
     evaluate_lifecycle,
-    expected_skills,
     normalize_checks,
 )
 
@@ -119,6 +119,12 @@ def read_trajectory(trial_dir: Path) -> dict | None:
     except (OSError, json.JSONDecodeError):
         return None
     return data if isinstance(data, dict) else None
+
+
+def expected_skills(task: str) -> list[str]:
+    config = Path(__file__).parent / "harbor" / task / "task.toml"
+    data = tomllib.loads(config.read_text())
+    return json.loads(data["verifier"]["env"]["EXPECTED_SKILLS"])
 
 
 def trace_overview(trial_dir: Path, task: str | None = None) -> dict | None:

@@ -14,6 +14,9 @@ user = "agent"
 timeout_sec = 120
 user = "root"
 
+[verifier.env]
+EXPECTED_SKILLS = '["smol-activate", "smol-design", "smol-plan", "smol-execute", "smol-finish"]'
+
 [environment]
 build_timeout_sec = 600
 network_mode = "public"
