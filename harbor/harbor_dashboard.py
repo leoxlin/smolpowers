@@ -6,13 +6,13 @@ Usage:
 
 Reads each job's config.json / result.json plus per-trial result.json,
 verifier checks and test stdout tail, and renders harbor/harbor_dashboard.html.j2
-(Tailwind + DaisyUI via CDN). The page reloads when the jobs directory changes.
+(Tailwind + DaisyUI via CDN). The server scans jobs on every request. The page
+shows the latest runs after the user refreshes it.
 """
 
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from collections import Counter
 from datetime import datetime
@@ -561,27 +561,13 @@ def make_env(template_dir: Path) -> Environment:
     return env
 
 
-def jobs_version(jobs_dir: Path) -> str:
-    """Return a version that changes when the jobs tree changes."""
-    digest = hashlib.sha256()
-    for path in sorted(jobs_dir.rglob("*")):
-        try:
-            stat = path.stat()
-        except OSError:
-            continue
-        digest.update(str(path.relative_to(jobs_dir)).encode())
-        digest.update(f"{stat.st_mtime_ns}:{stat.st_size}".encode())
-    return digest.hexdigest()
-
-
-def render(jobs: list[dict], template_dir: Path, version: str = "") -> str:
+def render(jobs: list[dict], template_dir: Path) -> str:
     template = make_env(template_dir).get_template("harbor_dashboard.html.j2")
     return template.render(
         stats=page_stats(jobs),
         rollup=agent_rollup(jobs),
         agents=sorted({a for j in jobs for a in j["agents"]}),
         jobs=jobs,
-        jobs_version=version,
     )
 
 
@@ -611,17 +597,7 @@ def make_handler(jobs_dir: Path, template_dir: Path) -> type[BaseHTTPRequestHand
         def do_GET(self) -> None:
             path = urlparse(self.path).path
             if path in ("/", "/index.html"):
-                version = jobs_version(jobs_dir)
-                self._send_html(render(load_jobs(jobs_dir), template_dir, version))
-                return
-            if path == "/jobs-version":
-                data = jobs_version(jobs_dir).encode()
-                self.send_response(200)
-                self.send_header("Content-Type", "text/plain; charset=utf-8")
-                self.send_header("Cache-Control", "no-store")
-                self.send_header("Content-Length", str(len(data)))
-                self.end_headers()
-                self.wfile.write(data)
+                self._send_html(render(load_jobs(jobs_dir), template_dir))
                 return
             parts = [unquote(p) for p in path.strip("/").split("/")]
             if len(parts) == 3 and parts[0] == "trace":
