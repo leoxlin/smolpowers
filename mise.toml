@@ -47,6 +47,17 @@ uv run --locked python harbor/run_harbor.py \
   --agent codex=openai/gpt-5.6-sol
 """
 
+[tasks."test:integration:claude"]
+description = "Run supported lifecycle integration tests in Claude Code"
+raw_args = true
+run = """
+uv run --locked python harbor/run_harbor.py \
+  --case override-custom \
+  --case override-superpowers \
+  --case control-superpowers \
+  --agent claude-code=kimi-for-coding
+"""
+
 [tasks.dashboard]
 description = "Serve the Harbor jobs dashboard (harbor/jobs) on http://127.0.0.1:8642/"
 raw_args = true
