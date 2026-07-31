@@ -24,7 +24,7 @@ subprocess.run(
 )
 
 sys.path.insert(0, str(ROOT))
-from app import create_app
+from app import create_app  # noqa: E402
 
 with tempfile.TemporaryDirectory() as directory:
     database = Path(directory) / "links.sqlite3"

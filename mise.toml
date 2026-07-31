@@ -8,6 +8,11 @@ description = "Run unit tests"
 raw_args = true
 run = "uv run --locked pytest -c pyproject.toml"
 
+[tasks.lint]
+description = "Lint Python files"
+raw_args = true
+run = "uv run --locked ruff check ."
+
 [tasks."test:integration"]
 description = "Run integration tests"
 raw_args = true
