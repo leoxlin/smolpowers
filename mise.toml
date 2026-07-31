@@ -16,6 +16,10 @@ uv run --locked ruff check .
 uv run --locked basedpyright
 """
 
+[tasks.tokens]
+description = "Count skill tokens"
+run = "uv run --locked python tools/token_counter.py"
+
 [tasks."test:integration"]
 description = "Run integration tests"
 raw_args = true
