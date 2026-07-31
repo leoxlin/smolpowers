@@ -5,6 +5,30 @@ import re
 
 
 SKILL_PATH_RE = re.compile(r"(?<![\w.-])skills[/\\]([\w.-]+)[/\\]SKILL\.md\b")
+EXPECTED_SKILLS = {
+    "codex-sp": [
+        "using-superpowers",
+        "brainstorming",
+        "writing-plans",
+        "test-driven-development",
+        "verification-before-completion",
+    ],
+    "codex-smol": [
+        "smol-activate",
+        "smol-design",
+        "smol-plan",
+        "smol-execute",
+        "smol-finish",
+    ],
+    "codex-mix": [
+        "smol-activate",
+        "smol-design",
+        "writing-plans",
+        "smol-execute",
+        "test-driven-development",
+        "smol-finish",
+    ],
+}
 
 
 def _canonical_skill(value: str) -> str:

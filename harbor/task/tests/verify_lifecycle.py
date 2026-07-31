@@ -1,14 +1,13 @@
 import json
-import os
 from pathlib import Path
 
-from lifecycle_eval import evaluate_lifecycle
+from lifecycle_eval import EXPECTED_SKILLS, evaluate_lifecycle
 
 
 trajectory = json.loads(Path("/logs/agent/trajectory.json").read_text())
 result = evaluate_lifecycle(
     trajectory,
-    json.loads(os.environ["EXPECTED_SKILLS"]),
+    EXPECTED_SKILLS[trajectory["agent"]["name"]],
 )
 print(json.dumps(result, indent=2))
 assert result["passed"], result

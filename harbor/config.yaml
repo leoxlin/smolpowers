@@ -1,0 +1,39 @@
+jobs_dir: harbor/jobs
+debug: true
+n_concurrent_trials: 8
+
+tasks:
+  - path: harbor/task
+
+agents:
+  - name: codex-sp
+    import_path: agents:CodexSp
+    model_name: openai/gpt-5.6-sol
+    skills:
+      - ../superpowers/skills
+    kwargs:
+      reasoning_effort: medium
+      reasoning_summary: detailed
+      lifecycle_instruction: Use the `using-superpowers` skill.
+
+  - name: codex-smol
+    import_path: agents:CodexSmol
+    model_name: openai/gpt-5.6-sol
+    skills:
+      - ./skills
+    kwargs:
+      reasoning_effort: medium
+      reasoning_summary: detailed
+      lifecycle_instruction: Use the `smol-activate` skill.
+
+  - name: codex-mix
+    import_path: agents:CodexMix
+    model_name: openai/gpt-5.6-sol
+    skills:
+      - ./skills
+      - ../superpowers/skills/writing-plans
+      - ../superpowers/skills/test-driven-development
+    kwargs:
+      reasoning_effort: medium
+      reasoning_summary: detailed
+      lifecycle_instruction: Use the `smol-activate` skill.

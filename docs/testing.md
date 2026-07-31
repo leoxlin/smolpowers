@@ -18,46 +18,28 @@ Run model-backed evaluations separately with
 [Harbor](https://www.harborframework.com/):
 
 ```bash
-uv run --locked python harbor/run_harbor.py \
-  --case control-base \
-  --case override-custom \
-  --case override-superpowers \
-  --case control-superpowers \
-  --agent codex=openai/gpt-5.6-sol
+PYTHONPATH=harbor \
+CODEX_FORCE_AUTH_JSON=1 \
+uv run --locked harbor jobs start --config harbor/config.yaml
 ```
 
-Repeat `--agent AGENT=MODEL` to evaluate multiple agents concurrently within
-each case. Supported agents are `claude-code`, `codex`, `kimi-cli`, and `pi`.
-Set the provider credentials required by the selected model.
+The configuration runs one lifecycle task with these Codex agents:
+
+- `codex-sp` uses the Superpowers lifecycle.
+- `codex-smol` uses the Smolpowers lifecycle.
+- `codex-mix` uses Smolpowers with the Superpowers plan and TDD skills.
+
+Harbor can run up to eight trials at the same time. The three configured agents
+run at the same time for the current task.
 
 ### Subscription credentials
 
-The runner wires host subscription logins automatically for the selected
-agents; variables already present in the environment take precedence.
+The agents use the Codex subscription. Run `codex login` before the evaluation
+so that `~/.codex/auth.json` exists. Set `CODEX_FORCE_AUTH_JSON=1` so Harbor
+uses this file.
 
-- `codex` and `pi` use the Codex (ChatGPT) subscription. Codex reads
-  `~/.codex/auth.json` (`CODEX_FORCE_AUTH_JSON=1`); Pi injects
-  `~/.pi/agent/auth.json` into the trial container. Models must use the
-  `openai/…` and `openai-codex/…` providers respectively.
-- `kimi-cli` and `claude-code` use the Kimi subscription. The OAuth token in
-  `~/.kimi-code/credentials/kimi-code.json` is exported as `KIMI_API_KEY` for
-  kimi-cli (`kimi/…` models) and as `ANTHROPIC_AUTH_TOKEN` with
-  `ANTHROPIC_BASE_URL=https://api.kimi.com/coding/anthropic` for claude-code.
-
-```bash
-uv run --locked python harbor/run_harbor.py \
-  --case override-custom \
-  --agent codex=openai/gpt-5.6-sol \
-  --agent pi=openai-codex/gpt-5.6-sol \
-  --agent kimi-cli=kimi/kimi-for-coding \
-  --agent claude-code=kimi-for-coding
-```
-
-The Superpowers cases read their checkout from `--superpowers-root`,
-`SUPERPOWERS_ROOT`, or the sibling `../superpowers` directory, in that order.
-The `override-superpowers` case installs Smolpowers and the configured
-Superpowers overrides. The `control-superpowers` case installs only
-Superpowers.
+The configuration reads Superpowers skills from the sibling
+`../superpowers/skills` directory.
 
 ## Job dashboard and traces
 

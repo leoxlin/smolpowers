@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import tomllib
 from collections import Counter
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -22,8 +21,8 @@ from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-
-from shared.tests.lifecycle_eval import (
+from task.tests.lifecycle_eval import (
+    EXPECTED_SKILLS,
     activation_evidence,
     evaluate_lifecycle,
     normalize_checks,
@@ -41,9 +40,13 @@ PHASES = [
 PHASE_COLORS = ["bg-neutral", "bg-info", "bg-primary", "bg-secondary"]
 
 STATUS_CLS = {
-    "passed": "badge-success", "finished": "badge-success",
-    "failed": "badge-error", "error": "badge-error", "stalled": "badge-error",
-    "running": "badge-info", "pending": "badge-ghost",
+    "passed": "badge-success",
+    "finished": "badge-success",
+    "failed": "badge-error",
+    "error": "badge-error",
+    "stalled": "badge-error",
+    "running": "badge-info",
+    "pending": "badge-ghost",
 }
 
 
@@ -116,18 +119,12 @@ def read_trajectory(trial_dir: Path) -> dict | None:
     """Read a trial's ATIF trajectory (agent/trajectory.json), if present."""
     try:
         data = json.loads((trial_dir / "agent" / "trajectory.json").read_text())
-    except (OSError, json.JSONDecodeError):
+    except OSError, json.JSONDecodeError:
         return None
     return data if isinstance(data, dict) else None
 
 
-def expected_skills(task: str) -> list[str]:
-    config = Path(__file__).parent / "tasks" / task / "task.toml"
-    data = tomllib.loads(config.read_text())
-    return json.loads(data["verifier"]["env"]["EXPECTED_SKILLS"])
-
-
-def trace_overview(trial_dir: Path, task: str | None = None) -> dict | None:
+def trace_overview(trial_dir: Path) -> dict | None:
     """Lightweight trace summary for the jobs list: counts and touched skills."""
     data = read_trajectory(trial_dir)
     if data is None:
@@ -136,25 +133,23 @@ def trace_overview(trial_dir: Path, task: str | None = None) -> dict | None:
     tool_calls = [tc for s in steps for tc in (s.get("tool_calls") or [])]
     evidence = activation_evidence(data)
     lifecycle = []
-    if task:
-        try:
-            evaluation = evaluate_lifecycle(data, expected_skills(task))
-        except (KeyError, FileNotFoundError):
-            evaluation = None
-        if evaluation:
-            for skill in evaluation["expected"]:
-                activation = next(
-                    (item for item in evaluation["observed"] if item["skill"] == skill),
-                    None,
-                )
-                step_id = activation["step_id"] if activation else None
-                lifecycle.append(
-                    {
-                        "skill": skill,
-                        "step_id": step_id,
-                        "href": f"#step-{step_id}" if step_id is not None else None,
-                    }
-                )
+    agent_name = (data.get("agent") or {}).get("name")
+    expected = EXPECTED_SKILLS.get(agent_name) if isinstance(agent_name, str) else None
+    if expected:
+        evaluation = evaluate_lifecycle(data, expected)
+        for skill in evaluation["expected"]:
+            activation = next(
+                (item for item in evaluation["observed"] if item["skill"] == skill),
+                None,
+            )
+            step_id = activation["step_id"] if activation else None
+            lifecycle.append(
+                {
+                    "skill": skill,
+                    "step_id": step_id,
+                    "href": f"#step-{step_id}" if step_id is not None else None,
+                }
+            )
     final = data.get("final_metrics") or {}
     return {
         "steps": len(steps),
@@ -162,17 +157,13 @@ def trace_overview(trial_dir: Path, task: str | None = None) -> dict | None:
         "reasoning": sum(1 for s in steps if s.get("reasoning_content")),
         "skills": list(dict.fromkeys(item["skill"] for item in evidence)),
         "lifecycle": lifecycle,
-        "reasoning_tokens": (final.get("extra") or {}).get(
-            "reasoning_output_tokens"
-        ),
+        "reasoning_tokens": (final.get("extra") or {}).get("reasoning_output_tokens"),
     }
 
 
 def _observation_text(step: dict) -> str:
     results = (step.get("observation") or {}).get("results") or []
-    return "\n".join(
-        str(r.get("content", "")) for r in results if isinstance(r, dict)
-    )
+    return "\n".join(str(r.get("content", "")) for r in results if isinstance(r, dict))
 
 
 def load_trace(trial_dir: Path) -> dict | None:
@@ -186,9 +177,7 @@ def load_trace(trial_dir: Path) -> dict | None:
     for s in data.get("steps") or []:
         tool_calls = []
         for tc in s.get("tool_calls") or []:
-            args = json.dumps(
-                tc.get("arguments") or {}, indent=2, ensure_ascii=False
-            )
+            args = json.dumps(tc.get("arguments") or {}, indent=2, ensure_ascii=False)
             name = tc.get("function_name", "?")
             tool_names[name] += 1
             skills = [
@@ -232,9 +221,7 @@ def load_trace(trial_dir: Path) -> dict | None:
         "model_name": agent.get("model_name", "?"),
         "steps": steps,
         "sources": sorted({s["source"] for s in steps}),
-        "tools": [
-            {"name": name, "n": n} for name, n in tool_names.most_common()
-        ],
+        "tools": [{"name": name, "n": n} for name, n in tool_names.most_common()],
         "skills": sorted({sk for s in steps for sk in s["skills"]}),
         "n_reasoning": sum(1 for s in steps if s["reasoning"]),
         "final": {
@@ -261,19 +248,30 @@ def resolve_trial_dir(jobs_dir: Path, job: str, trial: str) -> Path | None:
 def load_trial(trial_dir: Path) -> dict:
     try:
         r = json.loads((trial_dir / "result.json").read_text())
-    except (OSError, json.JSONDecodeError):
+    except OSError, json.JSONDecodeError:
         r = None
 
     if r is None:
         trial = {
-            "name": trial_dir.name, "task": trial_dir.name.split("__")[0],
+            "name": trial_dir.name,
+            "task": trial_dir.name.split("__")[0],
             "dir": trial_dir.name,
-            "agent": "?", "model": "?", "status": "pending",
-            "checks": normalize_checks(None), "evaluation_label": "pending",
-            "exception": "", "started_label": "—", "duration": None,
-            "input_tokens": None, "cache_tokens": None, "output_tokens": None,
-            "reasoning_tokens": None, "tokens_total": None,
-            "cost_usd": None, "phases": [], "stdout_tail": "",
+            "agent": "?",
+            "model": "?",
+            "status": "pending",
+            "checks": normalize_checks(None),
+            "evaluation_label": "pending",
+            "exception": "",
+            "started_label": "—",
+            "duration": None,
+            "input_tokens": None,
+            "cache_tokens": None,
+            "output_tokens": None,
+            "reasoning_tokens": None,
+            "tokens_total": None,
+            "cost_usd": None,
+            "phases": [],
+            "stdout_tail": "",
             "trace": None,
         }
         try:
@@ -282,7 +280,7 @@ def load_trial(trial_dir: Path) -> dict:
             trial["agent"] = agent_name(agent_cfg)
             model = agent_cfg.get("model_name") or "?"
             trial["model"] = model.split("/", 1)[-1]
-        except (OSError, json.JSONDecodeError):
+        except OSError, json.JSONDecodeError:
             pass
         return trial
 
@@ -301,7 +299,10 @@ def load_trial(trial_dir: Path) -> dict:
     phases = []
     for key, label in PHASES:
         span = r.get(key) or {}
-        p_start, p_end = parse_ts(span.get("started_at")), parse_ts(span.get("finished_at"))
+        p_start, p_end = (
+            parse_ts(span.get("started_at")),
+            parse_ts(span.get("finished_at")),
+        )
         dur = (p_end - p_start).total_seconds() if p_start and p_end else None
         phases.append({"label": label, "seconds": dur})
 
@@ -319,7 +320,7 @@ def load_trial(trial_dir: Path) -> dict:
             exc_text = "…" + exc_text[-EXCEPTION_TAIL_CHARS:]
 
     task = r.get("task_name", "?")
-    trace = trace_overview(trial_dir, task)
+    trace = trace_overview(trial_dir)
     input_tokens = agent_result.get("n_input_tokens")
     output_tokens = agent_result.get("n_output_tokens")
     return {
@@ -333,7 +334,9 @@ def load_trial(trial_dir: Path) -> dict:
         "evaluation_label": checks["kind"],
         "exception": exc_text,
         "started_label": fmt_ts(started),
-        "duration": (finished - started).total_seconds() if started and finished else None,
+        "duration": (finished - started).total_seconds()
+        if started and finished
+        else None,
         "input_tokens": input_tokens,
         "cache_tokens": agent_result.get("n_cache_tokens"),
         "output_tokens": output_tokens,
@@ -346,7 +349,9 @@ def load_trial(trial_dir: Path) -> dict:
         ),
         "cost_usd": agent_result.get("cost_usd"),
         "phases": phases,
-        "stdout_tail": tail_lines(trial_dir / "verifier" / "test-stdout.txt", STDOUT_TAIL_LINES),
+        "stdout_tail": tail_lines(
+            trial_dir / "verifier" / "test-stdout.txt", STDOUT_TAIL_LINES
+        ),
         "trace": trace,
     }
 
@@ -360,11 +365,13 @@ def phase_view(phases: list[dict]) -> tuple[list[dict], str]:
         secs = p["seconds"] or 0
         if secs <= 0:
             continue
-        segments.append({
-            "cls": color,
-            "width": f"{max(2.0, secs / total * 100):.1f}",
-            "title": f"{p['label']}: {fmt_dur(secs)}",
-        })
+        segments.append(
+            {
+                "cls": color,
+                "width": f"{max(2.0, secs / total * 100):.1f}",
+                "title": f"{p['label']}: {fmt_dur(secs)}",
+            }
+        )
     legend = " · ".join(
         f"{p['label']} {fmt_dur(p['seconds'])}" for p in phases if p["seconds"]
     )
@@ -375,12 +382,12 @@ def load_job(job_dir: Path) -> dict:
     config = {}
     try:
         config = json.loads((job_dir / "config.json").read_text())
-    except (OSError, json.JSONDecodeError):
+    except OSError, json.JSONDecodeError:
         pass
     result = {}
     try:
         result = json.loads((job_dir / "result.json").read_text())
-    except (OSError, json.JSONDecodeError):
+    except OSError, json.JSONDecodeError:
         pass
 
     stats = result.get("stats") or {}
@@ -396,8 +403,10 @@ def load_job(job_dir: Path) -> dict:
         t["phase_segments"], t["phase_legend"] = phase_view(t.pop("phases"))
         t["trace_href"] = f"/trace/{job_dir.name}/{t['dir']}" if t["trace"] else None
 
-    agents = sorted({t.get("agent", "?") for t in trials} or
-                    {agent_name(a) for a in config.get("agents", [])})
+    agents = sorted(
+        {t.get("agent", "?") for t in trials}
+        or {agent_name(a) for a in config.get("agents", [])}
+    )
 
     counts = {
         "passed": 0,
@@ -416,18 +425,15 @@ def load_job(job_dir: Path) -> dict:
             ("error", "error", "badge-error badge-soft"),
             ("running", "run", "badge-info badge-soft"),
             ("pending", "pend", "badge-ghost"),
-        ] if counts[key]
+        ]
+        if counts[key]
     ]
 
     overall = [
-        int(t["checks"]["passed"])
-        for t in trials
-        if t["checks"]["kind"] == "named"
+        int(t["checks"]["passed"]) for t in trials if t["checks"]["kind"] == "named"
     ]
     skills = [
-        t["checks"]["skills_in_order"]
-        for t in trials
-        if t["checks"]["kind"] == "named"
+        t["checks"]["skills_in_order"] for t in trials if t["checks"]["kind"] == "named"
     ]
     requested = [
         t["checks"]["requested_change_completed"]
@@ -446,9 +452,13 @@ def load_job(job_dir: Path) -> dict:
         "name": job_dir.name,
         "status": job_status,
         "started_label": fmt_ts(started),
-        "duration": (finished - started).total_seconds() if started and finished else None,
+        "duration": (finished - started).total_seconds()
+        if started and finished
+        else None,
         "agents": agents,
-        "tasks": sorted({Path(t.get("path", "?")).name for t in config.get("tasks", [])}),
+        "tasks": sorted(
+            {Path(t.get("path", "?")).name for t in config.get("tasks", [])}
+        ),
         "count_badges": count_badges,
         "overall_rate": fmt_rate(pass_rate(overall)),
         "skills_rate": fmt_rate(pass_rate(skills)),
@@ -465,11 +475,21 @@ def agent_rollup(jobs: list[dict]) -> list[dict]:
     for job in jobs:
         for t in job["trials"]:
             key = (t.get("agent", "?"), t.get("model", "?"))
-            bucket = rollup.setdefault(key, {
-                "agent": key[0], "model": key[1], "trials": 0, "errors": 0,
-                "overall": [], "skills": [], "requested": [], "token_totals": [],
-                "cost": 0.0, "has_cost": False,
-            })
+            bucket = rollup.setdefault(
+                key,
+                {
+                    "agent": key[0],
+                    "model": key[1],
+                    "trials": 0,
+                    "errors": 0,
+                    "overall": [],
+                    "skills": [],
+                    "requested": [],
+                    "token_totals": [],
+                    "cost": 0.0,
+                    "has_cost": False,
+                },
+            )
             bucket["trials"] += 1
             bucket["errors"] += 1 if t["status"] == "error" else 0
             checks = t["checks"]
@@ -481,9 +501,7 @@ def agent_rollup(jobs: list[dict]) -> list[dict]:
             if isinstance(t.get("input_tokens"), (int, float)) and isinstance(
                 t.get("output_tokens"), (int, float)
             ):
-                bucket["token_totals"].append(
-                    t["input_tokens"] + t["output_tokens"]
-                )
+                bucket["token_totals"].append(t["input_tokens"] + t["output_tokens"])
             if isinstance(t.get("cost_usd"), (int, float)):
                 bucket["cost"] += t["cost_usd"]
                 bucket["has_cost"] = True
@@ -503,14 +521,10 @@ def agent_rollup(jobs: list[dict]) -> list[dict]:
 def page_stats(jobs: list[dict]) -> dict:
     trials = [t for job in jobs for t in job["trials"]]
     overall = [
-        int(t["checks"]["passed"])
-        for t in trials
-        if t["checks"]["kind"] == "named"
+        int(t["checks"]["passed"]) for t in trials if t["checks"]["kind"] == "named"
     ]
     skills = [
-        t["checks"]["skills_in_order"]
-        for t in trials
-        if t["checks"]["kind"] == "named"
+        t["checks"]["skills_in_order"] for t in trials if t["checks"]["kind"] == "named"
     ]
     requested = [
         t["checks"]["requested_change_completed"]

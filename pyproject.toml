@@ -17,7 +17,7 @@ package = false
 
 [tool.basedpyright]
 include = ["harbor", "skills/smol-activate/scripts", "tests"]
-exclude = ["**/.venv", "harbor/shared", "harbor/jobs"]
+exclude = ["**/.venv", "harbor/jobs", "harbor/task/environment"]
 pythonVersion = "3.14"
 venvPath = "."
 venv = ".venv"
@@ -30,3 +30,8 @@ norecursedirs = [".venv", "fixtures", "jobs"]
 pythonpath = ["harbor"]
 python_files = ["test_*.py"]
 testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "basedpyright==1.39.9",
+]
