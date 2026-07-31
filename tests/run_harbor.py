@@ -25,9 +25,9 @@ SMOLURL = TESTS / "fixtures/smolurl"
 TASK_FIXTURES = TESTS / "fixtures/tasks"
 SUPPORTED_AGENTS = ("claude-code", "codex", "kimi-cli", "pi")
 CASES = {
-    "base": TESTS / "harbor/base-lifecycle",
-    "override": TESTS / "harbor/override-lifecycle",
-    "superpowers": TESTS / "harbor/superpowers-lifecycle",
+    "base": TESTS / "harbor/base",
+    "override": TESTS / "harbor/override",
+    "superpowers": TESTS / "harbor/superpowers",
 }
 SMOL_SKILLS = tuple(
     ROOT / f"skills/{name}"

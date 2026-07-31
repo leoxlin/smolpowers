@@ -153,7 +153,7 @@ def test_load_trial_exposes_trace_overview(tmp_path: Path) -> None:
         json.dumps(
             {
                 "trial_name": "task__abc",
-                "task_name": "base-lifecycle",
+                "task_name": "base",
                 "agent_info": {"name": "codex", "model_info": {"name": "gpt-5"}},
                 "agent_result": {
                     "n_input_tokens": 300,
