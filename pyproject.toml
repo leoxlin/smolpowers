@@ -16,7 +16,7 @@ package = false
 
 [tool.basedpyright]
 include = ["harbor", "skills/smol-activate/scripts", "tests"]
-exclude = ["harbor/fixtures", "harbor/jobs"]
+exclude = ["harbor/shared", "harbor/jobs"]
 pythonVersion = "3.14"
 venvPath = "."
 venv = ".venv"

@@ -21,9 +21,7 @@ from harbor.models.trial.config import AgentConfig, TaskConfig
 
 ROOT = Path(__file__).resolve().parents[1]
 HARBOR = Path(__file__).resolve().parent
-FIXTURES = HARBOR / "fixtures"
-SMOLURL = FIXTURES / "smolurl"
-TASK_FIXTURES = FIXTURES / "tasks"
+SHARED = HARBOR / "shared"
 SUPPORTED_AGENTS = ("claude-code", "codex", "kimi-cli", "pi")
 CASES = {
     "base": HARBOR / "tasks/base",
@@ -47,7 +45,7 @@ SUBSCRIPTION_MODEL_PREFIXES = {
     "pi": "openai-codex",
 }
 OVERRIDE_SKILLS = tuple(
-    FIXTURES / f"override-skills/{name}"
+    HARBOR / f"override-skills/{name}"
     for name in (
         "integration-design",
         "integration-plan",
@@ -165,20 +163,11 @@ def stage_task(case: str, destination_root: Path) -> Path:
         ignore=shutil.ignore_patterns("__pycache__"),
     )
     shutil.copytree(
-        TASK_FIXTURES / "common",
+        SHARED,
         staged,
         dirs_exist_ok=True,
         ignore=shutil.ignore_patterns("__pycache__"),
     )
-    shutil.copytree(
-        SMOLURL,
-        staged / "environment/fixture",
-        dirs_exist_ok=True,
-        ignore=shutil.ignore_patterns("__pycache__"),
-    )
-    fixture_tests = FIXTURES / "tests"
-    for source in fixture_tests.glob("*.*"):
-        shutil.copy2(source, staged / "tests" / source.name)
     if case == "base":
         for relative in PLUGIN_PATHS:
             shutil.copytree(
