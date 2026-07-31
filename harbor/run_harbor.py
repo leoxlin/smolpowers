@@ -323,11 +323,18 @@ async def run_cases(
                 else "unknown-model"
             )
             usage = trial.agent_result
-            total_tokens = usage.n_input_tokens + usage.n_output_tokens
+            input_tokens = usage.n_input_tokens if usage is not None else None
+            cache_tokens = usage.n_cache_tokens if usage is not None else None
+            output_tokens = usage.n_output_tokens if usage is not None else None
+            total_tokens = (
+                input_tokens + output_tokens
+                if input_tokens is not None and output_tokens is not None
+                else None
+            )
             print(
                 f"{status} {case} {trial.agent_info.name}={model} "
-                f"tokens=total:{total_tokens} input:{usage.n_input_tokens} "
-                f"cached-input:{usage.n_cache_tokens} output:{usage.n_output_tokens} "
+                f"tokens=total:{total_tokens} input:{input_tokens} "
+                f"cached-input:{cache_tokens} output:{output_tokens} "
                 f"reasoning:{reasoning_tokens(trial)}"
             )
             if not passed:
