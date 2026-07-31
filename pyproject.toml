@@ -14,6 +14,15 @@ dependencies = [
 [tool.uv]
 package = false
 
+[tool.basedpyright]
+include = ["harbor", "skills/smol-activate/scripts", "tests"]
+exclude = ["harbor/fixtures", "harbor/jobs"]
+pythonVersion = "3.14"
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "standard"
+reportMissingTypeStubs = false
+
 [tool.pytest.ini_options]
 addopts = "-ra"
 norecursedirs = [".venv", "fixtures", "jobs"]
