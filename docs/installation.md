@@ -3,34 +3,30 @@
 Smolpowers uses the [skills CLI](https://github.com/vercel-labs/skills).
 Install all five skills as one suite.
 
-## Global installation
-
-Use global installation by default:
-
 ```bash
-npx skills add leoxlin/smolpowers --global --skill '*'
+npx skills add leoxlin/smolpowers
 ```
 
-## Project installation
+After installation, start a new agent session. Request the `smol-activate`
+skill by name and describe the task:
 
-Omit `--global` to install the suite in the current project:
-
-```bash
-npx skills add leoxlin/smolpowers --skill '*'
+```text
+Use the smol-activate skill to [describe the task].
 ```
 
-## Local checkout
+Install the complete suite because `smol-activate` contains resources that all
+phases use. Installation of one phase without the complete suite is not
+supported.
 
-Use an absolute checkout path during local development:
+## Automatic Activation (Optional)
 
-```bash
-npx skills add /absolute/path/to/smolpowers --global --skill '*'
+You can add a project instruction that tells your agent to activate Smolpowers
+for software changes.
+
+For most agents, add this instruction to `AGENTS.md`:
+
+```text
+For software changes, use the smol-activate skill.
 ```
 
-Omit `--global` if you want a project installation.
-
-After installation, start a new agent session if necessary. Request the
-`smol-activate` skill by name and describe the task. Install the complete
-suite because `smol-activate` contains resources that all phases use.
-
-Installation of one phase without the complete suite is not supported.
+For Claude, add the same instruction to `CLAUDE.md`.

@@ -1,7 +1,14 @@
 # Integrations
 
-With selected upstream Superpowers skills installed, configure one by name or
-request it for a single run to replace its Smolpowers phase:
+Install Superpowers with the skills CLI:
+
+```bash
+npx skills add obra/superpowers
+```
+
+With selected upstream Superpowers skills installed, use
+[configuration](configuration.md) to configure one by name, or request it for
+a single run to replace its Smolpowers phase:
 
 - `brainstorming` replaces Design.
 - `writing-plans` replaces Plan.
