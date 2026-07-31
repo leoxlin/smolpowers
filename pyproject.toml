@@ -19,4 +19,4 @@ addopts = "-ra"
 norecursedirs = [".venv", "fixtures", "jobs"]
 pythonpath = ["harbor"]
 python_files = ["test_*.py"]
-testpaths = ["tests", "harbor/tests"]
+testpaths = ["tests"]

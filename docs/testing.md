@@ -3,17 +3,14 @@
 Run the full locked Python 3.14 pytest suite:
 
 ```bash
-bash tests/run-all.sh
+mise run test:unit
 ```
 
 Pass test paths to the same wrapper for focused runs:
 
 ```bash
-bash tests/run-all.sh tests/test_config.py
+mise run test:unit -- tests/test_config.py
 ```
-
-The deterministic suite includes Harbor task validation without making model
-requests.
 
 ## Authenticated lifecycle evaluations
 

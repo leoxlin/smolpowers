@@ -6,7 +6,7 @@ uv = "latest"
 [tasks."test:unit"]
 description = "Run unit tests"
 raw_args = true
-run = "bash tests/run-all.sh"
+run = "uv run --locked pytest -c pyproject.toml"
 
 [tasks."test:integration"]
 description = "Run integration tests"
