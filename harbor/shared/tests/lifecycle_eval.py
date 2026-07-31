@@ -4,7 +4,7 @@ import json
 import re
 
 
-SKILL_PATH_RE = re.compile(r"(?:^|[/\\])skills[/\\]([\w.-]+)[/\\]SKILL\.md\b")
+SKILL_PATH_RE = re.compile(r"(?<![\w.-])skills[/\\]([\w.-]+)[/\\]SKILL\.md\b")
 
 
 def _canonical_skill(value: str) -> str:

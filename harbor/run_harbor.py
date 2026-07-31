@@ -40,6 +40,7 @@ SMOL_SKILLS = tuple(
     )
 )
 PI_SUBSCRIPTION_AGENT = "harbor_agents:SubscriptionPi"
+NPX_SKILLS_CODEX_AGENT = "harbor_agents:NpxSkillsCodex"
 CODEX_AUTH_JSON = Path.home() / ".codex/auth.json"
 PI_AUTH_JSON = Path.home() / ".pi/agent/auth.json"
 KIMI_CREDENTIALS = Path.home() / ".kimi-code/credentials/kimi-code.json"
@@ -220,6 +221,8 @@ def apply_subscription_auth(agents: list[AgentModel]) -> None:
 
 
 def agent_import_path(case: str, agent: str) -> str | None:
+    if case in {"override-superpowers", "control-superpowers"} and agent == "codex":
+        return NPX_SKILLS_CODEX_AGENT
     if agent == "pi":
         return PI_SUBSCRIPTION_AGENT
     return None
