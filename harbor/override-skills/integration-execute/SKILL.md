@@ -11,6 +11,6 @@ Own only the Execute phase of the integration fixture.
 2. Append `execute|<specDir>|<stateDir>` to `<stateDir>/phase-calls.log`, using the absolute loader values.
 3. Change repository-root `app.py` to replace the link shortener's in-memory storage with SQLite using the configured `DATABASE` path. Preserve the existing API, tests, dependencies, and configuration.
 4. Run `python -m unittest discover -s tests`. Only after it passes, mark the plan's single task checked.
-5. Invoke the configured Finish owner, `integration-finish`, with the repository root, configured roots, active request, exact spec path, and exact plan path.
+5. Invoke the configured Finish owner, `smol-finish`, with the repository root, configured roots, active request, exact spec path, and exact plan path.
 
 Do not perform Finish or Git work yourself.

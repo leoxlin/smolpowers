@@ -19,9 +19,10 @@ Run model-backed evaluations separately with
 
 ```bash
 uv run --locked python harbor/run_harbor.py \
-  --case base \
-  --case override \
-  --case superpowers \
+  --case control-base \
+  --case override-custom \
+  --case override-superpowers \
+  --case control-superpowers \
   --agent codex=openai/gpt-5.6-sol
 ```
 
@@ -45,15 +46,18 @@ agents; variables already present in the environment take precedence.
 
 ```bash
 uv run --locked python harbor/run_harbor.py \
-  --case override \
+  --case override-custom \
   --agent codex=openai/gpt-5.6-sol \
   --agent pi=openai-codex/gpt-5.6-sol \
   --agent kimi-cli=kimi/kimi-for-coding \
   --agent claude-code=kimi-for-coding
 ```
 
-The Superpowers case reads its checkout from `--superpowers-root`,
+The Superpowers cases read their checkout from `--superpowers-root`,
 `SUPERPOWERS_ROOT`, or the sibling `../superpowers` directory, in that order.
+The `override-superpowers` case installs Smolpowers and the configured
+Superpowers overrides. The `control-superpowers` case installs only
+Superpowers.
 
 ## Job dashboard and traces
 

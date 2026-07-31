@@ -7,5 +7,6 @@
 - Test observable behavior and structured interfaces, not prose, headings, or static file substrings.
 - Use proportional TDD by default; strict mode requires an observed failing test before production code.
 - Run focused tests via `mise run test:unit -- <paths>` and the full unit suite via `mise run test:unit`.
+- Do not create unit tests for Harbor.
 - Keep Harbor/model-backed fixtures isolated from the source repo; never commit or push from fixtures.
 - Use conventional commit subjects (`feat:`, `fix:`, `test:`, `docs:`, `chore:`).

@@ -15,7 +15,7 @@ timeout_sec = 120
 user = "root"
 
 [verifier.env]
-EXPECTED_SKILLS = '["smol-activate", "integration-design", "integration-plan", "integration-execute", "integration-finish"]'
+EXPECTED_SKILLS = '["smol-activate", "integration-design", "smol-plan", "integration-execute", "smol-finish"]'
 
 [environment]
 build_timeout_sec = 600

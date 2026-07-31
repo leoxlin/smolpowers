@@ -62,11 +62,11 @@ assert (ROOT / "app.py").read_bytes() != (BASELINE / "app.py").read_bytes()
 phase_log = ROOT / config.get("stateDir", ".superpowers") / "phase-calls.log"
 if phase_log.exists():
     calls = phase_log.read_text().splitlines()
-    assert [call.split("|", 1)[0] for call in calls] == [
-        "design",
-        "plan",
-        "execute",
-        "finish",
+    configured_overrides = [
+        name
+        for name, phase in config.get("phases", {}).items()
+        if phase.get("owner", "").startswith("integration-")
     ]
+    assert [call.split("|", 1)[0] for call in calls] == configured_overrides
     expected_roots = f"|{docs}|{phase_log.parent}"
     assert all(call.endswith(expected_roots) for call in calls)

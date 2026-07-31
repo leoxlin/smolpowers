@@ -21,27 +21,29 @@ ANTHROPIC_API_KEY="$OPENROUTER_API_KEY" \
 ANTHROPIC_BASE_URL="https://openrouter.ai/api" \
 CODEX_FORCE_AUTH_JSON=1 \
 uv run --locked python harbor/run_harbor.py \
-  --case override \
-  --case superpowers \
+  --case override-custom \
+  --case override-superpowers \
+  --case control-superpowers \
   --agent claude-code=openrouter/moonshotai/kimi-k2.7-code \
   --agent codex=openai/gpt-5.6-sol \
   --agent kimi-cli=openrouter/moonshotai/kimi-k2.7-code \
   --agent pi=openrouter/moonshotai/kimi-k2.7-code
 CODEX_FORCE_AUTH_JSON=1 \
 uv run --locked python harbor/run_harbor.py \
-  --case base \
+  --case control-base \
   --agent codex=openai/gpt-5.6-sol
 """
 
 [tasks."test:integration:codex"]
-description = "Run the base lifecycle integration test in Codex"
+description = "Run all lifecycle integration tests in Codex"
 raw_args = true
 run = """
 CODEX_FORCE_AUTH_JSON=1 \
 uv run --locked python harbor/run_harbor.py \
-  --case base \
-  --case override \
-  --case superpowers \
+  --case control-base \
+  --case override-custom \
+  --case override-superpowers \
+  --case control-superpowers \
   --agent codex=openai/gpt-5.6-sol
 """
 

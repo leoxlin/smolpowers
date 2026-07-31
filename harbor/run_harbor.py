@@ -24,9 +24,10 @@ HARBOR = Path(__file__).resolve().parent
 SHARED = HARBOR / "shared"
 SUPPORTED_AGENTS = ("claude-code", "codex", "kimi-cli", "pi")
 CASES = {
-    "base": HARBOR / "tasks/base",
-    "override": HARBOR / "tasks/override",
-    "superpowers": HARBOR / "tasks/superpowers",
+    "control-base": HARBOR / "tasks/control-base",
+    "override-custom": HARBOR / "tasks/override-custom",
+    "override-superpowers": HARBOR / "tasks/override-superpowers",
+    "control-superpowers": HARBOR / "tasks/control-superpowers",
 }
 SMOL_SKILLS = tuple(
     ROOT / f"skills/{name}"
@@ -48,13 +49,11 @@ SUBSCRIPTION_MODEL_PREFIXES = {
     "kimi-cli": "kimi",
     "pi": "openai-codex",
 }
-OVERRIDE_SKILLS = tuple(
+CUSTOM_OVERRIDE_SKILLS = tuple(
     HARBOR / f"override-skills/{name}"
     for name in (
         "integration-design",
-        "integration-plan",
         "integration-execute",
-        "integration-finish",
     )
 )
 
@@ -109,13 +108,18 @@ def resolve_superpowers_root(argument: Path | None) -> Path:
 
 
 def skills_for(case: str, superpowers_root: Path) -> tuple[Path, ...]:
-    if case == "base":
+    if case == "control-base":
         return SMOL_SKILLS
-    if case == "override":
-        return SMOL_SKILLS + OVERRIDE_SKILLS
-    return SMOL_SKILLS + (
-        superpowers_root / "skills/writing-plans",
-        superpowers_root / "skills/test-driven-development",
+    if case == "override-custom":
+        return SMOL_SKILLS + CUSTOM_OVERRIDE_SKILLS
+    if case == "override-superpowers":
+        return SMOL_SKILLS + (
+            superpowers_root / "skills/writing-plans",
+            superpowers_root / "skills/test-driven-development",
+        )
+    return tuple(
+        skill.parent
+        for skill in sorted((superpowers_root / "skills").glob("*/SKILL.md"))
     )
 
 
@@ -124,8 +128,8 @@ def validate_inputs(
     agents: list[AgentModel],
     superpowers_root: Path,
 ) -> None:
-    if "base" in cases and any(spec.agent != "codex" for spec in agents):
-        raise ValueError("base lifecycle supports only codex")
+    if "control-base" in cases and any(spec.agent != "codex" for spec in agents):
+        raise ValueError("control-base lifecycle supports only codex")
 
     duplicate_agents = {
         spec.agent for spec in agents if sum(item.agent == spec.agent for item in agents) > 1
@@ -147,19 +151,24 @@ def validate_inputs(
         task = CASES[case]
         if not task.is_dir():
             raise FileNotFoundError(f"missing Harbor task template: {task}")
-        for skill in skills_for(case, superpowers_root):
+        skills = skills_for(case, superpowers_root)
+        if not skills:
+            raise FileNotFoundError(
+                f"missing injected skills beneath: {superpowers_root / 'skills'}"
+            )
+        for skill in skills:
             if not (skill / "SKILL.md").is_file():
                 raise FileNotFoundError(f"missing injected skill: {skill / 'SKILL.md'}")
 
 
 def stage_task(case: str, destination_root: Path) -> Path:
     staged = shutil.copytree(
-        CASES[case],
+        SHARED,
         destination_root / case,
         ignore=shutil.ignore_patterns("__pycache__"),
     )
     shutil.copytree(
-        SHARED,
+        CASES[case],
         staged,
         dirs_exist_ok=True,
         ignore=shutil.ignore_patterns("__pycache__"),
