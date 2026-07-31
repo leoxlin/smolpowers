@@ -3,6 +3,7 @@ import shlex
 from typing import override
 
 from harbor.agents.installed.codex import Codex
+from harbor.agents.installed.kimi_cli import KimiCli
 from harbor.environments.base import BaseEnvironment
 from harbor.models.agent.context import AgentContext
 
@@ -106,3 +107,73 @@ class CodexMix(NpxSkillsCodex):
     @override
     def name() -> str:
         return "codex-mix"
+
+
+class SkillsKimiCli(KimiCli):
+    """Kimi CLI with injected skills and a lifecycle instruction."""
+
+    smolpowers_config: dict[str, object] | None = None
+
+    def __init__(self, *args, lifecycle_instruction: str, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.lifecycle_instruction = lifecycle_instruction
+
+    @override
+    async def run(
+        self,
+        instruction: str,
+        environment: BaseEnvironment,
+        context: AgentContext,
+    ) -> None:
+        if self.skills_dir is None:
+            raise ValueError("SkillsKimiCli requires injected skills")
+        if self.smolpowers_config is not None:
+            config = json.dumps(self.smolpowers_config, indent=2) + "\n"
+            script = (
+                "from pathlib import Path; "
+                f"config = {config!r}; "
+                "Path('/app/.smolpowers.json').write_text(config); "
+                "Path('/opt/fixture/.smolpowers.json').write_text(config)"
+            )
+            await self.exec_as_root(
+                environment,
+                command=f"python -c {shlex.quote(script)}",
+            )
+        await super().run(
+            self.lifecycle_instruction + "\n\n" + instruction,
+            environment,
+            context,
+        )
+
+    @override
+    def populate_context_post_run(self, context: AgentContext) -> None:
+        super().populate_context_post_run(context)
+        trajectory_path = self.logs_dir / "trajectory.json"
+        if not trajectory_path.is_file():
+            return
+        trajectory = json.loads(trajectory_path.read_text())
+        trajectory["agent"]["name"] = self.name()
+        trajectory_path.write_text(json.dumps(trajectory, indent=2) + "\n")
+
+
+class KimiSp(SkillsKimiCli):
+    @staticmethod
+    @override
+    def name() -> str:
+        return "kimi-sp"
+
+
+class KimiSmol(SkillsKimiCli):
+    @staticmethod
+    @override
+    def name() -> str:
+        return "kimi-smol"
+
+
+class KimiMix(SkillsKimiCli):
+    smolpowers_config = MIX_CONFIG
+
+    @staticmethod
+    @override
+    def name() -> str:
+        return "kimi-mix"

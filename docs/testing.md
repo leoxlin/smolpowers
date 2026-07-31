@@ -18,25 +18,35 @@ Run model-backed evaluations separately with
 [Harbor](https://www.harborframework.com/):
 
 ```bash
-PYTHONPATH=harbor \
-CODEX_FORCE_AUTH_JSON=1 \
-uv run --locked harbor jobs start --config harbor/config.yaml
+mise run test:integration:codex
+mise run test:integration:kimi
 ```
 
-The configuration runs one lifecycle task with these Codex agents:
+`mise run test:integration` runs both configurations in sequence.
 
-- `codex-sp` uses the Superpowers lifecycle.
-- `codex-smol` uses the Smolpowers lifecycle.
-- `codex-mix` uses Smolpowers with the Superpowers plan and TDD skills.
+Each configuration runs one lifecycle task with three agents:
+
+- `-sp` uses the Superpowers lifecycle.
+- `-smol` uses the Smolpowers lifecycle.
+- `-mix` uses Smolpowers with the Superpowers plan and TDD skills.
+
+`harbor/config.codex.yaml` defines the Codex agents and
+`harbor/config.kimi.yaml` defines the Kimi CLI agents.
 
 Harbor can run up to eight trials at the same time. The three configured agents
 run at the same time for the current task.
 
 ### Subscription credentials
 
-The agents use the Codex subscription. Run `codex login` before the evaluation
-so that `~/.codex/auth.json` exists. Set `CODEX_FORCE_AUTH_JSON=1` so Harbor
-uses this file.
+The Codex agents use the Codex subscription. Run `codex login` before the
+evaluation so that `~/.codex/auth.json` exists. Set `CODEX_FORCE_AUTH_JSON=1`
+so Harbor uses this file. The mise tasks set this variable for the Codex
+configuration.
+
+The Kimi CLI agents use the Kimi Code subscription. Create an API key in the
+Kimi Code Console and set `KIMI_API_KEY` before the evaluation. Harbor sets a
+128K context limit for `kimi-for-coding`; set `KIMI_MODEL_MAX_CONTEXT_SIZE` to
+use a larger window.
 
 ## Job dashboard and traces
 

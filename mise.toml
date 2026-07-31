@@ -26,7 +26,9 @@ raw_args = true
 run = """
 PYTHONPATH=harbor \
 CODEX_FORCE_AUTH_JSON=1 \
-uv run --locked harbor jobs start --config harbor/config.yaml
+uv run --locked harbor jobs start --config harbor/config.codex.yaml
+PYTHONPATH=harbor \
+uv run --locked harbor jobs start --config harbor/config.kimi.yaml
 """
 
 [tasks."test:integration:codex"]
@@ -35,7 +37,15 @@ raw_args = true
 run = """
 PYTHONPATH=harbor \
 CODEX_FORCE_AUTH_JSON=1 \
-uv run --locked harbor jobs start --config harbor/config.yaml
+uv run --locked harbor jobs start --config harbor/config.codex.yaml
+"""
+
+[tasks."test:integration:kimi"]
+description = "Run all lifecycle integration tests in Kimi CLI"
+raw_args = true
+run = """
+PYTHONPATH=harbor \
+uv run --locked harbor jobs start --config harbor/config.kimi.yaml
 """
 
 [tasks.dashboard]
