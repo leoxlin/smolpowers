@@ -10,15 +10,15 @@ phase owners, ordered companions, or phase-specific settings:
   "stateDir": ".superpowers",
   "phases": {
     "design": {
-      "owner": "superpowers:brainstorming"
+      "owner": "brainstorming"
     },
     "execute": {
-      "owner": "smolpowers:smol-execute",
+      "owner": "smol-execute",
       "companions": [],
       "tdd": "strict"
     },
     "finish": {
-      "owner": "superpowers:finishing-a-development-branch"
+      "owner": "finishing-a-development-branch"
     }
   }
 }
@@ -36,6 +36,9 @@ Paths may be absolute or repository-root-relative. Each phase has one explicit
 `owner` and an optional ordered `companions` array. Omitted phases and
 properties use their defaults. Execute accepts `tdd: proportional` (the
 default) or `strict`.
+
+Use bare skill names. The loader accepts a legacy `namespace:skill` value and
+removes its namespace without a warning.
 
 Missing or invalid configuration warns once and falls back atomically to all
 defaults.

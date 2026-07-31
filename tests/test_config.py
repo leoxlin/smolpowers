@@ -19,20 +19,20 @@ def defaults(project: Path) -> dict:
         "activation": "full",
         "phases": {
             "design": {
-                "owner": "smolpowers:smol-design",
+                "owner": "smol-design",
                 "companions": [],
             },
             "plan": {
-                "owner": "smolpowers:smol-plan",
+                "owner": "smol-plan",
                 "companions": [],
             },
             "execute": {
-                "owner": "smolpowers:smol-execute",
+                "owner": "smol-execute",
                 "companions": [],
                 "tdd": "proportional",
             },
             "finish": {
-                "owner": "smolpowers:smol-finish",
+                "owner": "smol-finish",
                 "companions": [],
             },
         },
@@ -89,28 +89,28 @@ def test_nested_phase_configuration(tmp_path: Path) -> None:
     write_config(
         project,
         '{"phases":{'
-        '"design":{"owner":"superpowers:brainstorming"},'
-        '"execute":{"owner":"smolpowers:smol-execute",'
-        '"companions":["superpowers:test-driven-development"],"tdd":"strict"},'
-        '"finish":{"owner":"superpowers:finishing-a-development-branch",'
+        '"design":{"owner":"legacy:brainstorming"},'
+        '"execute":{"owner":"legacy:smol-execute",'
+        '"companions":["legacy:test-driven-development"],"tdd":"strict"},'
+        '"finish":{"owner":"legacy:finishing-a-development-branch",'
         '"companions":[]}}}\n',
     )
     actual, stderr = load(project)
     assert actual["phases"]["design"] == {
-        "owner": "superpowers:brainstorming",
+        "owner": "brainstorming",
         "companions": [],
     }
     assert actual["phases"]["plan"] == {
-        "owner": "smolpowers:smol-plan",
+        "owner": "smol-plan",
         "companions": [],
     }
     assert actual["phases"]["execute"] == {
-        "owner": "smolpowers:smol-execute",
-        "companions": ["superpowers:test-driven-development"],
+        "owner": "smol-execute",
+        "companions": ["test-driven-development"],
         "tdd": "strict",
     }
     assert actual["phases"]["finish"] == {
-        "owner": "superpowers:finishing-a-development-branch",
+        "owner": "finishing-a-development-branch",
         "companions": [],
     }
     assert stderr == ""
@@ -121,12 +121,12 @@ def test_partial_nested_phase_uses_defaults(tmp_path: Path) -> None:
     write_config(
         project,
         '{"phases":{"execute":{'
-        '"companions":["superpowers:test-driven-development"]}}}\n',
+        '"companions":["legacy:test-driven-development"]}}}\n',
     )
     actual, stderr = load(project)
     assert actual["phases"]["execute"] == {
-        "owner": "smolpowers:smol-execute",
-        "companions": ["superpowers:test-driven-development"],
+        "owner": "smol-execute",
+        "companions": ["test-driven-development"],
         "tdd": "proportional",
     }
     assert stderr == ""
@@ -136,18 +136,18 @@ def test_legacy_phase_owners(tmp_path: Path) -> None:
     project = tmp_path / "legacy-owners"
     write_config(
         project,
-        '{"design":"superpowers:brainstorming",'
-        '"finish":"superpowers:finishing-a-development-branch"}\n',
+        '{"design":"legacy:brainstorming",'
+        '"finish":"legacy:finishing-a-development-branch"}\n',
     )
     actual, stderr = load(project)
     assert actual["phases"]["design"] == {
-        "owner": "superpowers:brainstorming",
+        "owner": "brainstorming",
         "companions": [],
     }
-    assert actual["phases"]["plan"]["owner"] == "smolpowers:smol-plan"
-    assert actual["phases"]["execute"]["owner"] == "smolpowers:smol-execute"
+    assert actual["phases"]["plan"]["owner"] == "smol-plan"
+    assert actual["phases"]["execute"]["owner"] == "smol-execute"
     assert actual["phases"]["finish"] == {
-        "owner": "superpowers:finishing-a-development-branch",
+        "owner": "finishing-a-development-branch",
         "companions": [],
     }
     assert stderr == ""
@@ -157,13 +157,13 @@ def test_legacy_phase_chain(tmp_path: Path) -> None:
     project = tmp_path / "legacy-chain"
     write_config(
         project,
-        '{"execute":["superpowers:test-driven-development",'
-        '"smolpowers:smol-execute"]}\n',
+        '{"execute":["legacy:test-driven-development",'
+        '"legacy:smol-execute"]}\n',
     )
     actual, stderr = load(project)
     assert actual["phases"]["execute"] == {
-        "owner": "smolpowers:smol-execute",
-        "companions": ["superpowers:test-driven-development"],
+        "owner": "smol-execute",
+        "companions": ["test-driven-development"],
         "tdd": "proportional",
     }
     assert stderr == ""
@@ -198,14 +198,17 @@ INVALID_CONFIGS = {
     "unsafe": '{"specDir":"bad\\npath","stateDir":"custom"}\n',
     "legacy-invalid-owner": '{"design":""}\n',
     "legacy-empty-chain": '{"execute":[]}\n',
-    "legacy-non-string-member": '{"execute":["smolpowers:smol-execute",42]}\n',
-    "legacy-empty-member": '{"execute":["","smolpowers:smol-execute"]}\n',
+    "legacy-non-string-member": '{"execute":["legacy:smol-execute",42]}\n',
+    "legacy-empty-member": '{"execute":["","legacy:smol-execute"]}\n',
     "legacy-invalid-tdd": '{"tdd":"sometimes"}\n',
     "invalid-activation": '{"activation":"sometimes"}\n',
-    "mixed-shapes": '{"execute":"smolpowers:smol-execute","phases":{}}\n',
+    "mixed-shapes": '{"execute":"smol-execute","phases":{}}\n',
     "unknown-phase": '{"phases":{"deploy":{"owner":"example:deploy"}}}\n',
     "unknown-phase-property": '{"phases":{"design":{"mode":"fast"}}}\n',
     "empty-owner": '{"phases":{"design":{"owner":""}}}\n',
+    "empty-qualified-owner": (
+        '{"phases":{"design":{"owner":"legacy:"}}}\n'
+    ),
     "non-array-companions": (
         '{"phases":{"execute":{"companions":"example:tdd"}}}\n'
     ),

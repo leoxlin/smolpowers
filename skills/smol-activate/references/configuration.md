@@ -25,7 +25,7 @@ The loader always returns one normalized phase object for each lifecycle phase:
   "activation": "full",
   "phases": {
     "execute": {
-      "owner": "smolpowers:smol-execute",
+      "owner": "smol-execute",
       "companions": [],
       "tdd": "proportional"
     }
@@ -47,9 +47,10 @@ skill is not installed, report that exact skill instead of dropping it or
 running a default.
 
 The preferred `.smolpowers.json` input groups settings beneath `phases`.
-Released flat phase keys, ordered phase arrays, and top-level `tdd` remain
-accepted as legacy input when `phases` is absent. The loader normalizes both
-input shapes, so lifecycle skills consume only explicit phase objects.
+Use bare skill names. Released flat phase keys, ordered phase arrays, and
+top-level `tdd` remain accepted as legacy input when `phases` is absent. The
+loader also removes the namespace from a legacy `namespace:skill` value. Thus,
+lifecycle skills consume only explicit phase objects with bare skill names.
 
 Configuration is loaded when the absolute repository root, both roots,
 activation level, and all four normalized phase objects are known.

@@ -25,3 +25,9 @@ def test_skills_fit_token_budget(monkeypatch: pytest.MonkeyPatch) -> None:
         assert (
             len(encoding.encode(descriptor)) <= MAX_SKILL_METADATA_TOKENS
         ), metadata["name"]
+
+
+def test_skill_names_match_folder_names() -> None:
+    for path in sorted(ROOT.glob("skills/*/SKILL.md")):
+        metadata = yaml.safe_load(path.read_text().split("---", 2)[1])
+        assert metadata["name"] == path.parent.name

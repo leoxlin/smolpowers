@@ -15,10 +15,10 @@ DEFAULT_STATE = ".superpowers"
 DEFAULT_ACTIVATION = "full"
 DEFAULT_TDD = "proportional"
 DEFAULT_OWNERS = {
-    "design": "smolpowers:smol-design",
-    "plan": "smolpowers:smol-plan",
-    "execute": "smolpowers:smol-execute",
-    "finish": "smolpowers:smol-finish",
+    "design": "smol-design",
+    "plan": "smol-plan",
+    "execute": "smol-execute",
+    "finish": "smol-finish",
 }
 PHASES = tuple(DEFAULT_OWNERS)
 WARNING = "smolpowers: invalid configuration; using defaults"
@@ -45,6 +45,13 @@ def safe_string(value: object) -> bool:
         and bool(value)
         and not any(character in value for character in "\0\n\r")
     )
+
+
+def normalize_skill(value: str) -> str:
+    name = value.rpartition(":")[2] if ":" in value else value
+    if not safe_string(name):
+        raise ValueError
+    return name
 
 
 def validate_phase(value: object, allow_tdd: bool) -> bool:
@@ -122,8 +129,13 @@ def normalize_phases(config: dict) -> dict:
     if "phases" in config:
         normalized = default_phases()
         for name, phase in config["phases"].items():
-            normalized[name]["owner"] = phase.get("owner") or DEFAULT_OWNERS[name]
-            normalized[name]["companions"] = phase.get("companions") or []
+            normalized[name]["owner"] = normalize_skill(
+                phase.get("owner") or DEFAULT_OWNERS[name]
+            )
+            normalized[name]["companions"] = [
+                normalize_skill(companion)
+                for companion in phase.get("companions") or []
+            ]
             if name == "execute":
                 normalized[name]["tdd"] = phase.get("tdd") or DEFAULT_TDD
         return normalized
@@ -134,10 +146,12 @@ def normalize_phases(config: dict) -> dict:
         if value is None:
             continue
         if isinstance(value, list):
-            normalized[name]["owner"] = value[-1]
-            normalized[name]["companions"] = value[:-1]
+            normalized[name]["owner"] = normalize_skill(value[-1])
+            normalized[name]["companions"] = [
+                normalize_skill(companion) for companion in value[:-1]
+            ]
         else:
-            normalized[name]["owner"] = value
+            normalized[name]["owner"] = normalize_skill(value)
     normalized["execute"]["tdd"] = config.get("tdd") or DEFAULT_TDD
     return normalized
 

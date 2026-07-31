@@ -1,47 +1,36 @@
 # Installation
 
-Smolpowers supports Claude Code, Codex, Kimi Code, and Pi.
+Smolpowers uses the [skills CLI](https://github.com/vercel-labs/skills).
+Install all five skills as one suite.
 
-## Claude Code
+## Global installation
 
-```bash
-claude plugin marketplace add leoxlin/smolpowers
-claude plugin install smolpowers@smolpowers
-```
-
-## Codex
+Use global installation by default:
 
 ```bash
-codex plugin marketplace add leoxlin/smolpowers
-codex plugin add smolpowers@smolpowers
+npx skills add leoxlin/smolpowers --global --skill '*'
 ```
 
-Start a new Codex session after installation.
+## Project installation
 
-## Kimi Code
-
-Run Kimi Code, then enter:
-
-```text
-/plugins install https://github.com/leoxlin/smolpowers
-/reload
-```
-
-Confirm that you trust the third-party source when prompted.
-
-## Pi
+Omit `--global` to install the suite in the current project:
 
 ```bash
-pi install git:github.com/leoxlin/smolpowers
+npx skills add leoxlin/smolpowers --skill '*'
 ```
 
-## Install from a local checkout
+## Local checkout
 
-Replace the remote source above with the checkout path:
+Use an absolute checkout path during local development:
 
-```text
-Claude Code: claude plugin marketplace add /absolute/path/to/smolpowers
-Codex:       codex plugin marketplace add /absolute/path/to/smolpowers
-Kimi Code:   /plugins install /absolute/path/to/smolpowers
-Pi:          pi install /absolute/path/to/smolpowers
+```bash
+npx skills add /absolute/path/to/smolpowers --global --skill '*'
 ```
+
+Omit `--global` if you want a project installation.
+
+After installation, start a new agent session if necessary. Request the
+`smol-activate` skill by name and describe the task. Install the complete
+suite because `smol-activate` contains resources that all phases use.
+
+Installation of one phase without the complete suite is not supported.

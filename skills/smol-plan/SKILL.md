@@ -9,7 +9,7 @@ Validate the product specification. Write an implementation plan that an agent c
 
 Follow [configuration.md](../smol-activate/references/configuration.md) and apply the configured `plan` phase.
 
-A user request for `superpowers:writing-plans` replaces this phase. Use the [upstream contract](../smol-activate/references/compatibility.md).
+A user request for `writing-plans` replaces this phase. Use the [upstream contract](../smol-activate/references/compatibility.md).
 
 Otherwise, start each companion in its configured sequence. If a different skill owns the phase, start it and stop.
 

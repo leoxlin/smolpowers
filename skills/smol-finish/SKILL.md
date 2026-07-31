@@ -9,7 +9,7 @@ Verify the requirements and the complete change before you report completion.
 
 Follow [configuration.md](../smol-activate/references/configuration.md) and apply the configured `finish` phase.
 
-A request for `superpowers:finishing-a-development-branch` replaces this phase. Use the [upstream contract](../smol-activate/references/compatibility.md).
+A request for `finishing-a-development-branch` replaces this phase. Use the [upstream contract](../smol-activate/references/compatibility.md).
 
 Otherwise, start each companion in its configured sequence. If a different skill owns the phase, start it and stop.
 

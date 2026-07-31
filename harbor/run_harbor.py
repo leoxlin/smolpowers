@@ -30,10 +30,14 @@ CASES = {
 }
 SMOL_SKILLS = tuple(
     ROOT / f"skills/{name}"
-    for name in ("smol-activate", "smol-design", "smol-plan", "smol-execute", "smol-finish")
+    for name in (
+        "smol-activate",
+        "smol-design",
+        "smol-plan",
+        "smol-execute",
+        "smol-finish",
+    )
 )
-PLUGIN_PATHS = (".agents", ".codex-plugin", "hooks", "skills")
-BASE_CODEX_AGENT = "harbor_agents:PluginCodex"
 PI_SUBSCRIPTION_AGENT = "harbor_agents:SubscriptionPi"
 CODEX_AUTH_JSON = Path.home() / ".codex/auth.json"
 PI_AUTH_JSON = Path.home() / ".pi/agent/auth.json"
@@ -143,14 +147,6 @@ def validate_inputs(
         task = CASES[case]
         if not task.is_dir():
             raise FileNotFoundError(f"missing Harbor task template: {task}")
-        if case == "base":
-            for path in (
-                ROOT / ".agents/plugins/marketplace.json",
-                ROOT / ".codex-plugin/plugin.json",
-                ROOT / "hooks/hooks.json",
-            ):
-                if not path.is_file():
-                    raise FileNotFoundError(f"missing plugin file: {path}")
         for skill in skills_for(case, superpowers_root):
             if not (skill / "SKILL.md").is_file():
                 raise FileNotFoundError(f"missing injected skill: {skill / 'SKILL.md'}")
@@ -168,12 +164,6 @@ def stage_task(case: str, destination_root: Path) -> Path:
         dirs_exist_ok=True,
         ignore=shutil.ignore_patterns("__pycache__"),
     )
-    if case == "base":
-        for relative in PLUGIN_PATHS:
-            shutil.copytree(
-                ROOT / relative,
-                staged / "environment/plugin" / relative,
-            )
     if not Task.is_valid_dir(staged):
         raise ValueError(f"invalid staged Harbor task: {staged}")
     return staged
@@ -221,8 +211,6 @@ def apply_subscription_auth(agents: list[AgentModel]) -> None:
 
 
 def agent_import_path(case: str, agent: str) -> str | None:
-    if case == "base":
-        return BASE_CODEX_AGENT
     if agent == "pi":
         return PI_SUBSCRIPTION_AGENT
     return None
@@ -245,7 +233,7 @@ def build_job_config(
                 name=spec.agent if agent_import_path(case, spec.agent) is None else None,
                 import_path=agent_import_path(case, spec.agent),
                 model_name=spec.model,
-                skills=[] if case == "base" else list(skills_for(case, superpowers_root)),
+                skills=list(skills_for(case, superpowers_root)),
                 # Reasoning summaries land in trajectory.json as reasoning_content.
                 kwargs=(
                     {
@@ -253,15 +241,6 @@ def build_job_config(
                         "reasoning_summary": "detailed",
                     }
                     if spec.agent == "codex"
-                    else {}
-                ),
-                env=(
-                    {
-                        "SMOLPOWERS_ACTIVATION_LOG": (
-                            "/logs/agent/smolpowers-activation.json"
-                        )
-                    }
-                    if case == "base"
                     else {}
                 ),
             )

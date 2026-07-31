@@ -9,7 +9,7 @@ Examine the context. Select the product change. Write the product specification.
 
 Follow [configuration.md](../smol-activate/references/configuration.md) and apply the configured `design` phase.
 
-A user request for `superpowers:brainstorming` replaces this phase. Use the [upstream contract](../smol-activate/references/compatibility.md).
+A user request for `brainstorming` replaces this phase. Use the [upstream contract](../smol-activate/references/compatibility.md).
 
 Otherwise, start each companion in its configured sequence. If a different skill owns the phase, start it and stop.
 

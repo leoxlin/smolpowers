@@ -24,18 +24,18 @@ By default, specs and plans are written under `docs/superpowers/`.
 Install Smolpowers:
 
 ```bash
-npx skills add leoxlin/smolpowers
+npx skills add leoxlin/smolpowers --global --skill '*'
 ```
 
-Then run:
+Then request the activation skill by name:
 
 ```text
-/smol-activate [Describe the task]
+Use the smol-activate skill to [describe the task].
 ```
 
 ## Documentation
 
-- [Installation](docs/installation.md) — installing Smolpowers as a plugin.
+- [Installation](docs/installation.md) — global, project, and local checkout installation.
 - [Configuration](docs/configuration.md) — schema, defaults, and examples.
 - [Integrations](docs/integrations.md) — using selected upstream Superpowers skills.
 - [Testing](docs/testing.md) — deterministic tests and model-backed evaluations.
