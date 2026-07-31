@@ -122,7 +122,7 @@ def read_trajectory(trial_dir: Path) -> dict | None:
 
 
 def expected_skills(task: str) -> list[str]:
-    config = Path(__file__).parent / task / "task.toml"
+    config = Path(__file__).parent / "tasks" / task / "task.toml"
     data = tomllib.loads(config.read_text())
     return json.loads(data["verifier"]["env"]["EXPECTED_SKILLS"])
 
@@ -139,7 +139,7 @@ def trace_overview(trial_dir: Path, task: str | None = None) -> dict | None:
     if task:
         try:
             evaluation = evaluate_lifecycle(data, expected_skills(task))
-        except KeyError:
+        except (KeyError, FileNotFoundError):
             evaluation = None
         if evaluation:
             for skill in evaluation["expected"]:
