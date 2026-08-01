@@ -6,28 +6,27 @@ tasks:
   - path: harbor/task
 
 agents:
-  - name: kimi-sp
-    import_path: agents:KimiSp
+  - name: kimi-code-sp
+    import_path: agents:KimiCodeSp
     model_name: kimi/kimi-for-coding
-    skills:
-      - https://github.com/obra/superpowers/tree/v6.2.0/skills
     kwargs:
-      lifecycle_instruction: Use the `using-superpowers` skill.
+      lifecycle_instruction: "Follow the Superpowers lifecycle in order: `using-superpowers`, `brainstorming`, `writing-plans`, `test-driven-development`, `verification-before-completion`. Invoke each skill with the Skill tool."
+      superpowers_ref: v6.2.0
 
-  - name: kimi-smol
-    import_path: agents:KimiSmol
+  - name: kimi-code-smol
+    import_path: agents:KimiCodeSmol
     model_name: kimi/kimi-for-coding
     skills:
       - ./skills
     kwargs:
       lifecycle_instruction: Use the `smol-activate` skill.
 
-  - name: kimi-mix
-    import_path: agents:KimiMix
+  - name: kimi-code-mix
+    import_path: agents:KimiCodeMix
     model_name: kimi/kimi-for-coding
     skills:
       - ./skills
       - https://github.com/obra/superpowers/tree/v6.2.0/skills/writing-plans
       - https://github.com/obra/superpowers/tree/v6.2.0/skills/test-driven-development
     kwargs:
-      lifecycle_instruction: Use the `smol-activate` skill.
+      lifecycle_instruction: "Follow the lifecycle in order: `smol-activate`, `smol-design`, `writing-plans`, `smol-execute`, `test-driven-development`, `smol-finish`. Invoke each skill with the Skill tool."

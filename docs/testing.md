@@ -31,7 +31,7 @@ Each configuration runs one lifecycle task with three agents:
 - `-mix` uses Smolpowers with the Superpowers plan and TDD skills.
 
 `harbor/config.codex.yaml` defines the Codex agents and
-`harbor/config.kimi.yaml` defines the Kimi CLI agents.
+`harbor/config.kimi.yaml` defines the Kimi Code agents.
 
 Harbor can run up to eight trials at the same time. The three configured agents
 run at the same time for the current task.
@@ -43,10 +43,17 @@ evaluation so that `~/.codex/auth.json` exists. Set `CODEX_FORCE_AUTH_JSON=1`
 so Harbor uses this file. The mise tasks set this variable for the Codex
 configuration.
 
-The Kimi CLI agents use the Kimi Code subscription. Create an API key in the
-Kimi Code Console and set `KIMI_API_KEY` before the evaluation. Harbor sets a
-128K context limit for `kimi-for-coding`; set `KIMI_MODEL_MAX_CONTEXT_SIZE` to
-use a larger window.
+The Kimi Code agents use the Kimi Code subscription. Create an API key in the
+Kimi Code Console and set `KIMI_API_KEY` before the evaluation. The agent
+sends the key to `https://api.kimi.com/coding/v1` as `KIMI_MODEL_API_KEY` and
+sets a 256K context limit.
+
+The Kimi Code agents run the Kimi Code CLI (npm package
+`@moonshot-ai/kimi-code`), not the `kimi-cli` Python package. The `-sp` agent
+installs Superpowers as a managed plugin. The plugin manifest adds the skills,
+starts the `using-superpowers` skill at session start, and adds the Kimi Code
+tool mapping (`skillInstructions`) from `.kimi-plugin/plugin.json`. The
+`-smol` and `-mix` agents copy plain skills into `$KIMI_CODE_HOME/skills`.
 
 ## Job dashboard and traces
 

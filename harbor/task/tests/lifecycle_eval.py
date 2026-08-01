@@ -28,6 +28,28 @@ EXPECTED_SKILLS = {
         "test-driven-development",
         "smol-finish",
     ],
+    "kimi-code-sp": [
+        "using-superpowers",
+        "brainstorming",
+        "writing-plans",
+        "test-driven-development",
+        "verification-before-completion",
+    ],
+    "kimi-code-smol": [
+        "smol-activate",
+        "smol-design",
+        "smol-plan",
+        "smol-execute",
+        "smol-finish",
+    ],
+    "kimi-code-mix": [
+        "smol-activate",
+        "smol-design",
+        "writing-plans",
+        "smol-execute",
+        "test-driven-development",
+        "smol-finish",
+    ],
 }
 
 
