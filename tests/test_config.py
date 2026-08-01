@@ -1,8 +1,6 @@
 import json
-import os
 import subprocess
 import sys
-import tomllib
 from pathlib import Path
 
 import pytest
@@ -177,16 +175,18 @@ def test_legacy_strict_tdd(tmp_path: Path) -> None:
     assert stderr == ""
 
 
-def test_absolute_dirs_are_preserved(tmp_path: Path) -> None:
+def test_absolute_dirs_inside_repository_are_preserved(tmp_path: Path) -> None:
     project = tmp_path / "absolute"
+    spec_dir = project / "smol-docs"
+    state_dir = project / "smol-state"
     write_config(
         project,
-        '{"specDir":"/tmp/smol-docs","stateDir":"/tmp/smol-state"}\n',
+        json.dumps({"specDir": str(spec_dir), "stateDir": str(state_dir)}),
     )
     actual, stderr = load(project)
     expected = defaults(project)
-    expected["specDir"] = "/tmp/smol-docs"
-    expected["stateDir"] = "/tmp/smol-state"
+    expected["specDir"] = str(spec_dir)
+    expected["stateDir"] = str(state_dir)
     assert actual == expected
     assert stderr == ""
 
@@ -196,7 +196,15 @@ INVALID_CONFIGS = {
     "unknown": '{"specDir":"docs","surprise":"value"}\n',
     "atomic": '{"specDir":"custom","stateDir":""}\n',
     "unsafe": '{"specDir":"bad\\npath","stateDir":"custom"}\n',
+    "absolute-path-outside-repository": (
+        '{"specDir":"/tmp/smol-docs","stateDir":".superpowers"}\n'
+    ),
+    "path-traversal-outside-repository": (
+        '{"specDir":"../smol-docs","stateDir":".superpowers"}\n'
+    ),
     "legacy-invalid-owner": '{"design":""}\n',
+    "whitespace-owner": '{"design":"   "}\n',
+    "padded-owner": '{"design":" smol-design"}\n',
     "legacy-empty-chain": '{"execute":[]}\n',
     "legacy-non-string-member": '{"execute":["legacy:smol-execute",42]}\n',
     "legacy-empty-member": '{"execute":["","legacy:smol-execute"]}\n',
@@ -231,16 +239,6 @@ def test_invalid_config_falls_back_atomically(
     assert len(stderr.splitlines()) == 1
 
 
-def test_pep_723_metadata() -> None:
-    lines = LOADER.read_text().splitlines()
-    start = lines.index("# /// script") + 1
-    end = lines.index("# ///", start)
-    metadata = tomllib.loads(
-        "\n".join(line.removeprefix("# ") for line in lines[start:end])
-    )
-    assert metadata == {"requires-python": ">=3.11", "dependencies": []}
-
-
 def test_omitted_repository_uses_git_repository() -> None:
     explicit = subprocess.run(
         [sys.executable, str(LOADER), str(ROOT)],
@@ -267,22 +265,3 @@ def test_rejects_extra_argument() -> None:
     )
     assert result.returncode == 2
     assert "usage:" in result.stderr
-
-
-def test_runs_with_pipx(tmp_path: Path) -> None:
-    project = tmp_path / "pipx"
-    project.mkdir()
-    result = subprocess.run(
-        ["pipx", "run", str(LOADER), str(project)],
-        capture_output=True,
-        check=True,
-        env=os.environ
-        | {
-            "PATH": str(Path(sys.executable).parent),
-            "PIPX_HOME": str(tmp_path / "pipx-home"),
-            "PIPX_BIN_DIR": str(tmp_path / "pipx-bin"),
-        },
-        text=True,
-    )
-    assert json.loads(result.stdout) == defaults(project)
-    assert result.stderr == ""

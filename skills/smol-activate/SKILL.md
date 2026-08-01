@@ -1,64 +1,59 @@
 ---
 name: smol-activate
-description: Route applicable work through the first incomplete Design → Plan → Execute → Finish phase. Use when the user requests Smolpowers or a large change.
+description: Start or continue Smolpowers for explicit requests, new features, large refactors, and important changes. Route work through the first incomplete Design → Plan → Execute → Finish phase.
 ---
 
-# Smol Activate
+Smolpowers is now active 🐹
 
-Load the configuration. Apply the activation level. Examine the artifacts. Start one phase when the request is applicable.
+<IMPORTANT>
+- Ignore this skill if you are a subagent with a specific task.
+- Activate the applicable Smolpowers skills.
+- Write Smolpowers text in ASD-STE100.
+- Use this order: `design` → `plan` → `execute` → `finish`.
+- Do not skip, reorder, or run phases in parallel.
+</IMPORTANT>
 
-Write all Smolpowers text in ASD-STE100 Simplified Technical English.
+## Configuration
 
-## Bootstrap
+- Run `python3 <smol-activate>/scripts/load-config.py`. 
+- Save its output as `SMOL_CONFIG`. 
+- Use `specDir` for artifacts and `stateDir` for information only.
 
-Follow [configuration.md](references/configuration.md). Load the repository root, configured roots, activation level, and phase objects.
+Read `SMOL_CONFIG.activation` before phase selection:
 
-## Activation
+- `lite`: Activate for explicit smolpowers requests.
+- `full`: Also activate for new features, large refactors, and important changes.
+- `ultra`: Activate for every change. Do not activate for questions or a requested different workflow. 
 
-Use the configured activation level:
+Use the normal process if the request does not match the level.
 
-| Level | Activate Smolpowers for |
-|---|---|
-| `lite` | A request to use or continue Smolpowers. |
-| `full` | `lite` work, new features, large refactors, and other important changes. |
-| `ultra` | `full` work and each requested code change. |
+## Phase
 
-If the request is not applicable, use the normal agent process.
+1. Use an artifact or slug that the user gives. Otherwise, use the artifact pair that agrees with the request.
+2. Examine the request, repository, and artifacts:
+   - Design: `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
+   - Plan: `<specDir>/plans/YYYY-MM-DD-<slug>.md`
 
-Read [lifecycle.md](references/lifecycle.md) if the correct phase is not clear.
+Select only the FIRST matching phase:
 
-Read [compatibility.md](references/compatibility.md) if an upstream Superpowers skill owns the phase.
+1. `design` if the design is absent, incomplete, incorrect, or stale.
+2. `plan` if the plan is absent, incomplete, incorrect, or stale.
+3. `execute` if plan tasks or verification are incomplete.
+4. `finish` if all plan tasks are complete and the change needs final verification.
 
-## Select One Phase
+Stop if plan tasks and final verification are complete. Read [lifecycle.md](references/lifecycle.md) if selection is unclear.
 
-Examine the request, the repository, and these artifacts:
+## Start a Phase
 
-- `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
-- `<specDir>/plans/YYYY-MM-DD-<slug>.md`
-
-Use an artifact or slug that the user gives. Otherwise, use the artifact pair that agrees with the request.
-
-Start only one configured phase:
-
-1. Start `design` if the product specification is absent, incomplete, incorrect, or stale.
-2. Start `plan` if the specification is current and the implementation plan is not current.
-3. Start `execute` if a plan task or its verification is not complete.
-4. Start `finish` if all plan tasks are complete and the change needs final verification.
-
-If task tracking is available, make one task record for each unchecked plan task.
-
-Return to a prerequisite phase if its artifact is stale. Do not omit a missing phase.
-
-An upstream skill that the user requests replaces the configured phase.
-
-Follow the contract in [compatibility.md](references/compatibility.md). Continue with the next incomplete phase when the upstream skill returns.
+1. Select the requested phase skill, or `SMOL_CONFIG.phases.<phase>.owner`.
+2. Use `smol-<phase>` if the owner is invalid.
+3. Activate relevant `SMOL_CONFIG.phases.<phase>.companions`.
+4. Activate the selected owner.
 
 ## Continue Automatically
 
-Treat a request to build, change, or correct as approval to continue through the lifecycle.
-
-Pause for an important ambiguity, larger scope, destructive action, or external effect.
-
-Stop after the requested artifact if the user requests only a design or a plan.
-
-Do not create worktrees, use subagents, push, publish, or write external files without approval.
+- Return to previous phase for a stale artifact. Do not omit a missing phase.
+- A build, change, or correction request approves all phases.
+- Pause for important ambiguity, larger scope, destructive action, or external effect.
+- Stop after a requested design or plan. Otherwise, continue to the next phase.
+- Stop when Finish completes.

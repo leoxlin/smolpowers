@@ -22,9 +22,13 @@ WARNING = "smolpowers: invalid configuration; using defaults"
 
 
 def resolve_path(repo_root: Path, value: str) -> str:
-    if Path(value).is_absolute() or PureWindowsPath(value).is_absolute():
-        return value
-    return str(repo_root / value)
+    path = Path(value)
+    if PureWindowsPath(value).is_absolute() and not path.is_absolute():
+        raise ValueError
+    resolved = (path if path.is_absolute() else repo_root / path).resolve()
+    if not resolved.is_relative_to(repo_root):
+        raise ValueError
+    return str(resolved)
 
 
 def default_phases() -> dict:
@@ -44,9 +48,15 @@ def safe_string(value: object) -> bool:
     )
 
 
+def safe_skill(value: object) -> bool:
+    return isinstance(value, str) and safe_string(value) and not any(
+        character.isspace() for character in value
+    )
+
+
 def normalize_skill(value: str) -> str:
     name = value.rpartition(":")[2]
-    if not safe_string(name):
+    if not safe_skill(name):
         raise ValueError
     return name
 
@@ -79,12 +89,12 @@ def validate_phase(value: object, allow_tdd: bool) -> bool:
         return False
     companions = value.get("companions")
     return (
-        (value.get("owner") is None or safe_string(value["owner"]))
+        (value.get("owner") is None or safe_skill(value["owner"]))
         and (
             companions is None
             or (
                 isinstance(companions, list)
-                and all(safe_string(companion) for companion in companions)
+                and all(safe_skill(companion) for companion in companions)
             )
         )
         and value.get("tdd") in (None, *TDD_MODES)

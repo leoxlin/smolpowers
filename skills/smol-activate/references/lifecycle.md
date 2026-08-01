@@ -1,21 +1,39 @@
 # Lifecycle Selection
 
-## Artifact states
+## Artifacts
 
-Treat an artifact as incomplete if it does not use ASD-STE100 Simplified Technical English.
+- **Design**: `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`. The specification. It records the goal, scope,
+  constraints, and the chosen approach for the change.
+- **Plan**: `<specDir>/plans/YYYY-MM-DD-<slug>.md`. The implementation plan. It turns the current specification into
+  tasks that have commands which can verify each outcome.
 
-An artifact is also incomplete if it has placeholders, unresolved decisions, or missing required headings.
+## Phases
 
-Treat a spec as stale when the active request or relevant repository behavior materially contradicts its goal, scope, constraints, or chosen approach.
+Smolpowers moves a change through four phases in a fixed order.
 
-Treat a plan as stale when it no longer implements the current spec, names interfaces or files that materially changed, or lacks commands that can verify its outcomes. Do not use timestamps alone; content and repository evidence decide freshness.
+- **Design**: Write or update the Design artifact.
+- **Plan**: Write or update the Plan artifact.
+- **Execute**: Do the tasks in the Plan artifact.
+- **Finish**: Verify the change and do the approved Git actions.
 
-## Resume rules
+Do not skip, reorder, or run phases in parallel. Stop when Finish completes.
+
+## Artifact State
+
+- **Incomplete**: The artifact has placeholders, unresolved decisions, or missing required headings.
+- **Stale design**: The current request or repository behavior contradicts its goal, scope, constraints, or approach.
+- **Stale plan**: It no longer implements the current spec, names changed files or interfaces, or lacks commands that
+  verify its outcomes.
+
+Judge freshness by content and repository evidence, not timestamps.
+
+## Resume Rules
 
 - Existing spec, no plan: Plan.
 - Existing plan with unchecked tasks: Execute.
 - Existing plan with checked tasks but failing checks: Execute.
 - Existing plan with checked tasks and unverified diff: Finish.
+- Existing plan with checked tasks and verified diff: Complete.
 - Changed request that invalidates scope: Design.
 - Changed implementation shape with unchanged product decision: Plan.
 
