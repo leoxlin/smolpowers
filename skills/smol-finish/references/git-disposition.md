@@ -8,8 +8,15 @@ Apply only an already authorized action:
 - open a pull request;
 - merge through the repository's normal process.
 
-Before committing, review `git status`, staged diff, and commit message. Never include unrelated user changes.
+Before committing, review `git status`, staged diff, and commit message. Never include unrelated user changes. Use
+existing conventions for commit message, if there isn't one, use conventional commit message.
 
-Before pushing or opening a pull request, confirm the remote, branch, authentication, and explicit authorization. Use a conventional commit as the pull-request title when one is created.
+## Conventional Commit Message
 
-Never force-push, discard changes, delete a branch, remove a worktree, or rewrite history without explicit authorization.
+Use a conventional commit message. Report this information:
+
+- The artifact paths
+- The implementation result
+- Current verification evidence
+- The commit or exact worktree state
+- Each authentication, availability, or integration problem

@@ -3,14 +3,9 @@ name: smol-finish
 description: Finish a Smolpowers change with complete verification and approved Git actions. Use after all Implementation Plan tasks pass.
 ---
 
-Verify the requirements and the complete change before you report completion.
-
-## Validate the Lifecycle
-
-Require a matching Design Spec and Implementation Plan. Both artifacts must use ASD-STE100.
-
-If the Design Spec or Implementation Plan is absent or stale, or if a task or its result is incomplete, report the problem and
-stop. `smol-activate` owns all phase routing.
+Verify the requirements and the complete change before you report completion. Require a matching Design Spec and
+Implementation Plan. If the Design Spec or Implementation Plan is absent or stale, or if a task or its result is
+incomplete, report the problem and return to the phase routing in `smol-activate`.
 
 ## Verify the Work
 
@@ -32,14 +27,6 @@ approval.
 
 ## Handle Git
 
-Read [git-disposition.md](references/git-disposition.md). Examine the current branch and remotes. Do only the Git action that the user approved.
-
-A local commit does not give approval to push. An implementation request does not give approval for other Git actions.
-
-Use a conventional commit message. Report this information:
-
-- The artifact paths
-- The implementation result
-- Current verification evidence
-- The commit or exact worktree state
-- Each authentication, availability, or integration problem
+Read [git-disposition.md](references/git-disposition.md). Examine the current branch and remotes. Do only the Git action
+that the user approved. A local commit does not give approval to push. An implementation request does not give approval
+for other Git actions.
