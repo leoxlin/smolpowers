@@ -1,8 +1,3 @@
-# /// script
-# requires-python = ">=3.11"
-# dependencies = []
-# ///
-
 import argparse
 import json
 import subprocess
@@ -14,6 +9,7 @@ DEFAULT_SPEC = "docs/superpowers"
 DEFAULT_STATE = ".superpowers"
 DEFAULT_ACTIVATION = "full"
 DEFAULT_TDD = "proportional"
+TDD_MODES = ("proportional", "strict")
 DEFAULT_OWNERS = {
     "design": "smol-design",
     "plan": "smol-plan",
@@ -21,6 +17,7 @@ DEFAULT_OWNERS = {
     "finish": "smol-finish",
 }
 PHASES = tuple(DEFAULT_OWNERS)
+LEGACY_KEYS = set(PHASES) | {"tdd"}
 WARNING = "smolpowers: invalid configuration; using defaults"
 
 
@@ -48,20 +45,41 @@ def safe_string(value: object) -> bool:
 
 
 def normalize_skill(value: str) -> str:
-    name = value.rpartition(":")[2] if ":" in value else value
+    name = value.rpartition(":")[2]
     if not safe_string(name):
         raise ValueError
     return name
+
+
+def to_nested(config: dict) -> dict:
+    """Return phase configuration in nested form, converting legacy keys."""
+    if "phases" in config:
+        return config["phases"]
+    phases = {}
+    for name in PHASES:
+        value = config.get(name)
+        if value is None:
+            continue
+        if isinstance(value, str):
+            phases[name] = {"owner": value}
+        elif isinstance(value, list) and value:
+            phases[name] = {"owner": value[-1], "companions": value[:-1]}
+        else:
+            raise ValueError
+    if config.get("tdd") is not None:
+        phases.setdefault("execute", {})["tdd"] = config["tdd"]
+    return phases
 
 
 def validate_phase(value: object, allow_tdd: bool) -> bool:
     if not isinstance(value, dict):
         return False
     allowed = {"owner", "companions"} | ({"tdd"} if allow_tdd else set())
+    if not set(value) <= allowed:
+        return False
     companions = value.get("companions")
     return (
-        set(value) <= allowed
-        and (value.get("owner") is None or safe_string(value["owner"]))
+        (value.get("owner") is None or safe_string(value["owner"]))
         and (
             companions is None
             or (
@@ -69,22 +87,12 @@ def validate_phase(value: object, allow_tdd: bool) -> bool:
                 and all(safe_string(companion) for companion in companions)
             )
         )
-        and (
-            not allow_tdd
-            or value.get("tdd") is None
-            or value["tdd"] in ("proportional", "strict")
-        )
+        and value.get("tdd") in (None, *TDD_MODES)
     )
 
 
 def validate(config: object) -> None:
-    legacy_keys = set(PHASES) | {"tdd"}
-    allowed = legacy_keys | {
-        "activation",
-        "specDir",
-        "phases",
-        "stateDir",
-    }
+    allowed = LEGACY_KEYS | {"activation", "specDir", "phases", "stateDir"}
     if not isinstance(config, dict) or not set(config) <= allowed:
         raise ValueError
     if config.get("activation") not in (None, "lite", "full", "ultra"):
@@ -94,66 +102,34 @@ def validate(config: object) -> None:
         for name in ("specDir", "stateDir")
     ):
         raise ValueError
-
-    if "phases" in config:
-        phases = config["phases"]
-        if legacy_keys & set(config) or not isinstance(phases, dict):
-            raise ValueError
-        if not set(phases) <= set(PHASES):
-            raise ValueError
-        if not all(
-            name not in phases
-            or validate_phase(phases[name], name == "execute")
-            for name in PHASES
-        ):
-            raise ValueError
-        return
-
-    for name in PHASES:
-        value = config.get(name)
-        if value is None:
-            continue
-        if safe_string(value):
-            continue
-        if (
-            not isinstance(value, list)
-            or not value
-            or not all(safe_string(member) for member in value)
-        ):
-            raise ValueError
-    if config.get("tdd") not in (None, "proportional", "strict"):
+    if config.get("tdd") not in (None, *TDD_MODES):
+        raise ValueError
+    if "phases" in config and LEGACY_KEYS & set(config):
+        raise ValueError
+    phases = to_nested(config)
+    if not isinstance(phases, dict) or not set(phases) <= set(PHASES):
+        raise ValueError
+    if not all(
+        name not in phases
+        or validate_phase(phases[name], name == "execute")
+        for name in PHASES
+    ):
         raise ValueError
 
 
 def normalize_phases(config: dict) -> dict:
-    if "phases" in config:
-        normalized = default_phases()
-        for name, phase in config["phases"].items():
-            normalized[name]["owner"] = normalize_skill(
-                phase.get("owner") or DEFAULT_OWNERS[name]
-            )
-            normalized[name]["companions"] = [
-                normalize_skill(companion)
-                for companion in phase.get("companions") or []
-            ]
-            if name == "execute":
-                normalized[name]["tdd"] = phase.get("tdd") or DEFAULT_TDD
-        return normalized
-
-    normalized = default_phases()
-    for name in PHASES:
-        value = config.get(name)
-        if value is None:
-            continue
-        if isinstance(value, list):
-            normalized[name]["owner"] = normalize_skill(value[-1])
-            normalized[name]["companions"] = [
-                normalize_skill(companion) for companion in value[:-1]
-            ]
-        else:
-            normalized[name]["owner"] = normalize_skill(value)
-    normalized["execute"]["tdd"] = config.get("tdd") or DEFAULT_TDD
-    return normalized
+    phases = default_phases()
+    for name, phase in to_nested(config).items():
+        phases[name]["owner"] = normalize_skill(
+            phase.get("owner") or DEFAULT_OWNERS[name]
+        )
+        phases[name]["companions"] = [
+            normalize_skill(companion)
+            for companion in phase.get("companions") or []
+        ]
+        if name == "execute":
+            phases[name]["tdd"] = phase.get("tdd") or DEFAULT_TDD
+    return phases
 
 
 def normalize(repo_root: Path, config: dict) -> dict:
