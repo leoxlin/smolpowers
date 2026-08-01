@@ -27,10 +27,10 @@ Install Smolpowers:
 npx skills add leoxlin/smolpowers --skill '*'
 ```
 
-Then request the activation skill by name:
+Then invoke the activation skill:
 
 ```text
-Use the smol-activate skill to [describe the task].
+/smol-activate [describe the task].
 ```
 
 ## Documentation
