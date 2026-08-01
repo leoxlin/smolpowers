@@ -53,6 +53,13 @@ description = "Serve the Harbor jobs dashboard (harbor/jobs) on http://127.0.0.1
 raw_args = true
 run = "uv run --locked python harbor/harbor_dashboard.py"
 
+[tasks.clean]
+description = "Clear generated artifacts, keeping harbor/jobs"
+run = """
+rm -rf .ruff_cache .venv tests/.venv
+find . -type d \\( -name __pycache__ -o -name .pytest_cache \\) -exec rm -rf {} +
+"""
+
 [tasks.test]
 description = "Run all tests"
 depends = ["test:unit", "test:integration"]
