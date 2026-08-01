@@ -53,7 +53,7 @@ The Kimi Code agents run the Kimi Code CLI (npm package
 installs Superpowers as a managed plugin. The plugin manifest adds the skills,
 starts the `using-superpowers` skill at session start, and adds the Kimi Code
 tool mapping (`skillInstructions`) from `.kimi-plugin/plugin.json`. The
-`-smol` and `-mix` agents copy plain skills into `$KIMI_CODE_HOME/skills`.
+`-smol` and `-mix` agents get plain skills with the `--skills-dir` flag.
 
 ## Job dashboard and traces
 

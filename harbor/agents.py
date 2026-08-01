@@ -1,12 +1,9 @@
 import json
 import shlex
-import uuid
 from typing import Any, override
 
-from harbor.agents.installed.base import BaseInstalledAgent, with_prompt_template
 from harbor.agents.installed.codex import Codex
-from harbor.agents.installed.kimi_cli import KimiCli
-from harbor.agents.installed.node_install import nvm_node_install_snippet
+from harbor.agents.installed.kimi_code import KimiCode
 from harbor.environments.base import BaseEnvironment
 from harbor.models.agent.context import AgentContext
 from harbor.models.trajectories import (
@@ -95,6 +92,7 @@ class NpxSkillsCodex(Codex):
                 env={"CODEX_HOME": self._REMOTE_CODEX_HOME.as_posix()},
             )
         else:
+            assert skills_dir is not None
             await self.exec_as_agent(
                 environment,
                 command=(
@@ -151,83 +149,7 @@ class CodexMix(NpxSkillsCodex):
         return "codex-mix"
 
 
-class SkillsKimiCli(KimiCli):
-    """Kimi CLI with injected skills and a lifecycle instruction."""
-
-    smolpowers_config: dict[str, object] | None = None
-
-    def __init__(self, *args, lifecycle_instruction: str, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.lifecycle_instruction = lifecycle_instruction
-
-    @override
-    async def run(
-        self,
-        instruction: str,
-        environment: BaseEnvironment,
-        context: AgentContext,
-    ) -> None:
-        if self.skills_dir is None:
-            raise ValueError("SkillsKimiCli requires injected skills")
-        if self.smolpowers_config is not None:
-            config = json.dumps(self.smolpowers_config, indent=2) + "\n"
-            script = (
-                "from pathlib import Path; "
-                f"config = {config!r}; "
-                "Path('/app/.smolpowers.json').write_text(config); "
-                "Path('/opt/fixture/.smolpowers.json').write_text(config)"
-            )
-            await self.exec_as_root(
-                environment,
-                command=f"python -c {shlex.quote(script)}",
-            )
-        await super().run(
-            self.lifecycle_instruction + "\n\n" + instruction,
-            environment,
-            context,
-        )
-
-    @override
-    def populate_context_post_run(self, context: AgentContext) -> None:
-        super().populate_context_post_run(context)
-        trajectory_path = self.logs_dir / "trajectory.json"
-        if not trajectory_path.is_file():
-            return
-        trajectory = json.loads(trajectory_path.read_text())
-        trajectory["agent"]["name"] = self.name()
-        trajectory_path.write_text(json.dumps(trajectory, indent=2) + "\n")
-
-
-class KimiSp(SkillsKimiCli):
-    @staticmethod
-    @override
-    def name() -> str:
-        return "kimi-sp"
-
-
-class KimiSmol(SkillsKimiCli):
-    @staticmethod
-    @override
-    def name() -> str:
-        return "kimi-smol"
-
-
-class KimiMix(SkillsKimiCli):
-    smolpowers_config = MIX_CONFIG
-
-    @staticmethod
-    @override
-    def name() -> str:
-        return "kimi-mix"
-
-
-_KIMI_CODE_PACKAGE = "@moonshot-ai/kimi-code"
 _KIMI_CODE_HOME = EnvironmentPaths.agent_dir / ".kimi-code"
-_KIMI_CODE_OUTPUT = EnvironmentPaths.agent_dir / "kimi-code.txt"
-_NODE_PATH_SETUP = (
-    'if [ -s "$HOME/.nvm/nvm.sh" ]; then . "$HOME/.nvm/nvm.sh"; fi; '
-    'export PATH="$HOME/.local/bin:$PATH"; '
-)
 
 
 class _KimiCodeWireStep:
@@ -241,14 +163,14 @@ class _KimiCodeWireStep:
         self.token_usage: dict[str, Any] | None = None
 
 
-class KimiCodeCli(BaseInstalledAgent):
-    """Kimi Code CLI agent with injected skills and a lifecycle instruction.
+class KimiCodeCli(KimiCode):
+    """Upstream Kimi Code agent with the smolpowers extras.
 
-    Unlike the upstream kimi-cli agent, this runs the Kimi Code CLI
-    (https://github.com/MoonshotAI/kimi-code), whose plugin system consumes
-    the superpowers `.kimi-plugin/plugin.json` manifest (skills, sessionStart,
-    skillInstructions). When `superpowers_ref` is set, the superpowers repo is
-    installed as a managed plugin instead of registering plain skills.
+    Extends `harbor.agents.installed.kimi_code.KimiCode` (install, run loop,
+    `--skills-dir` injection) with a lifecycle instruction prepended to the
+    prompt, an optional superpowers plugin install (the superpowers repo
+    provides the `.kimi-plugin/plugin.json` manifest), the `.smolpowers.json`
+    mix config, and ATIF trajectories parsed from the wire.jsonl session log.
     """
 
     SUPPORTS_ATIF: bool = True
@@ -267,28 +189,6 @@ class KimiCodeCli(BaseInstalledAgent):
         self.superpowers_ref = superpowers_ref
 
     @override
-    async def install(self, environment: BaseEnvironment) -> None:
-        await self.exec_as_root(
-            environment,
-            command=(
-                "if ! command -v curl >/dev/null 2>&1; then "
-                "apt-get update && apt-get install -y curl; fi"
-            ),
-            env={"DEBIAN_FRONTEND": "noninteractive"},
-        )
-        version_spec = f"@{self._version}" if self._version else ""
-        await self.exec_as_agent(
-            environment,
-            command=(
-                "set -euo pipefail; "
-                f"{nvm_node_install_snippet()} && "
-                'mkdir -p "$HOME/.local" && '
-                f'npm install --global --prefix "$HOME/.local" '
-                f"{_KIMI_CODE_PACKAGE}{version_spec} && "
-                f"{_NODE_PATH_SETUP}kimi --version"
-            ),
-        )
-
     def _runtime_env(self) -> dict[str, str]:
         api_key = self._get_env("KIMI_API_KEY")
         if not api_key:
@@ -297,18 +197,18 @@ class KimiCodeCli(BaseInstalledAgent):
                 "trials; the Kimi Code subscription endpoint rejects "
                 "unauthenticated requests"
             )
-        model = (self.model_name or "kimi-for-coding").rsplit("/", 1)[-1]
-        return {
-            "KIMI_CODE_HOME": str(_KIMI_CODE_HOME),
-            "KIMI_DISABLE_TELEMETRY": "true",
-            "KIMI_CODE_NO_AUTO_UPDATE": "true",
-            "KIMI_CODE_BACKGROUND_KEEP_ALIVE_ON_EXIT": "true",
-            "NO_COLOR": "true",
-            "KIMI_MODEL_NAME": model,
-            "KIMI_MODEL_BASE_URL": "https://api.kimi.com/coding/v1",
-            "KIMI_MODEL_API_KEY": api_key,
-            "KIMI_MODEL_MAX_CONTEXT_SIZE": "262144",
-        }
+        env = super()._runtime_env()
+        env.update(
+            {
+                "KIMI_MODEL_NAME": (self.model_name or "kimi-for-coding").rsplit(
+                    "/", 1
+                )[-1],
+                "KIMI_MODEL_BASE_URL": "https://api.kimi.com/coding/v1",
+                "KIMI_MODEL_API_KEY": api_key,
+                "KIMI_MODEL_MAX_CONTEXT_SIZE": "262144",
+            }
+        )
+        return env
 
     async def _install_superpowers_plugin(
         self, environment: BaseEnvironment, env: dict[str, str]
@@ -351,7 +251,6 @@ class KimiCodeCli(BaseInstalledAgent):
         )
 
     @override
-    @with_prompt_template
     async def run(
         self,
         instruction: str,
@@ -372,34 +271,12 @@ class KimiCodeCli(BaseInstalledAgent):
                 environment,
                 command=f"python -c {shlex.quote(script)}",
             )
-        env = self._runtime_env()
         if self.superpowers_ref is not None:
-            await self._install_superpowers_plugin(environment, env)
-        elif self.skills_dir is not None:
-            await self.exec_as_agent(
-                environment,
-                command=(
-                    'mkdir -p "$KIMI_CODE_HOME/skills" && '
-                    f"cp -r {shlex.quote(self.skills_dir)}/* "
-                    '"$KIMI_CODE_HOME/skills/" 2>/dev/null || true'
-                ),
-                env=env,
-            )
-        prompt = self.lifecycle_instruction + "\n\n" + instruction
-        instruction_shell_var = f"harbor_kimi_code_instruction_{uuid.uuid4().hex}"
-        instruction_env_var = instruction_shell_var.upper()
-        run_env = {**env, instruction_env_var: prompt}
-        await self.exec_as_agent(
+            await self._install_superpowers_plugin(environment, self._runtime_env())
+        await super().run(
+            self.lifecycle_instruction + "\n\n" + instruction,
             environment,
-            command=(
-                f"{_NODE_PATH_SETUP}"
-                f'{instruction_shell_var}="${instruction_env_var}"; '
-                f"unset {instruction_env_var}; "
-                f'kimi --prompt "${instruction_shell_var}" '
-                "--output-format stream-json "
-                f"</dev/null 2>&1 | tee {_KIMI_CODE_OUTPUT}"
-            ),
-            env=run_env,
+            context,
         )
 
     def _parse_wire_events(self) -> list[dict[str, Any]]:
