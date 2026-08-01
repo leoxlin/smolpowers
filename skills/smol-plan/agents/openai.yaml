@@ -1,4 +1,4 @@
 interface:
   display_name: "Smol Plan"
   short_description: "Turn a Design Spec into an Implementation Plan"
-  default_prompt: "Use $smol-plan to create a precise, verifiable Implementation Plan from the current Design Spec."
+  default_prompt: "Use $smol-activate to route this work to $smol-plan for an Implementation Plan."

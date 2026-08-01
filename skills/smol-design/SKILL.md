@@ -5,6 +5,8 @@ description: Make a Smolpowers Design Spec. Use when the Design Spec is absent, 
 
 Examine the context. Select the product change. Write the Design Spec.
 
+Require `SMOL_CONFIG` and a selected slug from `smol-activate`. If either value is absent, activate `smol-activate` and stop.
+
 ## Design the Product
 
 Examine the repository, current documents, applicable changes, and the user request before you select an approach. For a

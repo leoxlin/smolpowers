@@ -7,12 +7,15 @@ Review the Implementation Plan. Do each remaining task. Keep each checkbox corre
 Implementation Plan for the same slug. If the Design Spec or Implementation Plan is absent, stale, inconsistent, or not
 verifiable, return to the phase routing in `smol-activate`.
 
+Require `SMOL_CONFIG` and a selected slug from `smol-activate`. If either value is absent, activate `smol-activate` and stop.
+
 Read the complete Implementation Plan before you edit files. Resolve only a conflict that blocks the work. Examine the
 worktree before you change it. Keep unrelated user changes.
 
 ## Implement Tasks
 
 - Do unchecked tasks in sequence unless the Implementation Plan identifies independent tasks.
+- Set the Implementation Plan status to `Active` before the first edit.
 - If task tracking is available, make one task record for each unchecked task.
 - Set a task to `in_progress` before the change. Set it to `completed` only after its checks pass.
 - Read [test-driven-development.md](references/test-driven-development.md). Use the mode in `phases.execute.tdd` for
@@ -26,9 +29,9 @@ If a check has an unexpected failure, find the cause before you edit. Read [debu
 ## Use Subagents
 
 - Do the work directly by default. Do not require subagents.
-- The primary agent must examine each result and run the complete verification. 
+- The primary agent must examine each result and run the complete verification.
 - Use subagents only for independent tasks, separate research, or an important review.
-- Ensure the subagent receive all required context to work effectively
+- Ensure that each subagent receives all required context.
 - Read [delegation.md](references/delegation.md) only if subagents are available and useful.
 
 ## Transition

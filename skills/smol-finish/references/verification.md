@@ -12,6 +12,7 @@ Inspect untracked files as part of the diff. Separate pre-existing user changes 
 
 ## Freshness
 
-Run commands after the final code change. Read their complete output and exit status. A focused test does not prove the build; a linter does not prove runtime behavior; a prior run does not prove current state.
+Run each unique command after the final code change. Read the complete output and exit status. A focused test does not
+prove the build. A linter does not prove runtime behavior. A prior run does not prove current state.
 
 For unavailable integrations, record the executable checked, version if available, command attempted, and exact authentication or availability failure.

@@ -2,6 +2,8 @@
 
 > **For agents:** Do each task in sequence. Update a checkbox only after you verify its result.
 
+**Status:** Active
+
 **Goal:** [Describe the result in one sentence.]
 
 **Architecture:** [Describe the implementation and its limits in two or three sentences.]

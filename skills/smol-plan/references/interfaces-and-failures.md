@@ -18,4 +18,4 @@ Keep one lifecycle owner. Do not put cleanup responsibility in both a caller and
 - Split tasks only when each produces an independently testable outcome or when two tasks can be reviewed independently.
 - Keep scaffolding, docs, and configuration in the outcome that needs them. 
 - Name cross-task interfaces in both the producing and consuming tasks. 
-- Repeat exact signatures; never rely on “as in Task N.”
+- Repeat exact signatures. Never rely on “as in Task N.”

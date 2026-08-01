@@ -1,4 +1,4 @@
 interface:
   display_name: "Smol Design"
   short_description: "Turn a request into a Design Spec"
-  default_prompt: "Use $smol-design to define the goal, scope, and product approach for this work."
+  default_prompt: "Use $smol-activate to route this work to $smol-design for a Design Spec."

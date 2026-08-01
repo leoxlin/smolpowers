@@ -14,7 +14,7 @@ Smolpowers keeps the smallest useful loop from
 [Superpowers](https://github.com/obra/superpowers), adapted from v6.2.0:
 
 It preserves reviewable specs, executable plans, proportional testing, and
-fresh verification—without telemetry, runtime dependencies, mandatory
+fresh verification—without telemetry, third-party runtime packages, mandatory
 worktrees, or mandatory subagents.
 
 By default, specs and plans are written under `docs/superpowers/`.
@@ -24,7 +24,7 @@ By default, specs and plans are written under `docs/superpowers/`.
 Install Smolpowers:
 
 ```bash
-npx skills add leoxlin/smolpowers
+npx skills add leoxlin/smolpowers --skill '*'
 ```
 
 Then request the activation skill by name:

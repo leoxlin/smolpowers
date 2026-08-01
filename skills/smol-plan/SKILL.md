@@ -4,6 +4,7 @@ description: Make a Smolpowers Implementation Plan from a current Design Spec. U
 ---
 
 Validate the Design Spec. Write an Implementation Plan that an agent can do.
+Require `SMOL_CONFIG` and a selected slug from `smol-activate`. If either value is absent, activate `smol-activate` and stop.
 Require a current Design Spec at this path:
 
 `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
@@ -12,16 +13,14 @@ Compare the Design Spec with the request and repository facts. The Design Spec i
 approach do not describe the requested work. If the Design Spec is not current, return to the phase routing in
 `smol-activate`.
 
-## Keep it SIMPLE Stupid
+## Keep the Plan Small
 
-Plan the SMALLEST solution that works, and satisfies all requirements. Keep simplicity in mind.
-- Does it need to exist? (YAGNI)
-- Reuse Exiting Patterns?
-- Use STDLIB?
-- Use Native Platform?
-- Use Existing Dependency?
-- No unrequested abstractions or "for later" scaffolding
-- Shortest diff at the root cause
+Plan the smallest solution that satisfies all requirements.
+- Omit work that does not need to exist.
+- Reuse current patterns.
+- Prefer the standard library, native platform, and installed dependencies.
+- Do not add unrequested abstractions or future scaffolding.
+- Make the shortest change at the root cause.
 
 ## Shape the Implementation
 
@@ -44,7 +43,7 @@ Write this file:
 
 Use [plan-template.md](references/plan-template.md). Keep these elements:
 
-- `Goal`, `Architecture`, and `Global Constraints`
+- `Status`, `Goal`, `Architecture`, and `Global Constraints`
 - Numbered `### Task N` headings
 - `Files`, `Outcome`, and interface details
 - Checkbox steps
@@ -56,6 +55,7 @@ Review it for these problems:
 - A missing Design Spec requirement
 - A placeholder or missing failure case
 - An inconsistent name or interface
+- A missing or invalid `Status` value
 - A command that cannot prove its result
 - An unapproved word, long sentence, contraction, passive sentence, or semicolon
 

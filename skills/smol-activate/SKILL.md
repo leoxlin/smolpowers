@@ -1,61 +1,54 @@
 ---
 name: smol-activate
-description: Start or continue Smolpowers for explicit requests, new features, large refactors, and important changes. Route work through the first incomplete Design → Plan → Execute → Finish phase.
+description: Start or continue Smolpowers for important software changes. Route work through the first incomplete Design → Plan → Execute → Finish phase.
 ---
 
-Smolpowers is now active 🐹
-
 <IMPORTANT>
-- Ignore this skill if you are a subagent with a specific task.
-- Activate the applicable Smolpowers skills.
-- Write Smolpowers text in ASD-STE100.
-- Use this order: `design` → `plan` → `execute` → `finish`.
-- Do not skip, reorder, or run phases in parallel.
+- Ignore this skill as a subagent with a specific task.
+- Use `design` → `plan` → `execute` → `finish` in sequence.
+- Write artifacts in ASD-STE100.
 </IMPORTANT>
 
-## Configuration
+## Load Configuration
 
-- Run `python3 <smol-activate>/scripts/load-config.py`. 
-- Save its output as `SMOL_CONFIG`. 
-- Use `specDir` for artifacts and `stateDir` for information only.
+- Run [load-config.py](scripts/load-config.py) from this skill root with Python 3.10 or later. Use `python3`, `python`, or `py -3`. Pass the repository root or require Git.
+- Save the JSON as `SMOL_CONFIG`. Use `specDir` for artifacts and `stateDir` for information only.
 
 Read `SMOL_CONFIG.activation` before phase selection:
 
-- `manual`: Activate for explicit smolpowers requests.
-- `default`: Activate for new features, large refactors, and important changes.
-- `always`: Activate for every change. Do not activate for questions or a requested different workflow. 
+- `manual`: Use for an explicit Smolpowers request.
+- `default`: Use for an important change.
+- `always`: Use for every change, except questions or a requested different workflow.
 
 Use the normal process if the request does not match the level.
 
-## Phase
+## Select a Phase
 
-1. Use an artifact or slug that the user gives. Otherwise, use the artifact pair that agrees with the request.
-2. Examine the request, repository, and artifacts:
+1. Use the user-specified artifact or slug. Otherwise, match the request to an artifact pair.
+2. Examine these files:
    - Design Spec: `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
    - Implementation Plan: `<specDir>/plans/YYYY-MM-DD-<slug>.md`
+   - Plan status: `**Status:** Active` or `**Status:** Complete`
 
-Select only the FIRST matching phase:
+Select the first match:
 
 1. `design` if the Design Spec is absent, incomplete, incorrect, or stale.
 2. `plan` if the Implementation Plan is absent, incomplete, incorrect, or stale.
 3. `execute` if an Implementation Plan task is incomplete or its verification fails.
-4. `finish` if all Implementation Plan tasks pass verification and Finish is incomplete.
+4. `finish` if all Implementation Plan tasks pass verification and its status is `Active`.
 
-Stop if Finish is complete. Read [lifecycle.md](references/lifecycle.md) if selection is unclear.
+Stop for `Complete` status. Read [lifecycle.md](references/lifecycle.md) if selection is unclear.
 
 ## Start a Phase
 
-1. Select the requested phase skill, or `SMOL_CONFIG.phases.<phase>.owner`.
-2. Use `smol-<phase>` if the owner is invalid.
+1. Select the requested phase skill or `SMOL_CONFIG.phases.<phase>.owner`.
+2. Use `smol-<phase>` if the owner is invalid, unavailable, or cannot load.
 3. Activate relevant `SMOL_CONFIG.phases.<phase>.companions`.
 4. Activate the selected owner.
 
 ## Continue Automatically
 
-- Return to previous phase for a stale artifact. Do not omit a missing phase.
-- A build, change, or correction request approves all phases.
+- Return to an earlier phase for a stale artifact. Do not omit a phase.
+- A change request approves all phases.
 - Pause for important ambiguity, larger scope, destructive action, or external effect.
-- After a phase owner completes, select the first matching phase again.
-- Stop after Design only if the user requested only a Design Spec.
-- Stop after Plan only if the user requested only an Implementation Plan.
-- Stop when Finish completes.
+- After each phase, select again. Stop early only for a Design-only or Plan-only request.

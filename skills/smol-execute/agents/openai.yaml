@@ -1,4 +1,4 @@
 interface:
   display_name: "Smol Execute"
   short_description: "Implement a Smolpowers Implementation Plan task by task"
-  default_prompt: "Use $smol-execute to implement the current Smolpowers Implementation Plan with fresh checks."
+  default_prompt: "Use $smol-activate to route this work to $smol-execute for implementation."

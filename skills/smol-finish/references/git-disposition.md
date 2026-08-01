@@ -2,14 +2,14 @@
 
 Apply only an already authorized action:
 
-- leave verified changes uncommitted;
-- create a local conventional commit;
-- push an existing branch;
-- open a pull request;
-- merge through the repository's normal process.
+- Leave verified changes uncommitted.
+- Create a local conventional commit.
+- Push an existing branch.
+- Open a pull request.
+- Merge through the repository's normal process.
 
-Before committing, review `git status`, staged diff, and commit message. Never include unrelated user changes. Use
-existing conventions for commit message, if there isn't one, use conventional commit message.
+Before a commit, review `git status`, the staged diff, and the commit message. Never include unrelated user changes. Use
+the repository commit convention. Use a conventional commit message when no convention exists.
 
 ## Conventional Commit Message
 

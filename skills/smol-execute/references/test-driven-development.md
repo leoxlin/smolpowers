@@ -46,5 +46,5 @@ Only after green, remove duplication or improve names when that makes the change
 during refactoring. Rerun the focused test after every refactor, then repeat the cycle for the next behavior.
 
 If production code was written during the current task before its test failed, remove that edit and restart at Red.
-Preserve pre-existing user work; when it prevents an honest red state, report that evidence instead of claiming TDD or
-discarding the work.
+Preserve pre-existing user work. If it prevents an honest red state, report that evidence instead of a TDD claim. Do not
+discard the work.
