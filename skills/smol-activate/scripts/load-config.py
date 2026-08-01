@@ -55,10 +55,9 @@ def safe_skill(value: object) -> bool:
 
 
 def normalize_skill(value: str) -> str:
-    name = value.rpartition(":")[2]
-    if not safe_skill(name):
+    if not safe_skill(value) or not safe_skill(value.rpartition(":")[2]):
         raise ValueError
-    return name
+    return value
 
 
 def to_nested(config: dict) -> dict:

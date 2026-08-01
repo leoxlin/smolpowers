@@ -38,10 +38,10 @@ Select only the FIRST matching phase:
 
 1. `design` if the design is absent, incomplete, incorrect, or stale.
 2. `plan` if the plan is absent, incomplete, incorrect, or stale.
-3. `execute` if plan tasks or verification are incomplete.
-4. `finish` if all plan tasks are complete and the change needs final verification.
+3. `execute` if a plan task is incomplete or its verification fails.
+4. `finish` if all plan tasks pass verification and Finish is incomplete.
 
-Stop if plan tasks and final verification are complete. Read [lifecycle.md](references/lifecycle.md) if selection is unclear.
+Stop if Finish is complete. Read [lifecycle.md](references/lifecycle.md) if selection is unclear.
 
 ## Start a Phase
 
@@ -55,5 +55,7 @@ Stop if plan tasks and final verification are complete. Read [lifecycle.md](refe
 - Return to previous phase for a stale artifact. Do not omit a missing phase.
 - A build, change, or correction request approves all phases.
 - Pause for important ambiguity, larger scope, destructive action, or external effect.
-- Stop after a requested design or plan. Otherwise, continue to the next phase.
+- After a phase owner completes, select the first matching phase again.
+- Stop after Design only if the user requested only a design.
+- Stop after Plan only if the user requested only a plan.
 - Stop when Finish completes.

@@ -52,4 +52,4 @@
 
 ## Assumptions
 
-- [Give only applicable assumptions. Add `[PLEASE VERIFY]` to each uncertain statement.]
+- [Give only applicable assumptions. Prefix `**uncertain**` to each uncertain statement.]

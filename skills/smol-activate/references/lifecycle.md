@@ -32,8 +32,8 @@ Judge freshness by content and repository evidence, not timestamps.
 - Existing spec, no plan: Plan.
 - Existing plan with unchecked tasks: Execute.
 - Existing plan with checked tasks but failing checks: Execute.
-- Existing plan with checked tasks and unverified diff: Finish.
-- Existing plan with checked tasks and verified diff: Complete.
+- Existing plan with checked tasks and passing checks: Finish.
+- Completed Finish phase: Complete.
 - Changed request that invalidates scope: Design.
 - Changed implementation shape with unchanged product decision: Plan.
 
