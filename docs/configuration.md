@@ -6,8 +6,8 @@ ordered phase skills, or phase-specific settings:
 ```json
 {
   "activation": "default",
-  "specDir": "docs/superpowers",
-  "stateDir": ".superpowers",
+  "designDir": "docs/superpowers/specs",
+  "planDir": "docs/superpowers/plans",
   "phases": {
     "design": {
       "skills": ["brainstorming"]
@@ -31,7 +31,7 @@ ordered phase skills, or phase-specific settings:
 
 ## Phases
 
-Paths can be absolute or repository-root-relative. Each phase has one ordered `skills` array. Smol Activate activates
+Artifact paths can be absolute or repository-root-relative. Each phase has one ordered `skills` array. Smol Activate activates
 each skill from first to last. The final skill runs the phase. Omitted phases and properties use their defaults. Execute
 accepts `tdd: proportional` by default or `strict`.
 

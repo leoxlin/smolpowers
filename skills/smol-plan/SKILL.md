@@ -7,7 +7,7 @@ Validate the Design Spec. Write an Implementation Plan that an agent can do.
 Require `SMOL_CONFIG` and a selected slug from `smol-activate`. If either value is absent, activate `smol-activate` and stop.
 Require a current Design Spec at this path:
 
-`<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
+`<designDir>/YYYY-MM-DD-<slug>-design.md`
 
 Compare the Design Spec with the request and repository facts. The Design Spec is stale if its goal, constraints, or
 approach do not describe the requested work. If the Design Spec is not current, return to the phase routing in
@@ -39,7 +39,7 @@ complex.
 
 Write this file:
 
-`<specDir>/plans/YYYY-MM-DD-<slug>.md`
+`<planDir>/YYYY-MM-DD-<slug>.md`
 
 Use [plan-template.md](references/plan-template.md). Keep these elements:
 
@@ -63,4 +63,4 @@ Correct each problem before you report the phase result.
 
 ## Transition
 
-Report the exact Implementation Plan path and the configured roots. Follow `smol-activate` for phase routing.
+Report the exact Implementation Plan path and the configured directories. Follow `smol-activate` for phase routing.

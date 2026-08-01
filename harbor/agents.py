@@ -20,8 +20,8 @@ from harbor.models.trial.paths import EnvironmentPaths
 from harbor.utils.trajectory_utils import format_trajectory_json
 
 MIX_CONFIG = {
-    "specDir": "artifacts",
-    "stateDir": ".smol-state",
+    "designDir": "artifacts/specs",
+    "planDir": "artifacts/plans",
     "phases": {
         "design": {
             "skills": ["smol-design"],

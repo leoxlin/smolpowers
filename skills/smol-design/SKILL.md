@@ -29,7 +29,7 @@ effects.
 
 Write this file:
 
-`<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
+`<designDir>/YYYY-MM-DD-<slug>-design.md`
 
 Use [spec-template.md](references/spec-template.md). Replace each placeholder and keep the primary headings.
 
@@ -46,4 +46,4 @@ Correct each problem before you report the phase result.
 
 ## Transition
 
-Report the exact Design Spec path and the configured roots. Follow `smol-activate` for phase routing.
+Report the exact Design Spec path and the configured directories. Follow `smol-activate` for phase routing.

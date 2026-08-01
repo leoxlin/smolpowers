@@ -2,9 +2,9 @@
 
 ## Artifacts
 
-- **Design Spec**: `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`. It records the goal, scope,
+- **Design Spec**: `<designDir>/YYYY-MM-DD-<slug>-design.md`. It records the goal, scope,
   constraints, and the chosen approach for the change.
-- **Implementation Plan**: `<specDir>/plans/YYYY-MM-DD-<slug>.md`. It turns the current Design Spec into
+- **Implementation Plan**: `<planDir>/YYYY-MM-DD-<slug>.md`. It turns the current Design Spec into
   tasks that have commands which can verify each outcome. Its `Status` is `Active` or `Complete`.
 
 ## Phases

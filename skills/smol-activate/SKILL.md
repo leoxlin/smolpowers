@@ -12,7 +12,7 @@ description: Start or continue Smolpowers for important software changes. Route 
 ## Load Configuration
 
 - Run [load-config.py](scripts/load-config.py) from this skill root with Python 3.10 or later. Use `python3`, `python`, or `py -3`. Pass the repository root or require Git.
-- Save the JSON as `SMOL_CONFIG`. Use `specDir` for artifacts and `stateDir` for information only.
+- Save the JSON as `SMOL_CONFIG`. Use `designDir` and `planDir` for artifact locations.
 
 Read `SMOL_CONFIG.activation` before phase selection:
 
@@ -26,8 +26,8 @@ Use the normal process if the request does not match the level.
 
 1. Use the user-specified artifact or slug. Otherwise, match the request to an artifact pair.
 2. Examine these files:
-   - Design Spec: `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
-   - Implementation Plan: `<specDir>/plans/YYYY-MM-DD-<slug>.md`
+   - Design Spec: `<designDir>/YYYY-MM-DD-<slug>-design.md`
+   - Implementation Plan: `<planDir>/YYYY-MM-DD-<slug>.md`
    - Plan status: `**Status:** Active` or `**Status:** Complete`
 
 Select the first match:

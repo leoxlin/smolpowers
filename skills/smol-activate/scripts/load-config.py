@@ -6,8 +6,8 @@ from pathlib import Path
 
 WARNING = "smolpowers: reading config failed, using defaults"
 DEFAULT_CONFIG = {
-    "specDir": "docs/superpowers",
-    "stateDir": ".superpowers",
+    "designDir": "docs/superpowers/specs",
+    "planDir": "docs/superpowers/plans",
     "activation": "default",
     "phases": {
         "design": {

@@ -40,9 +40,10 @@ with tempfile.TemporaryDirectory() as directory:
     assert response.headers["Location"] == link["url"]
 
 config = json.loads(CONFIG.read_text()) if CONFIG.exists() else {}
-docs = ROOT / config.get("specDir", "docs/superpowers")
-spec = only_match(docs / "specs", "*-design.md")
-plan = only_match(docs / "plans", "*.md")
+designs = ROOT / config.get("designDir", "docs/superpowers/specs")
+plans = ROOT / config.get("planDir", "docs/superpowers/plans")
+spec = only_match(designs, "*-design.md")
+plan = only_match(plans, "*.md")
 assert plan.stem == spec.stem.removesuffix("-design")
 
 protected = [".gitignore", "requirements.txt"]
@@ -59,7 +60,7 @@ for relative_path in protected:
     )
 assert (ROOT / "app.py").read_bytes() != (BASELINE / "app.py").read_bytes()
 
-phase_log = ROOT / config.get("stateDir", ".superpowers") / "phase-calls.log"
+phase_log = ROOT / ".smol-state" / "phase-calls.log"
 if phase_log.exists():
     calls = phase_log.read_text().splitlines()
     configured_overrides = [
@@ -68,5 +69,5 @@ if phase_log.exists():
         if phase.get("skills") and phase["skills"][-1].startswith("integration-")
     ]
     assert [call.split("|", 1)[0] for call in calls] == configured_overrides
-    expected_roots = f"|{docs}|{phase_log.parent}"
+    expected_roots = f"|{designs}|{plans}"
     assert all(call.endswith(expected_roots) for call in calls)

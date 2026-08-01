@@ -11,8 +11,8 @@ LOADER = ROOT / "skills/smol-activate/scripts/load-config.py"
 
 def defaults() -> dict:
     return {
-        "specDir": "docs/superpowers",
-        "stateDir": ".superpowers",
+        "designDir": "docs/superpowers/specs",
+        "planDir": "docs/superpowers/plans",
         "activation": "default",
         "phases": {
             "design": {"skills": ["smol-design"]},
@@ -53,13 +53,24 @@ def test_user_config_merges_with_defaults(tmp_path: Path) -> None:
     project = tmp_path / "partial"
     write_config(
         project,
-        '{"specDir":"notes/work","activation":"always",'
-        '"phases":{"execute":{"skills":["test-driven-development",'
-        '"smol-execute"],"tdd":"strict"}}}\n',
+        """
+        {
+            "designDir": "notes/designs",
+            "planDir":"notes/plans",
+            "activation":"always",
+            "phases": {
+                "execute":{
+                    "skills": ["test-driven-development", "smol-execute"],
+                    "tdd": "strict"
+                }
+            }
+        }
+        """,
     )
     actual, stderr = load(project)
     expected = defaults()
-    expected["specDir"] = "notes/work"
+    expected["designDir"] = "notes/designs"
+    expected["planDir"] = "notes/plans"
     expected["activation"] = "always"
     expected["phases"]["execute"] = {
         "skills": ["test-driven-development", "smol-execute"],
