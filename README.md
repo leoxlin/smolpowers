@@ -13,11 +13,12 @@
 Smolpowers keeps the smallest useful loop from
 [Superpowers](https://github.com/obra/superpowers), adapted from v6.2.0:
 
-It preserves reviewable specs, executable plans, proportional testing, and
-fresh verification—without telemetry, third-party runtime packages, mandatory
-worktrees, or mandatory subagents.
+It preserves reviewable specs, executable plans, proportional testing, and fresh verification—without telemetry,
+third-party runtime packages, mandatory worktrees, or mandatory subagents.
 
-By default, specs and plans are written under `docs/superpowers/`.
+Use superpowers if you want an opinionated but more complete and powerful SDD framework.
+
+Use smolpowers if you want a more composable, configurable SDD framework.
 
 ## Quickstart
 

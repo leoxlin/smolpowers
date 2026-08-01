@@ -17,7 +17,8 @@ EXPECTED_SKILLS = {
         "smol-activate",
         "smol-design",
         "writing-plans",
-        ["smol-execute", "test-driven-development"],
+        "test-driven-development",
+        "smol-execute",
         "smol-finish",
     ],
     "kimi-code-smol": [
@@ -31,7 +32,8 @@ EXPECTED_SKILLS = {
         "smol-activate",
         "smol-design",
         "writing-plans",
-        ["smol-execute", "test-driven-development"],
+        "test-driven-development",
+        "smol-execute",
         "smol-finish",
     ],
 }
@@ -72,47 +74,26 @@ def activation_evidence(trajectory: dict) -> list[dict]:
     return evidence
 
 
-def _flatten_expected(expected: list | tuple) -> list:
-    """Flatten phase groups into an ordered skill list.
-
-    Each entry is a skill name or a group of skill names. A group holds a
-    phase owner and its companions; skills in a group can activate in any
-    order.
-    """
-    flattened = []
-    for item in expected:
-        if isinstance(item, str):
-            flattened.append(item)
-        else:
-            flattened.extend(item)
-    return flattened
-
-
 def evaluate_lifecycle(trajectory: dict, expected: list | tuple) -> dict:
     expected = list(expected)
     observed = activation_evidence(trajectory)
     first_positions = {}
     for index, item in enumerate(observed):
         first_positions.setdefault(item["skill"], (index, item["step_id"]))
-    flat = _flatten_expected(expected)
-    missing = [skill for skill in flat if skill not in first_positions]
-
-    def positions_of(item) -> list:
-        skills = [item] if isinstance(item, str) else list(item)
-        return [first_positions[skill] for skill in skills if skill in first_positions]
+    missing = [skill for skill in expected if skill not in first_positions]
 
     def before_or_same(left, right) -> bool:
         return left[0] <= right[0] or (left[1] is not None and left[1] == right[1])
 
-    present_items = [item for item in expected if positions_of(item)]
+    present = [
+        first_positions[skill] for skill in expected if skill in first_positions
+    ]
     ordered = all(
         before_or_same(left, right)
-        for current, following in zip(present_items, present_items[1:])
-        for left in positions_of(current)
-        for right in positions_of(following)
+        for left, right in zip(present, present[1:])
     )
     return {
-        "expected": flat,
+        "expected": expected,
         "observed": observed,
         "missing": missing,
         "passed": not missing and ordered,

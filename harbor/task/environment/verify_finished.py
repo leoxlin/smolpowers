@@ -5,7 +5,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-
 ROOT = Path("/app")
 BASELINE = Path("/opt/fixture")
 CONFIG = ROOT / ".smolpowers.json"
@@ -35,9 +34,7 @@ with tempfile.TemporaryDirectory() as directory:
     with sqlite3.connect(database) as connection:
         saved_link = connection.execute("SELECT code, url FROM links").fetchone()
     assert saved_link == (link["code"], link["url"])
-    restarted_client = create_app(
-        {"TESTING": True, "DATABASE": database}
-    ).test_client()
+    restarted_client = create_app({"TESTING": True, "DATABASE": database}).test_client()
     response = restarted_client.get(f"/{link['code']}")
     assert response.status_code == 302
     assert response.headers["Location"] == link["url"]
@@ -68,7 +65,7 @@ if phase_log.exists():
     configured_overrides = [
         name
         for name, phase in config.get("phases", {}).items()
-        if phase.get("owner", "").startswith("integration-")
+        if phase.get("skills") and phase["skills"][-1].startswith("integration-")
     ]
     assert [call.split("|", 1)[0] for call in calls] == configured_overrides
     expected_roots = f"|{docs}|{phase_log.parent}"

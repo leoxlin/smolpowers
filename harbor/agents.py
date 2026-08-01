@@ -23,13 +23,18 @@ MIX_CONFIG = {
     "specDir": "artifacts",
     "stateDir": ".smol-state",
     "phases": {
-        "design": {"owner": "smol-design"},
-        "plan": {"owner": "writing-plans"},
-        "execute": {
-            "owner": "smol-execute",
-            "companions": ["test-driven-development"],
+        "design": {
+            "skills": ["smol-design"],
         },
-        "finish": {"owner": "smol-finish"},
+        "plan": {
+            "skills": ["writing-plans"],
+        },
+        "execute": {
+            "skills": ["test-driven-development", "smol-execute"],
+        },
+        "finish": {
+            "skills": ["smol-finish"],
+        },
     },
 }
 

@@ -41,10 +41,11 @@ Stop for `Complete` status. Read [lifecycle.md](references/lifecycle.md) if sele
 
 ## Start a Phase
 
-1. Select the requested phase skill or `SMOL_CONFIG.phases.<phase>.owner`.
-2. Use `smol-<phase>` if the owner is invalid, unavailable, or cannot load.
-3. Activate relevant `SMOL_CONFIG.phases.<phase>.companions`.
-4. Activate the selected owner.
+1. Use the requested ordered phase skill list when the user gives one. Otherwise, use
+   `SMOL_CONFIG.phases.<phase>.skills`.
+2. Activate each skill from first to last.
+3. Stop and identify an invalid or unavailable skill.
+4. Let the final skill run the phase.
 
 ## Continue Automatically
 

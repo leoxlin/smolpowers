@@ -9,29 +9,19 @@ ROOT = Path(__file__).resolve().parents[1]
 LOADER = ROOT / "skills/smol-activate/scripts/load-config.py"
 
 
-def defaults(project: Path) -> dict:
+def defaults() -> dict:
     return {
-        "specDir": str(project / "docs/superpowers"),
-        "stateDir": str(project / ".superpowers"),
+        "specDir": "docs/superpowers",
+        "stateDir": ".superpowers",
         "activation": "default",
         "phases": {
-            "design": {
-                "owner": "smol-design",
-                "companions": [],
-            },
-            "plan": {
-                "owner": "smol-plan",
-                "companions": [],
-            },
+            "design": {"skills": ["smol-design"]},
+            "plan": {"skills": ["smol-plan"]},
             "execute": {
-                "owner": "smol-execute",
-                "companions": [],
+                "skills": ["smol-execute"],
                 "tdd": "proportional",
             },
-            "finish": {
-                "owner": "smol-finish",
-                "companions": [],
-            },
+            "finish": {"skills": ["smol-finish"]},
         },
     }
 
@@ -55,23 +45,32 @@ def test_absent_config_uses_defaults(tmp_path: Path) -> None:
     project = tmp_path / "absent"
     project.mkdir()
     actual, stderr = load(project)
-    assert actual == defaults(project)
+    assert actual == defaults()
     assert stderr == ""
 
 
-def test_relative_dirs_are_resolved(tmp_path: Path) -> None:
-    project = tmp_path / "relative"
-    write_config(project, '{"specDir":"notes/work","stateDir":"var/smol"}\n')
+def test_user_config_merges_with_defaults(tmp_path: Path) -> None:
+    project = tmp_path / "partial"
+    write_config(
+        project,
+        '{"specDir":"notes/work","activation":"always",'
+        '"phases":{"execute":{"skills":["test-driven-development",'
+        '"smol-execute"],"tdd":"strict"}}}\n',
+    )
     actual, stderr = load(project)
-    expected = defaults(project)
-    expected["specDir"] = str(project / "notes/work")
-    expected["stateDir"] = str(project / "var/smol")
+    expected = defaults()
+    expected["specDir"] = "notes/work"
+    expected["activation"] = "always"
+    expected["phases"]["execute"] = {
+        "skills": ["test-driven-development", "smol-execute"],
+        "tdd": "strict",
+    }
     assert actual == expected
     assert stderr == ""
 
 
 @pytest.mark.parametrize("activation", ["manual", "default", "always"])
-def test_activation_level(tmp_path: Path, activation: str) -> None:
+def test_activation_value_is_preserved(tmp_path: Path, activation: str) -> None:
     project = tmp_path / activation
     write_config(project, f'{{"activation":"{activation}"}}\n')
     actual, stderr = load(project)
@@ -79,155 +78,27 @@ def test_activation_level(tmp_path: Path, activation: str) -> None:
     assert stderr == ""
 
 
-def test_nested_phase_configuration(tmp_path: Path) -> None:
-    project = tmp_path / "preferred"
+def test_user_keys_are_preserved(tmp_path: Path) -> None:
+    project = tmp_path / "extra-keys"
     write_config(
         project,
-        '{"phases":{'
-        '"design":{"owner":"namespaced:brainstorming"},'
-        '"execute":{"owner":"namespaced:smol-execute",'
-        '"companions":["namespaced:test-driven-development"],"tdd":"strict"},'
-        '"finish":{"owner":"namespaced:finishing-a-development-branch",'
-        '"companions":[]}}}\n',
+        '{"extension":"value","phases":{"design":{"option":true}}}\n',
     )
     actual, stderr = load(project)
+    assert actual["extension"] == "value"
     assert actual["phases"]["design"] == {
-        "owner": "namespaced:brainstorming",
-        "companions": [],
-    }
-    assert actual["phases"]["plan"] == {
-        "owner": "smol-plan",
-        "companions": [],
-    }
-    assert actual["phases"]["execute"] == {
-        "owner": "namespaced:smol-execute",
-        "companions": ["namespaced:test-driven-development"],
-        "tdd": "strict",
-    }
-    assert actual["phases"]["finish"] == {
-        "owner": "namespaced:finishing-a-development-branch",
-        "companions": [],
+        "option": True,
+        "skills": ["smol-design"],
     }
     assert stderr == ""
 
 
-def test_partial_nested_phase_uses_defaults(tmp_path: Path) -> None:
-    project = tmp_path / "preferred-partial"
-    write_config(
-        project,
-        '{"phases":{"execute":{"companions":["namespaced:test-driven-development"]}}}\n',
-    )
+def test_malformed_json_warns_and_uses_defaults(tmp_path: Path) -> None:
+    project = tmp_path / "malformed"
+    write_config(project, "{not json\n")
     actual, stderr = load(project)
-    assert actual["phases"]["execute"] == {
-        "owner": "smol-execute",
-        "companions": ["namespaced:test-driven-development"],
-        "tdd": "proportional",
-    }
-    assert stderr == ""
-
-
-def test_legacy_phase_owners(tmp_path: Path) -> None:
-    project = tmp_path / "legacy-owners"
-    write_config(
-        project,
-        '{"design":"namespaced:brainstorming",'
-        '"finish":"namespaced:finishing-a-development-branch"}\n',
-    )
-    actual, stderr = load(project)
-    assert actual["phases"]["design"] == {
-        "owner": "namespaced:brainstorming",
-        "companions": [],
-    }
-    assert actual["phases"]["plan"]["owner"] == "smol-plan"
-    assert actual["phases"]["execute"]["owner"] == "smol-execute"
-    assert actual["phases"]["finish"] == {
-        "owner": "namespaced:finishing-a-development-branch",
-        "companions": [],
-    }
-    assert stderr == ""
-
-
-def test_legacy_phase_chain(tmp_path: Path) -> None:
-    project = tmp_path / "legacy-chain"
-    write_config(
-        project,
-        '{"execute":["namespaced:test-driven-development","namespaced:smol-execute"]}\n',
-    )
-    actual, stderr = load(project)
-    assert actual["phases"]["execute"] == {
-        "owner": "namespaced:smol-execute",
-        "companions": ["namespaced:test-driven-development"],
-        "tdd": "proportional",
-    }
-    assert stderr == ""
-
-
-def test_legacy_strict_tdd(tmp_path: Path) -> None:
-    project = tmp_path / "legacy-tdd-strict"
-    write_config(project, '{"tdd":"strict"}\n')
-    actual, stderr = load(project)
-    assert actual["phases"]["execute"]["tdd"] == "strict"
-    assert stderr == ""
-
-
-def test_absolute_dirs_inside_repository_are_preserved(tmp_path: Path) -> None:
-    project = tmp_path / "absolute"
-    spec_dir = project / "smol-docs"
-    state_dir = project / "smol-state"
-    write_config(
-        project,
-        json.dumps({"specDir": str(spec_dir), "stateDir": str(state_dir)}),
-    )
-    actual, stderr = load(project)
-    expected = defaults(project)
-    expected["specDir"] = str(spec_dir)
-    expected["stateDir"] = str(state_dir)
-    assert actual == expected
-    assert stderr == ""
-
-
-INVALID_CONFIGS = {
-    "malformed": "{not json\n",
-    "unknown": '{"specDir":"docs","surprise":"value"}\n',
-    "atomic": '{"specDir":"custom","stateDir":""}\n',
-    "unsafe": '{"specDir":"bad\\npath","stateDir":"custom"}\n',
-    "absolute-path-outside-repository": (
-        '{"specDir":"/tmp/smol-docs","stateDir":".superpowers"}\n'
-    ),
-    "path-traversal-outside-repository": (
-        '{"specDir":"../smol-docs","stateDir":".superpowers"}\n'
-    ),
-    "legacy-invalid-owner": '{"design":""}\n',
-    "whitespace-owner": '{"design":"   "}\n',
-    "padded-owner": '{"design":" smol-design"}\n',
-    "legacy-empty-chain": '{"execute":[]}\n',
-    "legacy-non-string-member": '{"execute":["namespaced:smol-execute",42]}\n',
-    "legacy-empty-member": '{"execute":["","namespaced:smol-execute"]}\n',
-    "legacy-invalid-tdd": '{"tdd":"sometimes"}\n',
-    "invalid-activation": '{"activation":"sometimes"}\n',
-    "mixed-shapes": '{"execute":"smol-execute","phases":{}}\n',
-    "unknown-phase": '{"phases":{"deploy":{"owner":"example:deploy"}}}\n',
-    "unknown-phase-property": '{"phases":{"design":{"mode":"fast"}}}\n',
-    "empty-owner": '{"phases":{"design":{"owner":""}}}\n',
-    "empty-qualified-owner": ('{"phases":{"design":{"owner":"namespaced:"}}}\n'),
-    "non-array-companions": ('{"phases":{"execute":{"companions":"example:tdd"}}}\n'),
-    "non-string-companion": '{"phases":{"execute":{"companions":[42]}}}\n',
-    "empty-companion": '{"phases":{"execute":{"companions":[""]}}}\n',
-    "misplaced-tdd": '{"phases":{"design":{"tdd":"strict"}}}\n',
-    "invalid-nested-tdd": '{"phases":{"execute":{"tdd":"sometimes"}}}\n',
-    "phases-scalar": '{"phases":"execute"}\n',
-}
-
-
-@pytest.mark.parametrize(("name", "content"), INVALID_CONFIGS.items())
-def test_invalid_config_falls_back_atomically(
-    tmp_path: Path, name: str, content: str
-) -> None:
-    project = tmp_path / name
-    write_config(project, content)
-    actual, stderr = load(project)
-    assert actual == defaults(project)
-    assert len(stderr.splitlines()) == 1
+    assert actual == defaults()
+    assert stderr.splitlines() == ["smolpowers: reading config failed, using defaults"]
 
 
 def test_omitted_repository_uses_git_repository() -> None:
