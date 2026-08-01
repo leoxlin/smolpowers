@@ -85,6 +85,7 @@ class NpxSkillsCodex(Codex):
                 command=(
                     "set -euo pipefail; "
                     "if [ -s ~/.nvm/nvm.sh ]; then . ~/.nvm/nvm.sh; fi; "
+                    'mkdir -p "$CODEX_HOME" && '
                     "codex plugin marketplace add obra/superpowers "
                     f"--ref {shlex.quote(self.superpowers_ref)} && "
                     "codex plugin add superpowers@superpowers-dev"
