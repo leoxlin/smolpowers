@@ -9,12 +9,11 @@ agents:
   - name: codex-sp
     import_path: agents:CodexSp
     model_name: openai/gpt-5.6-sol
-    skills:
-      - https://github.com/obra/superpowers/tree/v6.2.0/skills
     kwargs:
       reasoning_effort: medium
       reasoning_summary: detailed
       lifecycle_instruction: Use the `using-superpowers` skill.
+      superpowers_ref: v6.2.0
 
   - name: codex-smol
     import_path: agents:CodexSmol

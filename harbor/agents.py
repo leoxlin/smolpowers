@@ -38,13 +38,24 @@ MIX_CONFIG = {
 
 
 class NpxSkillsCodex(Codex):
-    """Codex with injected skills installed by the Skills CLI."""
+    """Codex with injected skills installed by the Skills CLI.
+
+    When `superpowers_ref` is set, the superpowers repo is installed as a
+    Codex plugin instead of copying plain skills with `npx skills add`.
+    """
 
     smolpowers_config: dict[str, object] | None = None
 
-    def __init__(self, *args, lifecycle_instruction: str, **kwargs) -> None:
+    def __init__(
+        self,
+        *args,
+        lifecycle_instruction: str,
+        superpowers_ref: str | None = None,
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.lifecycle_instruction = lifecycle_instruction
+        self.superpowers_ref = superpowers_ref
 
     @override
     async def run(
@@ -54,8 +65,10 @@ class NpxSkillsCodex(Codex):
         context: AgentContext,
     ) -> None:
         skills_dir = self.skills_dir
-        if skills_dir is None:
-            raise ValueError("NpxSkillsCodex requires injected skills")
+        if skills_dir is None and self.superpowers_ref is None:
+            raise ValueError(
+                "NpxSkillsCodex requires injected skills or superpowers_ref"
+            )
         if self.smolpowers_config is not None:
             config = json.dumps(self.smolpowers_config, indent=2) + "\n"
             script = (
@@ -68,22 +81,36 @@ class NpxSkillsCodex(Codex):
                 environment,
                 command=f"python -c {shlex.quote(script)}",
             )
-        await self.exec_as_agent(
-            environment,
-            command=(
-                "if [ -s ~/.nvm/nvm.sh ]; then . ~/.nvm/nvm.sh; fi; "
-                f"npx --yes skills add {shlex.quote(skills_dir)} "
-                "--skill '*' --agent codex -g -y --copy"
-            ),
-        )
-        skill_note = (
-            "Codex setup installed the injected skills with `npx skills add` at "
-            "`/home/agent/.agents/skills`. A skill that disables implicit "
-            "invocation can be absent from the generated skill list. For each "
-            "requested or configured skill, read "
-            "`/home/agent/.agents/skills/<name>/SKILL.md` before you report that "
-            "the skill is not installed.\n\n"
-        )
+        skill_note = ""
+        if self.superpowers_ref is not None:
+            await self.exec_as_agent(
+                environment,
+                command=(
+                    "set -euo pipefail; "
+                    "if [ -s ~/.nvm/nvm.sh ]; then . ~/.nvm/nvm.sh; fi; "
+                    "codex plugin marketplace add obra/superpowers "
+                    f"--ref {shlex.quote(self.superpowers_ref)} && "
+                    "codex plugin add superpowers@superpowers-dev"
+                ),
+                env={"CODEX_HOME": self._REMOTE_CODEX_HOME.as_posix()},
+            )
+        else:
+            await self.exec_as_agent(
+                environment,
+                command=(
+                    "if [ -s ~/.nvm/nvm.sh ]; then . ~/.nvm/nvm.sh; fi; "
+                    f"npx --yes skills add {shlex.quote(skills_dir)} "
+                    "--skill '*' --agent codex -g -y --copy"
+                ),
+            )
+            skill_note = (
+                "Codex setup installed the injected skills with `npx skills add` at "
+                "`/home/agent/.agents/skills`. A skill that disables implicit "
+                "invocation can be absent from the generated skill list. For each "
+                "requested or configured skill, read "
+                "`/home/agent/.agents/skills/<name>/SKILL.md` before you report that "
+                "the skill is not installed.\n\n"
+            )
         await super().run(
             skill_note + self.lifecycle_instruction + "\n\n" + instruction,
             environment,
