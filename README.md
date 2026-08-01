@@ -24,24 +24,24 @@ Smolpowers is a lightweight SDD framework based on [Superpowers](https://github.
     </thead>
     <tbody>
       <tr>
-        <td>Features</td>
-        <td>Minimal</td>
-        <td>Robust</td>
+        <td align="center">Features</td>
+        <td align="center">Minimal</td>
+        <td align="center">Robust</td>
       </tr>
       <tr>
-        <td>Coverage</td>
-        <td>SDD only</td>
-        <td>Full SDLC</td>
+        <td align="center">Coverage</td>
+        <td align="center">SDD only</td>
+        <td align="center">Full SDLC</td>
       </tr>
       <tr>
-        <td>Customization</td>
-        <td>Configurable</td>
-        <td>Opinionated and fixed</td>
+        <td align="center">Customization</td>
+        <td align="center">Configurable</td>
+        <td align="center">Opinionated and fixed</td>
       </tr>
       <tr>
-        <td>Composability</td>
-        <td>Modular and composable</td>
-        <td>Complete framework</td>
+        <td align="center">Composability</td>
+        <td align="center">Modular and composable</td>
+        <td align="center">Complete framework</td>
       </tr>
     </tbody>
   </table>
