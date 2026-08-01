@@ -37,8 +37,8 @@ Paths may be absolute or repository-root-relative. Each phase has one explicit
 properties use their defaults. Execute accepts `tdd: proportional` (the
 default) or `strict`.
 
-Use bare skill names. The loader accepts a legacy `namespace:skill` value and
-removes its namespace without a warning.
+Use bare skill names. The loader also accepts a namespaced `namespace:skill`
+value and keeps the namespace.
 
 Missing or invalid configuration warns once and falls back atomically to all
 defaults.
