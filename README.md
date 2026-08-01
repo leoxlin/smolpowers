@@ -12,16 +12,46 @@
 
 Smolpowers is a lightweight SDD framework based on [Superpowers](https://github.com/obra/superpowers).
 
-It does not aim to replace Superpowers or replicate its effectiveness. Instead, it provides a simpler SDD loop with the
-same reviewable specifications, executable plans, proportional testing, and post-execution verification. You can also
-[compose](docs/integrations.md) Superpowers skills with Smolpowers whenever you need additional rigor or functionality.
+<br>
+<div align="center">
+  <table align="center">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>🐹 <em>Smolpowers</em></th>
+        <th>🦸 <strong>Superpowers</strong></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Features</td>
+        <td>Minimal</td>
+        <td>Robust</td>
+      </tr>
+      <tr>
+        <td>Coverage</td>
+        <td>SDD only</td>
+        <td>Full SDLC</td>
+      </tr>
+      <tr>
+        <td>Customization</td>
+        <td>Configurable</td>
+        <td>Opinionated and fixed</td>
+      </tr>
+      <tr>
+        <td>Composability</td>
+        <td>Modular and composable</td>
+        <td>Complete framework</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<br>
 
-| Category      | 🐹 *Smolpowers*        | 🦸 **Superpowers**                 |
-|---------------|------------------------|------------------------------------|
-| Features      | Minimal                | Robust                             |
-| Coverage      | SDD only               | Full SDLC                          |
-| Customization | Configurable           | Opinionated and fixed              |
-| Composability | Modular and composable | Complete framework                 |
+Smolpowers does not aim to replace Superpowers or replicate its effectiveness. Instead, it provides a simpler SDD loop
+with the same reviewable specifications, executable plans, proportional testing, and post-execution verification. You
+can also [compose](docs/integrations.md) Superpowers skills with Smolpowers whenever you need additional rigor or
+functionality.
 
 Use Smolpowers when composability, configurability, and easy integration with other skills matter more than a complete
 development framework.
