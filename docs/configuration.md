@@ -31,17 +31,9 @@ ordered phase skills, or phase-specific settings:
 
 ## Phases
 
-Paths can be absolute or repository-root-relative. Each phase has one ordered
-`skills` array. Smol Activate activates each skill from first to last. The
-final skill runs the phase. Omitted phases and properties use their defaults.
-Execute accepts `tdd: proportional` by default or `strict`.
+Paths can be absolute or repository-root-relative. Each phase has one ordered `skills` array. Smol Activate activates
+each skill from first to last. The final skill runs the phase. Omitted phases and properties use their defaults. Execute
+accepts `tdd: proportional` by default or `strict`.
 
-Use bare skill names. The loader also accepts a namespaced `namespace:skill`
-value and keeps the namespace.
-
-Missing or invalid configuration warns once and falls back atomically to all
-defaults.
-
-Released phase objects with `owner` and `companions` remain accepted as
-migration input. The loader puts companions first and the owner last. Do not
-mix these properties with `skills` in one phase.
+Use bare skill names. The loader also accepts a namespaced `namespace:skill` value and keeps the namespace. Missing or
+invalid configuration warns once and falls back atomically to all defaults.
