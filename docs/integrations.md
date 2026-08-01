@@ -1,20 +1,28 @@
 # Integrations
 
+## Superpowers
+
 Install Superpowers with the skills CLI:
 
 ```bash
 npx skills add obra/superpowers
 ```
 
-With selected upstream Superpowers skills installed, use [configuration](configuration.md) to configure one as the final
-phase skill. You can also request it for one run:
+With selected Superpowers skills installed, use [configuration](configuration.md) to configure which skills Smolpowers
+activates in each phase.
 
-- `brainstorming` replaces Design.
-- `writing-plans` replaces Plan.
-- `subagent-driven-development` replaces Execute.
-- `finishing-a-development-branch` replaces Finish.
+- `brainstorming` replaces `smol-design`.
+- `writing-plans` replaces `smol-plan`.
+- `subagent-driven-development` replaces `smol-execute`.
+- `finishing-a-development-branch` replaces `smol-finish`.
 
-To use the exact upstream TDD skill instead of built-in strict mode, put it before Smol Execute:
+Smolpowers activates each configured skill in order. The final skill runs the phase and returns control to the
+lifecycle. Upstream `executing-plans` replaces both Execute and Finish because it continues into upstream branch
+finishing.
+
+### Examples
+
+Use the Superpowers TDD skill instead of the built-in TDD in `smol-execute`
 
 ```json
 {
@@ -29,8 +37,20 @@ To use the exact upstream TDD skill instead of built-in strict mode, put it befo
 }
 ```
 
-Smolpowers activates each configured skill in order. The final skill runs the phase and returns control to the
-lifecycle. Upstream `executing-plans` replaces both Execute and Finish because it continues into upstream branch
-finishing.
+Use Superpowers for planning instead of `smol-plan`
 
-Install the selected upstream skills with the five Smolpowers skills. Then, request `smol-activate` by name.
+```json
+{
+  "phases": {
+    "plan": {
+      "skills": [
+        "writing-plans",
+      ]
+    }
+  }
+}
+```
+
+## OpenSpec
+
+> Coming Soon!

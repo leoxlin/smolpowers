@@ -10,15 +10,21 @@
 
 ## Why smolpowers
 
-Smolpowers keeps the smallest useful loop from
-[Superpowers](https://github.com/obra/superpowers), adapted from v6.2.0:
+Smolpowers is a lightweight SDD framework based on [Superpowers](https://github.com/obra/superpowers).
 
-It preserves reviewable specs, executable plans, proportional testing, and fresh verification—without telemetry,
-third-party runtime packages, mandatory worktrees, or mandatory subagents.
+It does not aim to replace Superpowers or replicate its effectiveness. Instead, it provides a simpler SDD loop with the
+same reviewable specifications, executable plans, proportional testing, and post-execution verification. You can also
+[compose](docs/integrations.md) Superpowers skills with Smolpowers whenever you need additional rigor or functionality.
 
-Use superpowers if you want an opinionated but more complete and powerful SDD framework.
+| Category      | 🐹 *Smolpowers*        | 🦸 **Superpowers**                 |
+|---------------|------------------------|------------------------------------|
+| Features      | Minimal                | Robust                             |
+| Coverage      | SDD only               | Full SDLC                          |
+| Customization | Configurable           | Opinionated and fixed              |
+| Composability | Modular and composable | Complete framework                 |
 
-Use smolpowers if you want a more composable, configurable SDD framework.
+Use Smolpowers when composability, configurability, and easy integration with other skills matter more than a complete
+development framework.
 
 ## Quickstart
 
