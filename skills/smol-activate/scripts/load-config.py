@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -25,6 +26,16 @@ DEFAULT_CONFIG = {
         },
     },
 }
+ENVIRONMENT_PATHS = {
+    "SMOL_DESIGN_DIR": ("designDir",),
+    "SMOL_PLAN_DIR": ("planDir",),
+    "SMOL_ACTIVATION": ("activation",),
+    "SMOL_PHASES_DESIGN_SKILLS": ("phases", "design", "skills"),
+    "SMOL_PHASES_PLAN_SKILLS": ("phases", "plan", "skills"),
+    "SMOL_PHASES_EXECUTE_SKILLS": ("phases", "execute", "skills"),
+    "SMOL_PHASES_EXECUTE_TDD": ("phases", "execute", "tdd"),
+    "SMOL_PHASES_FINISH_SKILLS": ("phases", "finish", "skills"),
+}
 
 
 def config_merge(a: dict, b: dict) -> dict:
@@ -37,12 +48,30 @@ def config_merge(a: dict, b: dict) -> dict:
     return result
 
 
+def config_set(config: dict, keys: tuple[str], value):
+    for key in keys[:-1]:
+        config = config.setdefault(key, {})
+    config[keys[-1]] = value
+
+
+def environment_override() -> dict:
+    config = {}
+    for name, path in ENVIRONMENT_PATHS.items():
+        if name not in os.environ:
+            continue
+        value = os.environ[name]
+        if name.endswith("SKILLS"):
+            value = value.split(",")
+        config_set(config, path, value)
+    return config
+
+
 def load(repo_root: Path) -> dict:
     config_file = repo_root / ".smolpowers.json"
-    if not config_file.is_file():
-        return DEFAULT_CONFIG
-    user_config = json.loads(config_file.read_text())
-    return config_merge(user_config, DEFAULT_CONFIG)
+    user_config = json.loads(config_file.read_text()) if config_file.is_file() else {}
+    return config_merge(
+        environment_override(), config_merge(user_config, DEFAULT_CONFIG)
+    )
 
 
 def repository_root(value: str | None) -> Path:

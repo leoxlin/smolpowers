@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -26,11 +27,14 @@ def defaults() -> dict:
     }
 
 
-def load(project: Path) -> tuple[dict, str]:
+def load(project: Path, environment: dict[str, str] | None = None) -> tuple[dict, str]:
+    process_environment = os.environ.copy()
+    process_environment.update(environment or {})
     result = subprocess.run(
         [sys.executable, str(LOADER), str(project)],
         capture_output=True,
         check=True,
+        env=process_environment,
         text=True,
     )
     return json.loads(result.stdout), result.stderr
@@ -77,6 +81,87 @@ def test_user_config_merges_with_defaults(tmp_path: Path) -> None:
         "tdd": "strict",
     }
     assert actual == expected
+    assert stderr == ""
+
+
+def test_environment_overrides_all_config_values(tmp_path: Path) -> None:
+    project = tmp_path / "environment"
+    project.mkdir()
+    actual, stderr = load(
+        project,
+        {
+            "SMOL_DESIGN_DIR": "env/designs",
+            "SMOL_PLAN_DIR": "env/plans",
+            "SMOL_ACTIVATION": "always",
+            "SMOL_PHASES_DESIGN_SKILLS": "brainstorming,smol-design",
+            "SMOL_PHASES_PLAN_SKILLS": "writing-plans",
+            "SMOL_PHASES_EXECUTE_SKILLS": ("test-driven-development,smol-execute"),
+            "SMOL_PHASES_EXECUTE_TDD": "strict",
+            "SMOL_PHASES_FINISH_SKILLS": ("finishing-a-development-branch"),
+        },
+    )
+    assert actual == {
+        "designDir": "env/designs",
+        "planDir": "env/plans",
+        "activation": "always",
+        "phases": {
+            "design": {"skills": ["brainstorming", "smol-design"]},
+            "plan": {"skills": ["writing-plans"]},
+            "execute": {
+                "skills": ["test-driven-development", "smol-execute"],
+                "tdd": "strict",
+            },
+            "finish": {"skills": ["finishing-a-development-branch"]},
+        },
+    }
+    assert stderr == ""
+
+
+def test_environment_has_priority_over_file(tmp_path: Path) -> None:
+    project = tmp_path / "priority"
+    write_config(
+        project,
+        """
+        {
+            "designDir": "file/designs",
+            "planDir": "file/plans",
+            "activation": "manual",
+            "phases": {
+                "design": {"skills": ["file-design"]},
+                "plan": {"skills": ["file-plan"]},
+                "execute": {"skills": ["file-execute"], "tdd": "proportional"},
+                "finish": {"skills": ["file-finish"]}
+            }
+        }
+        """,
+    )
+    actual, stderr = load(
+        project,
+        {
+            "SMOL_DESIGN_DIR": "env/designs",
+            "SMOL_PLAN_DIR": "env/plans",
+            "SMOL_ACTIVATION": "always",
+            "SMOL_PHASES_DESIGN_SKILLS": "env-design",
+            "SMOL_PHASES_PLAN_SKILLS": "env-plan",
+            "SMOL_PHASES_EXECUTE_SKILLS": "env-check,env-execute",
+            "SMOL_PHASES_EXECUTE_TDD": "strict",
+            "SMOL_PHASES_FINISH_SKILLS": "env-finish",
+        },
+    )
+    assert actual == {
+        "designDir": "env/designs",
+        "planDir": "env/plans",
+        "activation": "always",
+        "phases": {
+            "design": {"skills": ["env-design"]},
+            "plan": {"skills": ["env-plan"]},
+            "execute": {
+                "skills": ["env-check", "env-execute"],
+                "tdd": "strict",
+            },
+            "finish": {"skills": ["env-finish"]},
+        },
+    }
     assert stderr == ""
 
 
