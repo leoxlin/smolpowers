@@ -7,7 +7,7 @@ from pathlib import Path, PureWindowsPath
 
 DEFAULT_SPEC = "docs/superpowers"
 DEFAULT_STATE = ".superpowers"
-DEFAULT_ACTIVATION = "full"
+DEFAULT_ACTIVATION = "default"
 DEFAULT_TDD = "proportional"
 TDD_MODES = ("proportional", "strict")
 DEFAULT_OWNERS = {
@@ -104,7 +104,7 @@ def validate(config: object) -> None:
     allowed = LEGACY_KEYS | {"activation", "specDir", "phases", "stateDir"}
     if not isinstance(config, dict) or not set(config) <= allowed:
         raise ValueError
-    if config.get("activation") not in (None, "lite", "full", "ultra"):
+    if config.get("activation") not in (None, "manual", "default", "always"):
         raise ValueError
     if not all(
         config.get(name) is None or safe_string(config[name])

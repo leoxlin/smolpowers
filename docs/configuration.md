@@ -5,7 +5,7 @@ phase owners, ordered companions, or phase-specific settings:
 
 ```json
 {
-  "activation": "full",
+  "activation": "default",
   "specDir": "docs/superpowers",
   "stateDir": ".superpowers",
   "phases": {
@@ -26,9 +26,9 @@ phase owners, ordered companions, or phase-specific settings:
 
 ## Activation
 
-- `lite`: only explicit requests to use or resume Smolpowers.
-- `full` (default): new features, large refactors, and other non-trivial changes.
-- `ultra`: every requested code change.
+- `manual`: only explicit requests to use or resume Smolpowers.
+- `default` (used when unset): new features, large refactors, and other non-trivial changes.
+- `always`: every requested code change.
 
 ## Phases
 

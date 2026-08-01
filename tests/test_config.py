@@ -13,7 +13,7 @@ def defaults(project: Path) -> dict:
     return {
         "specDir": str(project / "docs/superpowers"),
         "stateDir": str(project / ".superpowers"),
-        "activation": "full",
+        "activation": "default",
         "phases": {
             "design": {
                 "owner": "smol-design",
@@ -70,7 +70,7 @@ def test_relative_dirs_are_resolved(tmp_path: Path) -> None:
     assert stderr == ""
 
 
-@pytest.mark.parametrize("activation", ["lite", "full", "ultra"])
+@pytest.mark.parametrize("activation", ["manual", "default", "always"])
 def test_activation_level(tmp_path: Path, activation: str) -> None:
     project = tmp_path / activation
     write_config(project, f'{{"activation":"{activation}"}}\n')

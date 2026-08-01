@@ -21,9 +21,9 @@ Smolpowers is now active 🐹
 
 Read `SMOL_CONFIG.activation` before phase selection:
 
-- `lite`: Activate for explicit smolpowers requests.
-- `full`: Also activate for new features, large refactors, and important changes.
-- `ultra`: Activate for every change. Do not activate for questions or a requested different workflow. 
+- `manual`: Activate for explicit smolpowers requests.
+- `default`: Activate for new features, large refactors, and important changes.
+- `always`: Activate for every change. Do not activate for questions or a requested different workflow. 
 
 Use the normal process if the request does not match the level.
 
