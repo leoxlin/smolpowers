@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- [Copy each project constraint from the specification with its exact value.]
+- [Copy each project constraint from the Design Spec with its exact value.]
 
 ---
 
@@ -59,7 +59,7 @@ Expected: PASS with [specific output or count].
 
 - [ ] **Step 5: Record the outcome**
 
-[Complete the task only when the files, interfaces, failure behavior, and check agree with this plan.]
+[Complete the task only when the files, interfaces, failure behavior, and check agree with this Implementation Plan.]
 
 ## Complete Verification
 

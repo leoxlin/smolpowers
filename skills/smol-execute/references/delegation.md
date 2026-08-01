@@ -14,6 +14,6 @@ The primary agent must:
 2. resolve integration conflicts;
 3. run the focused checks;
 4. run the complete verification;
-5. keep plan checkboxes and evidence truthful.
+5. keep Implementation Plan checkboxes and evidence truthful.
 
 If these conditions do not hold, execute directly.

@@ -31,15 +31,15 @@ Use the normal process if the request does not match the level.
 
 1. Use an artifact or slug that the user gives. Otherwise, use the artifact pair that agrees with the request.
 2. Examine the request, repository, and artifacts:
-   - Design: `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
-   - Plan: `<specDir>/plans/YYYY-MM-DD-<slug>.md`
+   - Design Spec: `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
+   - Implementation Plan: `<specDir>/plans/YYYY-MM-DD-<slug>.md`
 
 Select only the FIRST matching phase:
 
-1. `design` if the design is absent, incomplete, incorrect, or stale.
-2. `plan` if the plan is absent, incomplete, incorrect, or stale.
-3. `execute` if a plan task is incomplete or its verification fails.
-4. `finish` if all plan tasks pass verification and Finish is incomplete.
+1. `design` if the Design Spec is absent, incomplete, incorrect, or stale.
+2. `plan` if the Implementation Plan is absent, incomplete, incorrect, or stale.
+3. `execute` if an Implementation Plan task is incomplete or its verification fails.
+4. `finish` if all Implementation Plan tasks pass verification and Finish is incomplete.
 
 Stop if Finish is complete. Read [lifecycle.md](references/lifecycle.md) if selection is unclear.
 
@@ -56,6 +56,6 @@ Stop if Finish is complete. Read [lifecycle.md](references/lifecycle.md) if sele
 - A build, change, or correction request approves all phases.
 - Pause for important ambiguity, larger scope, destructive action, or external effect.
 - After a phase owner completes, select the first matching phase again.
-- Stop after Design only if the user requested only a design.
-- Stop after Plan only if the user requested only a plan.
+- Stop after Design only if the user requested only a Design Spec.
+- Stop after Plan only if the user requested only an Implementation Plan.
 - Stop when Finish completes.

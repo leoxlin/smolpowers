@@ -1,4 +1,4 @@
-# [Feature Name] Design
+# [Feature Name] Design Spec
 
 **Date:** YYYY-MM-DD
 **Status:** Current

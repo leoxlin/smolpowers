@@ -6,7 +6,7 @@ For each requirement, record:
 
 | Requirement | Implementation evidence | Verification command | Result |
 |---|---|---|---|
-| [Exact spec statement] | [File, behavior, or diff] | `[fresh command]` | [Exit status and count] |
+| [Exact Design Spec statement] | [File, behavior, or diff] | `[fresh command]` | [Exit status and count] |
 
 Inspect untracked files as part of the diff. Separate pre-existing user changes from lifecycle work.
 

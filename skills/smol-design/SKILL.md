@@ -1,9 +1,9 @@
 ---
 name: smol-design
-description: Make a Smolpowers product specification. Use when the specification is absent, incomplete, or stale.
+description: Make a Smolpowers Design Spec. Use when the Design Spec is absent, incomplete, or stale.
 ---
 
-Examine the context. Select the product change. Write the product specification.
+Examine the context. Select the product change. Write the Design Spec.
 
 ## Design the Product
 
@@ -23,7 +23,7 @@ Specify this information:
 Use reasonable values for small details. Pause only if an answer can change scope, behavior, damage risk, or external
 effects.
 
-## Write the Spec
+## Write the Design Spec
 
 Write this file:
 
@@ -44,5 +44,5 @@ Correct each problem before you report the phase result.
 
 ## Transition
 
-Report the exact specification path and the configured roots. Do not start another skill or phase. `smol-activate` owns
+Report the exact Design Spec path and the configured roots. Do not start another skill or phase. `smol-activate` owns
 all phase routing.

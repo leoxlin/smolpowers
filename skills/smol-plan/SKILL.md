@@ -1,35 +1,25 @@
 ---
 name: smol-plan
-description: Make a Smolpowers implementation plan from a current specification. Use when the plan is absent, incomplete, or stale.
+description: Make a Smolpowers Implementation Plan from a current Design Spec. Use when the Implementation Plan is absent, incomplete, or stale.
 ---
 
-# Smol Plan
-
-Validate the product specification. Write an implementation plan that an agent can do.
-
-Follow [configuration.md](../smol-activate/references/configuration.md) and apply the configured `plan` phase.
-
-A user request for `writing-plans` replaces this phase. Use the [upstream contract](../smol-activate/references/compatibility.md).
-
-Otherwise, start each companion in its configured sequence. If a different skill owns the phase, start it and stop.
+Validate the Design Spec. Write an Implementation Plan that an agent can do.
 
 ## Validate the Prerequisite
 
-Require a current specification at this path:
+Require a current Design Spec at this path:
 
 `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
 
-Compare the specification with the request and repository facts.
+Compare the Design Spec with the request and repository facts.
 
-The specification is stale if its goal, constraints, or approach do not describe the requested work.
-
-If the specification is not current, start the configured `design` phase and stop.
+The Design Spec is stale if its goal, constraints, or approach do not describe the requested work. If the
+Design Spec is not current, report the problem and stop. `smol-activate` owns all phase routing.
 
 ## Shape the Implementation
 
 Examine the applicable code paths and tests. Specify this information:
-
-- The smallest implementation that satisfies the specification
+- The smallest implementation that satisfies the Design Spec
 - The file responsibilities and public interfaces
 - The data flow and lifecycle owner
 - The failure behavior and recovery path
@@ -58,7 +48,7 @@ Replace each placeholder. Give each task all necessary information. Make sure th
 
 Write the complete artifact in ASD-STE100. Review it for these problems:
 
-- A missing specification requirement
+- A missing Design Spec requirement
 - A placeholder or missing failure case
 - An inconsistent name or interface
 - A command that cannot prove its result
@@ -68,6 +58,5 @@ Correct each problem before you report the phase result.
 
 ## Transition
 
-If the user requested implementation, start the configured `execute` phase. Give it the exact artifact paths.
-
-If the user requested only a plan, report the artifact path and stop.
+Report the exact Implementation Plan path and the configured roots. Do not start another skill or phase. `smol-activate` owns all
+phase routing.
