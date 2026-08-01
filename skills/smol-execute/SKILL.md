@@ -40,7 +40,5 @@ The primary agent must examine each result and run the complete verification. Do
 
 ## Transition
 
-Report the exact Implementation Plan path and the task results. Do not start another skill or phase. `smol-activate` owns all phase
-routing.
-
+Report the exact Implementation Plan path and the task results. Follow `smol-activate` for phase routing.
 Do not push, publish, or cause another external effect without user approval.

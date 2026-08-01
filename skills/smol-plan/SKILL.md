@@ -4,17 +4,24 @@ description: Make a Smolpowers Implementation Plan from a current Design Spec. U
 ---
 
 Validate the Design Spec. Write an Implementation Plan that an agent can do.
-
-## Validate the Prerequisite
-
 Require a current Design Spec at this path:
 
 `<specDir>/specs/YYYY-MM-DD-<slug>-design.md`
 
-Compare the Design Spec with the request and repository facts.
+Compare the Design Spec with the request and repository facts. The Design Spec is stale if its goal, constraints, or
+approach do not describe the requested work. If the Design Spec is not current, return to the phase routing in
+`smol-activate`.
 
-The Design Spec is stale if its goal, constraints, or approach do not describe the requested work. If the
-Design Spec is not current, report the problem and stop. `smol-activate` owns all phase routing.
+## Keep it SIMPLE Stupid
+
+Plan the SMALLEST solution that works, and satisfies all requirements. Keep simplicity in mind.
+- Does it need to exist? (YAGNI)
+- Reuse Exiting Patterns?
+- Use STDLIB?
+- Use Native Platform?
+- Use Existing Dependency?
+- No unrequested abstractions or "for later" scaffolding
+- Shortest diff at the root cause
 
 ## Shape the Implementation
 
@@ -26,9 +33,8 @@ Examine the applicable code paths and tests. Specify this information:
 - The task limits and observable results
 - The test-first steps and exact final checks
 
-Do not require worktrees, future abstractions, or subagents. Keep setup and documents with the task that needs them.
-
-Read [interfaces-and-failures.md](references/interfaces-and-failures.md) if an interface, migration, or cleanup path is complex.
+Read [interfaces-and-failures.md](references/interfaces-and-failures.md) if an interface, migration, or cleanup path is
+complex.
 
 ## Write the Implementation Plan
 
@@ -44,10 +50,9 @@ Use [plan-template.md](references/plan-template.md). Keep these elements:
 - Checkbox steps
 - Exact verification commands and expected results
 
-Replace each placeholder. Give each task all necessary information. Make sure that all interface definitions agree.
+Replace each placeholder, give each task all necessary information. Make sure that all interface definitions agree.
 
-Write the complete artifact in ASD-STE100. Review it for these problems:
-
+Review it for these problems:
 - A missing Design Spec requirement
 - A placeholder or missing failure case
 - An inconsistent name or interface
@@ -58,5 +63,4 @@ Correct each problem before you report the phase result.
 
 ## Transition
 
-Report the exact Implementation Plan path and the configured roots. Do not start another skill or phase. `smol-activate` owns all
-phase routing.
+Report the exact Implementation Plan path and the configured roots. Follow `smol-activate` for phase routing.

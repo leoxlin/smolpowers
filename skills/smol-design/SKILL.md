@@ -44,5 +44,4 @@ Correct each problem before you report the phase result.
 
 ## Transition
 
-Report the exact Design Spec path and the configured roots. Do not start another skill or phase. `smol-activate` owns
-all phase routing.
+Report the exact Design Spec path and the configured roots. Follow `smol-activate` for phase routing.
