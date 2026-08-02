@@ -1,0 +1,40 @@
+{
+  "cases": [
+    {
+      "id": "explicit-activation",
+      "request": "Use smol-activate to add a pros and cons table to README."
+    },
+    {
+      "id": "explicit-opt-out",
+      "request": "Do not activate Smolpowers. Remove LEGACY_KEYS."
+    },
+    {
+      "id": "analysis-only",
+      "request": "Investigate why test_config is failing and explain the cause."
+    },
+    {
+      "id": "documentation-only",
+      "request": "Add a pros and cons table to README."
+    },
+    {
+      "id": "tests-only",
+      "request": "Fix the configuration tests. Do not change load-config.py."
+    },
+    {
+      "id": "git-only",
+      "request": "Commit the current changes."
+    },
+    {
+      "id": "mechanical-correction",
+      "request": "Rename the local variable result to config_result in one test."
+    },
+    {
+      "id": "configuration-schema",
+      "request": "Allow environment variables to override every part of the configuration schema."
+    },
+    {
+      "id": "interface-refactor",
+      "request": "Replace phase owners and companions with one ordered phase skills interface."
+    }
+  ]
+}

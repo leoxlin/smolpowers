@@ -26,26 +26,64 @@ raw_args = true
 run = """
 PYTHONPATH=harbor \
 CODEX_FORCE_AUTH_JSON=1 \
-uv run --locked harbor jobs start --config harbor/config.codex.yaml
+uv run --locked harbor jobs start --config harbor/config.codex.yaml \
+  --path harbor/tasks/verify-small-change
 PYTHONPATH=harbor \
-uv run --locked harbor jobs start --config harbor/config.kimi.yaml
+CODEX_FORCE_AUTH_JSON=1 \
+uv run --locked harbor jobs start --config harbor/config.codex.yaml \
+  --path harbor/tasks/verify-activation \
+  --agent agents:CodexSmol \
+  --model openai/gpt-5.6-sol \
+  --skill ./skills \
+  --ak reasoning_effort=medium \
+  --ak reasoning_summary=detailed \
+  --ak 'lifecycle_instruction=Use the `smol-activate` skill.'
+PYTHONPATH=harbor \
+uv run --locked harbor jobs start --config harbor/config.kimi.yaml \
+  --path harbor/tasks/verify-small-change
+PYTHONPATH=harbor \
+uv run --locked harbor jobs start --config harbor/config.kimi.yaml \
+  --path harbor/tasks/verify-activation \
+  --agent agents:KimiSmol \
+  --model kimi/kimi-for-coding \
+  --skill ./skills \
+  --ak 'lifecycle_instruction=Use the `smol-activate` skill.'
 """
 
 [tasks."test:integration:codex"]
-description = "Run all lifecycle integration tests in Codex"
+description = "Run all Codex integration tests"
 raw_args = true
 run = """
 PYTHONPATH=harbor \
 CODEX_FORCE_AUTH_JSON=1 \
-uv run --locked harbor jobs start --config harbor/config.codex.yaml
+uv run --locked harbor jobs start --config harbor/config.codex.yaml \
+  --path harbor/tasks/verify-small-change
+PYTHONPATH=harbor \
+CODEX_FORCE_AUTH_JSON=1 \
+uv run --locked harbor jobs start --config harbor/config.codex.yaml \
+  --path harbor/tasks/verify-activation \
+  --agent agents:CodexSmol \
+  --model openai/gpt-5.6-sol \
+  --skill ./skills \
+  --ak reasoning_effort=medium \
+  --ak reasoning_summary=detailed \
+  --ak 'lifecycle_instruction=Use the `smol-activate` skill.'
 """
 
 [tasks."test:integration:kimi"]
-description = "Run all lifecycle integration tests in Kimi CLI"
+description = "Run all Kimi CLI integration tests"
 raw_args = true
 run = """
 PYTHONPATH=harbor \
-uv run --locked harbor jobs start --config harbor/config.kimi.yaml
+uv run --locked harbor jobs start --config harbor/config.kimi.yaml \
+  --path harbor/tasks/verify-small-change
+PYTHONPATH=harbor \
+uv run --locked harbor jobs start --config harbor/config.kimi.yaml \
+  --path harbor/tasks/verify-activation \
+  --agent agents:KimiSmol \
+  --model kimi/kimi-for-coding \
+  --skill ./skills \
+  --ak 'lifecycle_instruction=Use the `smol-activate` skill.'
 """
 
 [tasks.dashboard]

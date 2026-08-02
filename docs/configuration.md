@@ -5,7 +5,7 @@ ordered phase skills, or phase-specific settings:
 
 ```json
 {
-  "activation": "default",
+  "activation": "manual",
   "designDir": "docs/superpowers/specs",
   "planDir": "docs/superpowers/plans",
   "phases": {
@@ -25,9 +25,17 @@ ordered phase skills, or phase-specific settings:
 
 ## Activation
 
-- `manual`: only explicit requests to use or resume Smolpowers.
-- `default` (used when unset): new features, large refactors, and other non-trivial changes.
-- `always`: every requested code change.
+- `manual` (used when unset): only explicit requests to start or resume Smolpowers.
+- `default`: matching active changes, interface decisions, high-risk behavior changes, and coordinated refactors.
+- `always`: every repository change except an explicit opt-out or a read-only request.
+
+At `default`, Smolpowers does not activate for documentation-only, test-only, formatting-only, lint-only, Git-only,
+mechanical, or small known corrections. High-risk behavior affects a published interface, persisted data, configuration
+schema, security, concurrency, resource lifecycle, destructive behavior, or an external effect. If no activation rule
+matches, the agent uses its normal process.
+
+The skill reads this value only after the host discovers the skill. To apply `always` to each change, add a project
+instruction or a host start hook that evaluates Smol Activate for every request.
 
 ## Phases
 

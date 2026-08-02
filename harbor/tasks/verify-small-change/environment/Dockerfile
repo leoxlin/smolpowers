@@ -12,11 +12,6 @@ RUN mkdir -p /app /opt/fixture \
     && cp -a /tmp/environment/fixture/. /app/ \
     && cp -a /tmp/environment/fixture/. /opt/fixture/
 
-RUN if [ -f /tmp/environment/verify_finished.py ]; then \
-        cp /tmp/environment/verify_finished.py /opt/verify_finished.py \
-        && chmod 444 /opt/verify_finished.py; \
-    fi
-
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 RUN git -C /app init -q \

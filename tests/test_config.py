@@ -14,7 +14,7 @@ def defaults() -> dict:
     return {
         "designDir": "docs/superpowers/specs",
         "planDir": "docs/superpowers/plans",
-        "activation": "default",
+        "activation": "manual",
         "phases": {
             "design": {"skills": ["smol-design"]},
             "plan": {"skills": ["smol-plan"]},

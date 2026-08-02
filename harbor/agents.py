@@ -132,11 +132,11 @@ class NpxSkillsCodex(Codex):
         trajectory_path.write_text(json.dumps(trajectory, indent=2) + "\n")
 
 
-class CodexSp(NpxSkillsCodex):
+class CodexSuperpowers(NpxSkillsCodex):
     @staticmethod
     @override
     def name() -> str:
-        return "codex-sp"
+        return "codex-superpowers"
 
 
 class CodexSmol(NpxSkillsCodex):
@@ -479,24 +479,24 @@ class KimiCodeCli(KimiCode):
             context.n_cache_tokens = fm.total_cached_tokens or 0
 
 
-class KimiCodeSp(KimiCodeCli):
+class KimiSuperpowers(KimiCodeCli):
     @staticmethod
     @override
     def name() -> str:
-        return "kimi-code-sp"
+        return "kimi-superpowers"
 
 
-class KimiCodeSmol(KimiCodeCli):
+class KimiSmol(KimiCodeCli):
     @staticmethod
     @override
     def name() -> str:
-        return "kimi-code-smol"
+        return "kimi-smol"
 
 
-class KimiCodeMix(KimiCodeCli):
+class KimiMix(KimiCodeCli):
     smolpowers_config = MIX_CONFIG
 
     @staticmethod
     @override
     def name() -> str:
-        return "kimi-code-mix"
+        return "kimi-mix"

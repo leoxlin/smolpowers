@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyright: reportMissingImports=false
 """Serve a live HTML dashboard for Harbor job outputs under harbor/jobs.
 
 Usage:
@@ -14,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections import Counter
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -21,7 +23,12 @@ from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from task.tests.lifecycle_eval import (
+
+sys.path.insert(
+    0,
+    str(Path(__file__).parent / "tasks" / "verify-small-change" / "tests"),
+)
+from verify import (
     EXPECTED_SKILLS,
     activation_evidence,
     evaluate_lifecycle,

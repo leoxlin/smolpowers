@@ -3,11 +3,12 @@ debug: true
 n_concurrent_trials: 8
 
 tasks:
-  - path: harbor/task
+  - path: harbor/tasks/verify-small-change
+  - path: harbor/tasks/verify-activation
 
 agents:
-  - name: codex-sp
-    import_path: agents:CodexSp
+  - name: codex-superpowers
+    import_path: agents:CodexSuperpowers
     model_name: openai/gpt-5.6-sol
     kwargs:
       reasoning_effort: medium

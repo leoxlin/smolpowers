@@ -1,4 +1,4 @@
 interface:
   display_name: "Smol Activate"
   short_description: "Route work through the Smolpowers lifecycle"
-  default_prompt: "Use $smol-activate to continue this repository through its earliest incomplete phase."
+  default_prompt: "Use $smol-activate to route this requested change through its matching artifact pair."
