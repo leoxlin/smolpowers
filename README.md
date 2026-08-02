@@ -77,6 +77,8 @@ Then invoke the activation skill:
 - [Integrations](docs/integrations.md) — using selected upstream Superpowers skills.
 - [Testing](docs/testing.md) — deterministic tests and model-backed evaluations.
 
+Report bugs and request features in [Discussions](https://github.com/leoxlin/smolpowers/discussions).
+
 ## License
 
 [MIT](LICENSE)
