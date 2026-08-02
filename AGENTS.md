@@ -10,3 +10,4 @@
 - Do not create unit tests for Harbor.
 - Keep Harbor/model-backed fixtures isolated from the source repo; never commit or push from fixtures.
 - Use conventional commit subjects (`feat:`, `fix:`, `test:`, `docs:`, `chore:`).
+- Use release-please for releases; merge the release pull request to publish a release.
