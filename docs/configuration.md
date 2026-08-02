@@ -26,10 +26,10 @@ ordered phase skills, or phase-specific settings:
 ## Activation
 
 - `manual` (used when unset): only explicit requests to start or resume Smolpowers.
-- `default`: matching active changes, interface decisions, high-risk behavior changes, and coordinated refactors.
+- `important`: matching active changes, interface decisions, high-risk behavior changes, and coordinated refactors.
 - `always`: every repository change except an explicit opt-out or a read-only request.
 
-At `default`, Smolpowers does not activate for documentation-only, test-only, formatting-only, lint-only, Git-only,
+At `important`, Smolpowers does not activate for documentation-only, test-only, formatting-only, lint-only, Git-only,
 mechanical, or small known corrections. High-risk behavior affects a published interface, persisted data, configuration
 schema, security, concurrency, resource lifecycle, destructive behavior, or an external effect. If no activation rule
 matches, the agent uses its normal process.
@@ -39,9 +39,9 @@ instruction or a host start hook that evaluates Smol Activate for every request.
 
 ## Phases
 
-Artifact paths can be absolute or repository-root-relative. Each phase has one ordered `skills` array. Smol Activate activates
-each skill from first to last. The final skill runs the phase. Omitted phases and properties use their defaults. Execute
-accepts `tdd: proportional` by default or `strict`.
+Artifact paths can be absolute or repository-root-relative. Each phase has one ordered `skills` array. Smol Activate
+activates each skill from first to last. The final skill runs the phase. Omitted phases and properties use their
+defaults. Execute accepts `tdd: proportional` by default or `strict`.
 
 Use bare skill names. The loader also accepts a namespaced `namespace:skill` value and keeps the namespace. Missing or
 invalid configuration warns once and falls back atomically to all defaults.

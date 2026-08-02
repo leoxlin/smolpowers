@@ -165,7 +165,7 @@ def test_environment_has_priority_over_file(tmp_path: Path) -> None:
     assert stderr == ""
 
 
-@pytest.mark.parametrize("activation", ["manual", "default", "always"])
+@pytest.mark.parametrize("activation", ["manual", "important", "always"])
 def test_activation_value_is_preserved(tmp_path: Path, activation: str) -> None:
     project = tmp_path / activation
     write_config(project, f'{{"activation":"{activation}"}}\n')

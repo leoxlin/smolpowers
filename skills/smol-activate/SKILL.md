@@ -16,11 +16,12 @@ Apply the first matching rule:
 1. Use the normal process for an opt-out or another workflow.
 2. Activate for an explicit request to start or resume Smolpowers.
 3. Use the normal process for a read-only request.
-4. Run [load-config.py](scripts/load-config.py) with Python 3.10 or later. Pass the repository root or require Git. Save the JSON as `SMOL_CONFIG`.
+4. Run [load-config.py](scripts/load-config.py) with Python 3.10 or later. Pass the repository root or require Git. Save
+   the JSON as `SMOL_CONFIG`.
 5. Use the normal process for `manual`. Activate each remaining repository change for `always`.
-6. For `default`, use the normal process for documentation-only, test-only, formatting-only, lint-only, Git-only,
+6. For `important`, use the normal process for documentation-only, test-only, formatting-only, lint-only, Git-only,
    mechanical, or small known corrections.
-7. For `default`, activate for a matching active change, an interface decision, a coordinated refactor across modules,
+7. For `important`, activate for a matching active change, an interface decision, a coordinated refactor across modules,
    or a change to a published interface, persisted data, configuration schema, security, concurrency, resource
    lifecycle, destructive behavior, or external effect.
 8. Otherwise, use the normal process. Use it if uncertain.

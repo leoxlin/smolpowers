@@ -54,10 +54,10 @@ The Mise commands use Harbor overrides with these selections:
 - `verify-small-change` runs `-superpowers`, `-smol`, and `-mix`.
 - `verify-activation` runs only `-smol`.
 
-`verify-activation` uses `activation: default`. It checks explicit activation, explicit opt-out, analysis-only, documentation-only,
-test-only, Git-only, mechanical, configuration-schema, and interface-refactor requests. The agent writes one Boolean
-decision for each case. The verifier rejects missing, extra, duplicate, or incorrect decisions. The supported commands
-run this task only for the `-smol` agent.
+`verify-activation` uses `activation: important`. It checks explicit activation, explicit opt-out, analysis-only,
+documentation-only, test-only, Git-only, mechanical, configuration-schema, and interface-refactor requests. The agent
+writes one Boolean decision for each case. The verifier rejects missing, extra, duplicate, or incorrect decisions. The
+supported commands run this task only for the `-smol` agent.
 
 These are the only current model-backed harness configurations. Claude Code, Gemini CLI, Pi, and Cursor use the same
 common Agent Skills files, but this repository does not claim model-backed lifecycle evidence for them.
@@ -69,7 +69,7 @@ revision. Before a cross-harness release, cover these cases:
 - A direct phase request that must return to activation
 - A new session that reads a completed Implementation Plan
 - A failed Finish check that must return to Execute
-- A `default` activation matrix with both accepted and rejected requests
+- An `important` activation matrix with both accepted and rejected requests
 
 Harbor can run up to eight trials at the same time. The three configured agents run at the same time for each task.
 
