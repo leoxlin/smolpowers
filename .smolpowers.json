@@ -1,4 +1,4 @@
 {
-  "designDir": ".superpowers/docs/specs",
-  "planDir": ".superpowers/docs/plans"
+  "designDir": "specs",
+  "planDir": ".smolpowers"
 }
