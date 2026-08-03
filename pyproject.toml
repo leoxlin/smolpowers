@@ -1,6 +1,6 @@
 [project]
 name = "smolpowers-tests"
-version = "1.0.0"
+version = "1.0.1"
 requires-python = ">=3.14"
 dependencies = [
     "harbor==0.20.1.dev202607310211",

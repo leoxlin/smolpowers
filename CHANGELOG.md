@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/leoxlin/smolpowers/compare/v1.0.0...v1.0.1) (2026-08-03)
+
+
+### Documentation
+
+* add discussions link ([627b6be](https://github.com/leoxlin/smolpowers/commit/627b6bee141ca5d6a70711e5d914a813e7191f12))
+
 ## [1.0.0](https://github.com/leoxlin/smolpowers/compare/v0.1.0...v1.0.0) (2026-08-02)
 
 
