@@ -40,13 +40,14 @@ ENVIRONMENT_PATHS = {
 }
 
 
-def config_merge(a: dict, b: dict) -> dict:
-    result = a.copy()
-    for key, value in b.items():
-        if key not in result:
-            result[key] = value
-        elif isinstance(result[key], dict) and isinstance(value, dict):
-            result[key] = config_merge(result[key], value)
+def config_merge(*configs: dict) -> dict:
+    result = {}
+    for config in configs:
+        for key, value in config.items():
+            if isinstance(result.get(key), dict) and isinstance(value, dict):
+                result[key] = config_merge(result[key], value)
+            else:
+                result[key] = value
     return result
 
 
@@ -74,8 +75,10 @@ def load(repo_root: Path) -> dict:
     user_config = json.loads(user_file.read_text()) if user_file.is_file() else {}
     repo_config = json.loads(repo_file.read_text()) if repo_file.is_file() else {}
     return config_merge(
+        DEFAULT_CONFIG,
+        user_config,
+        repo_config,
         environment_override(),
-        config_merge(repo_config, config_merge(user_config, DEFAULT_CONFIG)),
     )
 
 
