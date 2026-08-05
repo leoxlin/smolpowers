@@ -17,7 +17,9 @@ ordered phase skills, or phase-specific settings:
       "tdd": "strict"
     },
     "finish": {
-      "skills": ["finishing-a-development-branch"]
+      "skills": ["smol-finish"],
+      "commit": "commit the verified change",
+      "push": "push the current branch"
     }
   }
 }
@@ -43,6 +45,11 @@ Artifact paths can be absolute or repository-root-relative. Each phase has one o
 activates each skill from first to last. The final skill runs the phase. Omitted phases and properties use their
 defaults. Execute accepts `tdd: proportional` by default or `strict`.
 
+Finish accepts `commit` and `push` instruction strings. Both properties are absent by default. A non-null value approves
+only its named Git action. Smol Finish performs Git operations only after successful verification. Direct Git
+instructions in the user prompt replace all configured Git operations for that run. Smol Finish commits before it pushes
+and does not push if the commit fails.
+
 Use bare skill names. The loader also accepts a namespaced `namespace:skill` value and keeps the namespace. Missing or
 invalid configuration warns once and falls back atomically to all defaults.
 
@@ -60,6 +67,8 @@ Environment variables have priority over `.smolpowers.json`. File values have pr
 | `SMOL_PHASES_EXECUTE_SKILLS` | `phases.execute.skills` |
 | `SMOL_PHASES_EXECUTE_TDD` | `phases.execute.tdd` |
 | `SMOL_PHASES_FINISH_SKILLS` | `phases.finish.skills` |
+| `SMOL_PHASES_FINISH_COMMIT` | `phases.finish.commit` |
+| `SMOL_PHASES_FINISH_PUSH` | `phases.finish.push` |
 
 Set a skill-list variable to a comma-separated list. The loader keeps the list order. For example:
 

@@ -35,6 +35,8 @@ ENVIRONMENT_PATHS = {
     "SMOL_PHASES_EXECUTE_SKILLS": ("phases", "execute", "skills"),
     "SMOL_PHASES_EXECUTE_TDD": ("phases", "execute", "tdd"),
     "SMOL_PHASES_FINISH_SKILLS": ("phases", "finish", "skills"),
+    "SMOL_PHASES_FINISH_COMMIT": ("phases", "finish", "commit"),
+    "SMOL_PHASES_FINISH_PUSH": ("phases", "finish", "push"),
 }
 
 
