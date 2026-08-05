@@ -125,6 +125,23 @@ def test_repository_config_has_priority_over_user_level_config(
     assert stderr == ""
 
 
+def test_config_path_replaces_repository_config(tmp_path: Path) -> None:
+    project = tmp_path / "project"
+    write_config(project, '{"activation":"always"}\n')
+    selected_file = tmp_path / "selected.json"
+    selected_file.write_text('{"designDir":"selected/designs"}\n')
+
+    actual, stderr = load(
+        project,
+        {"SMOL_CONFIG_PATH": str(selected_file)},
+    )
+
+    expected = defaults()
+    expected["designDir"] = "selected/designs"
+    assert actual == expected
+    assert stderr == ""
+
+
 def test_user_config_merges_with_defaults(tmp_path: Path) -> None:
     project = tmp_path / "partial"
     write_config(
