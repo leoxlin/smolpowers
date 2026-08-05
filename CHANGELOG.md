@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.0](https://github.com/leoxlin/smolpowers/compare/v1.0.0...v1.1.0) (2026-08-05)
+
+
+### Features
+
+* configure finish git operations ([#6](https://github.com/leoxlin/smolpowers/issues/6)) ([392a1d8](https://github.com/leoxlin/smolpowers/commit/392a1d8ff89cf52b7355ae406d05fdb7476b0d19))
+* configure repository config path ([#10](https://github.com/leoxlin/smolpowers/issues/10)) ([2c5329a](https://github.com/leoxlin/smolpowers/commit/2c5329a803429032bcb0dd2893fffc1054141d88))
+* user home config ([#9](https://github.com/leoxlin/smolpowers/issues/9)) ([0a98f76](https://github.com/leoxlin/smolpowers/commit/0a98f7630be12ea4999c14fdf11dd47ae1785e8d))
+
 ## [1.0.0](https://github.com/leoxlin/smolpowers/compare/v0.1.0...v1.0.0) (2026-08-02)
 
 
