@@ -1,7 +1,8 @@
 # Configuration
 
-Add `.smolpowers.json` to the repository root to change artifact locations,
-ordered phase skills, or phase-specific settings:
+Add `.smolpowers.json` to your home directory to share settings across repositories. Add the same file to a repository
+root for repository-specific settings. Both files can change artifact locations, ordered phase skills, or phase-specific
+settings:
 
 ```json
 {
@@ -55,7 +56,14 @@ invalid configuration warns once and falls back atomically to all defaults.
 
 ## Environment variables
 
-Environment variables have priority over `.smolpowers.json`. File values have priority over defaults.
+Configuration uses this priority, from highest to lowest:
+
+1. Environment variables
+2. The repository `.smolpowers.json` file
+3. The user `~/.smolpowers.json` file
+4. Defaults
+
+A value in a higher-priority source replaces the same value in a lower-priority source. Other values continue to merge.
 
 | Environment variable | Configuration value |
 | --- | --- |
