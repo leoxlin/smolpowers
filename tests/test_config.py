@@ -66,6 +66,10 @@ def test_user_config_merges_with_defaults(tmp_path: Path) -> None:
                 "execute":{
                     "skills": ["test-driven-development", "smol-execute"],
                     "tdd": "strict"
+                },
+                "finish": {
+                    "commit": "commit the verified change",
+                    "push": "push the current branch"
                 }
             }
         }
@@ -79,6 +83,11 @@ def test_user_config_merges_with_defaults(tmp_path: Path) -> None:
     expected["phases"]["execute"] = {
         "skills": ["test-driven-development", "smol-execute"],
         "tdd": "strict",
+    }
+    expected["phases"]["finish"] = {
+        "skills": ["smol-finish"],
+        "commit": "commit the verified change",
+        "push": "push the current branch",
     }
     assert actual == expected
     assert stderr == ""
@@ -98,6 +107,8 @@ def test_environment_overrides_all_config_values(tmp_path: Path) -> None:
             "SMOL_PHASES_EXECUTE_SKILLS": ("test-driven-development,smol-execute"),
             "SMOL_PHASES_EXECUTE_TDD": "strict",
             "SMOL_PHASES_FINISH_SKILLS": ("finishing-a-development-branch"),
+            "SMOL_PHASES_FINISH_COMMIT": "commit with the repository convention",
+            "SMOL_PHASES_FINISH_PUSH": "push the current branch",
         },
     )
     assert actual == {
@@ -111,7 +122,11 @@ def test_environment_overrides_all_config_values(tmp_path: Path) -> None:
                 "skills": ["test-driven-development", "smol-execute"],
                 "tdd": "strict",
             },
-            "finish": {"skills": ["finishing-a-development-branch"]},
+            "finish": {
+                "skills": ["finishing-a-development-branch"],
+                "commit": "commit with the repository convention",
+                "push": "push the current branch",
+            },
         },
     }
     assert stderr == ""
@@ -130,7 +145,11 @@ def test_environment_has_priority_over_file(tmp_path: Path) -> None:
                 "design": {"skills": ["file-design"]},
                 "plan": {"skills": ["file-plan"]},
                 "execute": {"skills": ["file-execute"], "tdd": "proportional"},
-                "finish": {"skills": ["file-finish"]}
+                "finish": {
+                    "skills": ["file-finish"],
+                    "commit": "file commit",
+                    "push": "file push"
+                }
             }
         }
         """,
@@ -146,6 +165,8 @@ def test_environment_has_priority_over_file(tmp_path: Path) -> None:
             "SMOL_PHASES_EXECUTE_SKILLS": "env-check,env-execute",
             "SMOL_PHASES_EXECUTE_TDD": "strict",
             "SMOL_PHASES_FINISH_SKILLS": "env-finish",
+            "SMOL_PHASES_FINISH_COMMIT": "env commit",
+            "SMOL_PHASES_FINISH_PUSH": "env push",
         },
     )
     assert actual == {
@@ -159,7 +180,11 @@ def test_environment_has_priority_over_file(tmp_path: Path) -> None:
                 "skills": ["env-check", "env-execute"],
                 "tdd": "strict",
             },
-            "finish": {"skills": ["env-finish"]},
+            "finish": {
+                "skills": ["env-finish"],
+                "commit": "env commit",
+                "push": "env push",
+            },
         },
     }
     assert stderr == ""

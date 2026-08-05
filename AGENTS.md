@@ -5,6 +5,8 @@
 - Use `.smolpowers.json`; keep parsing, validation, path resolution, and defaults in `load-config.py`.
 - Invalid or unsafe configuration must warn once and fall back atomically to all defaults.
 - Test observable behavior and structured interfaces, not prose, headings, or static file substrings.
+- Ignore `.smolpowers/` in code reviews unless the review is part of the Smolpowers SDD flow.
+- Test skill behavior with Harbor tests, not unit tests.
 - Use proportional TDD by default; strict mode requires an observed failing test before production code.
 - Run focused tests via `mise run test:unit -- <paths>` and the full unit suite via `mise run test:unit`.
 - Do not create unit tests for Harbor.

@@ -32,6 +32,12 @@ invalidate verified implementation evidence.
 
 ## Handle Git
 
-Read [git-disposition.md](references/git-disposition.md). Examine the current branch and remotes. Do only the Git action
-that the user approved. A local commit does not give approval to push. An implementation request does not give approval
-for other Git actions.
+1. Require successful verification before any Git operation. Examine the branch and remotes.
+2. If the user prompt gives Git instructions, ignore all configured Git operations and follow the prompt. Otherwise,
+   follow each non-null `SMOL_CONFIG.phases.finish.commit` and `SMOL_CONFIG.phases.finish.push` instruction.
+3. Before a commit, review `git status`, the staged diff, and the commit message. Never include unrelated user changes.
+   Use the configured convention, the repository convention, or a conventional commit message, in that order.
+4. Commit before push. If the commit fails, do not push.
+
+Report the artifact paths, implementation result, current verification evidence, commit or exact worktree state, and
+each authentication, availability, or integration problem.
