@@ -69,10 +69,13 @@ def environment_override() -> dict:
 
 
 def load(repo_root: Path) -> dict:
-    config_file = repo_root / ".smolpowers.json"
-    user_config = json.loads(config_file.read_text()) if config_file.is_file() else {}
+    user_file = Path.home() / ".smolpowers.json"
+    repo_file = repo_root / ".smolpowers.json"
+    user_config = json.loads(user_file.read_text()) if user_file.is_file() else {}
+    repo_config = json.loads(repo_file.read_text()) if repo_file.is_file() else {}
     return config_merge(
-        environment_override(), config_merge(user_config, DEFAULT_CONFIG)
+        environment_override(),
+        config_merge(repo_config, config_merge(user_config, DEFAULT_CONFIG)),
     )
 
 

@@ -27,8 +27,15 @@ def defaults() -> dict:
     }
 
 
-def load(project: Path, environment: dict[str, str] | None = None) -> tuple[dict, str]:
+def load(
+    project: Path,
+    environment: dict[str, str] | None = None,
+    home: Path | None = None,
+) -> tuple[dict, str]:
     process_environment = os.environ.copy()
+    home = home or project.parent / "home"
+    home.mkdir(exist_ok=True)
+    process_environment["HOME"] = str(home)
     process_environment.update(environment or {})
     result = subprocess.run(
         [sys.executable, str(LOADER), str(project)],
@@ -50,6 +57,71 @@ def test_absent_config_uses_defaults(tmp_path: Path) -> None:
     project.mkdir()
     actual, stderr = load(project)
     assert actual == defaults()
+    assert stderr == ""
+
+
+def test_user_level_config_merges_with_defaults(tmp_path: Path) -> None:
+    home = tmp_path / "user"
+    write_config(
+        home,
+        '{"designDir":"shared/designs","phases":{"execute":{"tdd":"strict"}}}\n',
+    )
+    project = tmp_path / "project"
+    project.mkdir()
+
+    actual, stderr = load(project, home=home)
+
+    expected = defaults()
+    expected["designDir"] = "shared/designs"
+    expected["phases"]["execute"]["tdd"] = "strict"
+    assert actual == expected
+    assert stderr == ""
+
+
+def test_repository_config_has_priority_over_user_level_config(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "user"
+    write_config(
+        home,
+        """
+        {
+            "activation": "always",
+            "phases": {
+                "execute": {"skills": ["user-execute"], "tdd": "strict"},
+                "finish": {"commit": "user commit"}
+            }
+        }
+        """,
+    )
+    project = tmp_path / "project"
+    write_config(
+        project,
+        """
+        {
+            "activation": "important",
+            "phases": {
+                "execute": {"skills": ["project-execute"]},
+                "finish": {"push": "project push"}
+            }
+        }
+        """,
+    )
+
+    actual, stderr = load(project, home=home)
+
+    expected = defaults()
+    expected["activation"] = "important"
+    expected["phases"]["execute"] = {
+        "skills": ["project-execute"],
+        "tdd": "strict",
+    }
+    expected["phases"]["finish"] = {
+        "skills": ["smol-finish"],
+        "commit": "user commit",
+        "push": "project push",
+    }
+    assert actual == expected
     assert stderr == ""
 
 
@@ -133,6 +205,8 @@ def test_environment_overrides_all_config_values(tmp_path: Path) -> None:
 
 
 def test_environment_has_priority_over_file(tmp_path: Path) -> None:
+    home = tmp_path / "home-config"
+    write_config(home, '{"activation":"manual","designDir":"user/designs"}\n')
     project = tmp_path / "priority"
     write_config(
         project,
@@ -157,6 +231,7 @@ def test_environment_has_priority_over_file(tmp_path: Path) -> None:
     actual, stderr = load(
         project,
         {
+            "HOME": str(home),
             "SMOL_DESIGN_DIR": "env/designs",
             "SMOL_PLAN_DIR": "env/plans",
             "SMOL_ACTIVATION": "always",
@@ -218,6 +293,22 @@ def test_malformed_json_warns_and_uses_defaults(tmp_path: Path) -> None:
     project = tmp_path / "malformed"
     write_config(project, "{not json\n")
     actual, stderr = load(project)
+    assert actual == defaults()
+    assert stderr.splitlines() == ["smolpowers: reading config failed, using defaults"]
+
+
+def test_malformed_user_level_json_warns_and_uses_defaults(tmp_path: Path) -> None:
+    home = tmp_path / "user"
+    write_config(home, "{not json\n")
+    project = tmp_path / "project"
+    write_config(project, '{"activation":"always"}\n')
+
+    actual, stderr = load(
+        project,
+        {"SMOL_DESIGN_DIR": "env/designs"},
+        home=home,
+    )
+
     assert actual == defaults()
     assert stderr.splitlines() == ["smolpowers: reading config failed, using defaults"]
 
