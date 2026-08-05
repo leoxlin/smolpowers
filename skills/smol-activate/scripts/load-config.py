@@ -71,7 +71,9 @@ def environment_override() -> dict:
 
 def load(repo_root: Path) -> dict:
     user_file = Path.home() / ".smolpowers.json"
-    repo_file = repo_root / ".smolpowers.json"
+    repo_file = Path(
+        os.environ.get("SMOL_CONFIG_PATH", repo_root / ".smolpowers.json")
+    )
     user_config = json.loads(user_file.read_text()) if user_file.is_file() else {}
     repo_config = json.loads(repo_file.read_text()) if repo_file.is_file() else {}
     return config_merge(

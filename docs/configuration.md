@@ -56,10 +56,14 @@ invalid configuration warns once and falls back atomically to all defaults.
 
 ## Environment variables
 
+Set `SMOL_CONFIG_PATH` to select a different repository configuration file. The value is a file path. A relative path
+starts from the process working directory. If the variable is not set, Smolpowers uses `.smolpowers.json` in the
+repository root. The selected file replaces the repository file. It does not replace the user file.
+
 Configuration uses this priority, from highest to lowest:
 
 1. Environment variables
-2. The repository `.smolpowers.json` file
+2. The selected repository configuration file
 3. The user `~/.smolpowers.json` file
 4. Defaults
 
