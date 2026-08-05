@@ -2,6 +2,10 @@
   "designDir": "specs",
   "planDir": ".smolpowers",
   "activation": "important",
-  "commit": "make a single conventional commit",
-  "push": "push only if you're on a branch"
+  "phases": {
+    "finish": {
+      "commit": "make a single conventional commit",
+      "push": "push only if you're on a branch"
+    }
+  }
 }
