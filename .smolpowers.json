@@ -1,4 +1,7 @@
 {
   "designDir": "specs",
-  "planDir": ".smolpowers"
+  "planDir": ".smolpowers",
+  "activation": "important",
+  "commit": "make a single conventional commit",
+  "push": "push only if you're on a branch"
 }
