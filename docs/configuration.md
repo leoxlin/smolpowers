@@ -9,8 +9,6 @@ settings:
   "activation": "manual",
   "designDir": "docs/superpowers/specs",
   "planDir": "docs/superpowers/plans",
-  "specTemplate": null,
-  "planTemplate": null,
   "phases": {
     "design": {
       "skills": ["brainstorming"]
@@ -48,9 +46,10 @@ Artifact paths can be absolute or repository-root-relative. Each phase has one o
 activates each skill from first to last. The final skill runs the phase. Omitted phases and properties use their
 defaults. Execute accepts `tdd: proportional` by default or `strict`.
 
-`specTemplate` selects the Design Spec template. `planTemplate` selects the Implementation Plan template. Set either
-value to an absolute path or a repository-root-relative path. The default `null` value uses the applicable built-in
-template. A configured file that does not exist or cannot be read stops that phase.
+`specTemplate` selects the Design Spec template. `planTemplate` selects the Implementation Plan template. Both
+properties are absent by default. Set either value to an absolute path or a repository-root-relative path. An absent or
+`null` value uses the applicable built-in template. A configured file that does not exist or cannot be read stops that
+phase.
 
 Finish accepts `commit` and `push` instruction strings. Both properties are absent by default. A non-null value approves
 only its named Git action. Smol Finish performs Git operations only after successful verification. Direct Git

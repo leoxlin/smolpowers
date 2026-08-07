@@ -9,8 +9,6 @@ WARNING = "smolpowers: reading config failed, using defaults"
 DEFAULT_CONFIG = {
     "designDir": "docs/superpowers/specs",
     "planDir": "docs/superpowers/plans",
-    "specTemplate": None,
-    "planTemplate": None,
     "activation": "manual",
     "phases": {
         "design": {
