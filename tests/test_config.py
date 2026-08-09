@@ -190,6 +190,8 @@ def test_environment_overrides_all_config_values(tmp_path: Path) -> None:
         {
             "SMOL_DESIGN_DIR": "env/designs",
             "SMOL_PLAN_DIR": "env/plans",
+            "SMOL_SPEC_TEMPLATE": "env/spec.md",
+            "SMOL_PLAN_TEMPLATE": "env/plan.md",
             "SMOL_ACTIVATION": "always",
             "SMOL_PHASES_DESIGN_SKILLS": "brainstorming,smol-design",
             "SMOL_PHASES_PLAN_SKILLS": "writing-plans",
@@ -203,6 +205,8 @@ def test_environment_overrides_all_config_values(tmp_path: Path) -> None:
     assert actual == {
         "designDir": "env/designs",
         "planDir": "env/plans",
+        "specTemplate": "env/spec.md",
+        "planTemplate": "env/plan.md",
         "activation": "always",
         "phases": {
             "design": {"skills": ["brainstorming", "smol-design"]},
@@ -231,6 +235,8 @@ def test_environment_has_priority_over_file(tmp_path: Path) -> None:
         {
             "designDir": "file/designs",
             "planDir": "file/plans",
+            "specTemplate": "file/spec.md",
+            "planTemplate": "file/plan.md",
             "activation": "manual",
             "phases": {
                 "design": {"skills": ["file-design"]},
@@ -251,6 +257,8 @@ def test_environment_has_priority_over_file(tmp_path: Path) -> None:
             "HOME": str(home),
             "SMOL_DESIGN_DIR": "env/designs",
             "SMOL_PLAN_DIR": "env/plans",
+            "SMOL_SPEC_TEMPLATE": "env/spec.md",
+            "SMOL_PLAN_TEMPLATE": "env/plan.md",
             "SMOL_ACTIVATION": "always",
             "SMOL_PHASES_DESIGN_SKILLS": "env-design",
             "SMOL_PHASES_PLAN_SKILLS": "env-plan",
@@ -264,6 +272,8 @@ def test_environment_has_priority_over_file(tmp_path: Path) -> None:
     assert actual == {
         "designDir": "env/designs",
         "planDir": "env/plans",
+        "specTemplate": "env/spec.md",
+        "planTemplate": "env/plan.md",
         "activation": "always",
         "phases": {
             "design": {"skills": ["env-design"]},

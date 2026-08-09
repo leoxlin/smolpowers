@@ -41,7 +41,9 @@ Write this file:
 
 `<planDir>/YYYY-MM-DD-<slug>.md`
 
-Use [plan-template.md](references/plan-template.md). Keep these elements:
+Select the template from `SMOL_CONFIG.planTemplate`. For `null`, use
+[plan-template.md](references/plan-template.md). Resolve a relative configured path from the repository root. Stop if a
+configured file does not exist or cannot be read. Use the selected template. Keep these elements:
 
 - `Status`, `Goal`, `Architecture`, and `Global Constraints`
 - Numbered `### Task N` headings

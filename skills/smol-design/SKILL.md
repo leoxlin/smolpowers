@@ -31,7 +31,10 @@ Write this file:
 
 `<designDir>/YYYY-MM-DD-<slug>-design.md`
 
-Use [spec-template.md](references/spec-template.md). Replace each placeholder and keep the primary headings.
+Select the template from `SMOL_CONFIG.specTemplate`. For `null`, use
+[spec-template.md](references/spec-template.md). Resolve a relative configured path from the repository root. Stop if a
+configured file does not exist or cannot be read. Use the selected template. Replace each placeholder and keep the
+primary headings.
 
 Write the complete artifact in ASD-STE100. Review it for these problems:
 

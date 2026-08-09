@@ -29,6 +29,8 @@ DEFAULT_CONFIG = {
 ENVIRONMENT_PATHS = {
     "SMOL_DESIGN_DIR": ("designDir",),
     "SMOL_PLAN_DIR": ("planDir",),
+    "SMOL_SPEC_TEMPLATE": ("specTemplate",),
+    "SMOL_PLAN_TEMPLATE": ("planTemplate",),
     "SMOL_ACTIVATION": ("activation",),
     "SMOL_PHASES_DESIGN_SKILLS": ("phases", "design", "skills"),
     "SMOL_PHASES_PLAN_SKILLS": ("phases", "plan", "skills"),
